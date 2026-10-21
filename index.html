@@ -425,6 +425,16 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .arcleg b{color:var(--tx3);font-variant-numeric:tabular-nums;margin-right:2px}
 .arcleg i{font-style:normal;color:var(--tx3);font-size:11px}
 .cloudb{position:relative;font-size:18px}
+.tfind{position:relative}
+.tfind .lnk{background:none;border:0;padding:0 0 0 6px;color:var(--acc);font:inherit;font-weight:600;cursor:pointer}
+.tfind .hint a{color:var(--acc)}
+.tres{position:absolute;left:0;right:0;top:calc(100% - 18px);z-index:30;background:var(--card);border:1px solid var(--line2);border-radius:var(--r2);box-shadow:var(--sh);max-height:min(360px,55vh);overflow:auto}
+.tres button{display:flex;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 10px;color:var(--tx);cursor:pointer;align-items:center;font:inherit;font-size:14px;line-height:1.35}
+.tres button:last-child{border-bottom:0}
+.tres button:hover,.tres button:focus-visible{background:var(--card2);outline:none}
+.tres img,.tres .noimg{width:36px;height:54px;object-fit:cover;border-radius:6px;background:var(--card2);flex:none;display:grid;place-items:center;color:var(--tx3)}
+.tres .dim{font-size:12.5px}
+.tres .tex{display:inline-block;margin-top:2px;font-size:11.5px;font-weight:700;color:var(--acc);border:1px solid currentColor;border-radius:999px;padding:0 7px}
 .cloudb i{position:absolute;right:4px;bottom:5px;width:9px;height:9px;border-radius:50%;background:var(--tx3);box-shadow:0 0 0 2px var(--bg)}
 .cloudb[data-st="ok"] i{background:var(--ok)}
 .cloudb[data-st="sync"] i,.cloudb[data-st="conn"] i{background:var(--acc);animation:cpulse .8s infinite alternate}
@@ -1700,10 +1710,18 @@ function vData(){
       <div class="row" style="margin-top:8px"><button class="btn sm" id="saveTypes">Сохранить</button></div></div>
     <div class="panel"><h3>Теги</h3><p>Нажмите на тег, чтобы переименовать или удалить его во всех записях.</p>
       <div class="chips">${allTags().map(([t,n])=>`<button class="chip" data-tagren="${esc(t)}">#${esc(t)} <small>${n}</small></button>`).join("")||`<span class="dim">Тегов пока нет</span>`}</div></div>
-    <div class="panel"><h3>Данные из TMDB</h3><p>Постеры, годы, жанры, синопсисы, длительность и серии по сезонам из TMDB уже встроены. Кнопка заново заполнит только пустые поля (например, если вы удалили постер).</p>
-      <button class="btn" id="tmdbAgain">↻ Дополнить пустые поля</button></div>
+    <div class="panel"><h3>🔎 Автозаполнение из TMDB</h3><p>С ключом TMDB при добавлении достаточно начать вводить название: появятся варианты, а постер, год, жанры, описание, длительность, сезоны и серии заполнятся сами. С ключом OMDb (панель «Мировые оценки») подтянутся ещё IMDb, Rotten Tomatoes и Metacritic, для аниме — MyAnimeList.</p>
+      <div class="row"><input class="inp" id="tmdbKey" placeholder="Ключ TMDB (API Key)" value="${esc(apiKey("tmdb"))}" style="flex:1;min-width:160px" autocomplete="off"><button class="btn pri" id="tmdbKeySave">${apiKey("tmdb")?"Проверить":"Сохранить"}</button></div>
+      <details class="cdet" style="margin-top:10px"><summary>Как получить ключ (бесплатно, ≈3 минуты)</summary><ol>
+        <li>Зарегистрируйтесь на <a href="https://www.themoviedb.org/signup" target="_blank" rel="noopener">themoviedb.org</a> и подтвердите почту.</li>
+        <li>Откройте <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">Настройки → API</a> → <b>Create</b> → <b>Developer</b>, примите условия.</li>
+        <li>В анкете: тип — <b>Personal</b>, название и описание — любые, адрес сайта — ссылка на вашу страницу на GitHub.</li>
+        <li>Скопируйте <b>API Key</b> (короткий) или <b>API Read Access Token</b> (длинный) — подходят оба.</li></ol>
+        <p class="dim" style="font-size:12.5px;margin:0">${CLOUD&&CLOUD.room?"Ключи хранятся в общих данных — второму человеку вводить их не нужно.":"Если подключено облако, ключи попадут и второму человеку — ему не придётся вводить их самому."}</p></details>
+      <p class="dim" style="font-size:13px;margin:10px 0 6px">Для 70 встроенных записей данные TMDB уже внутри файла.</p>
+      <button class="btn sm" id="tmdbAgain">↻ Дополнить пустые поля встроенными</button></div>
     <div class="panel"><h3>🌍 Мировые оценки</h3><p>IMDb, Rotten Tomatoes, Metacritic и MyAnimeList. Встроенные данные — на 2026 год (у ${DB.items.filter(i=>worldParts(i).length).length} из ${DB.items.length} записей). Свежие цифры можно подтянуть онлайн: нужен бесплатный ключ <a href="https://www.omdbapi.com/apikey.aspx" target="_blank" rel="noopener">OMDb</a> (приходит на почту за минуту).</p>
-      <div class="row" style="margin-bottom:8px"><input class="inp" id="omdbKey" placeholder="Ключ OMDb" value="${esc(UI.omdbKey||"")}" style="flex:1;min-width:140px"><button class="btn pri" id="omdbGo">↻ IMDb · RT · MC</button></div>
+      <div class="row" style="margin-bottom:8px"><input class="inp" id="omdbKey" placeholder="Ключ OMDb" value="${esc(apiKey("omdb"))}" style="flex:1;min-width:140px"><button class="btn pri" id="omdbGo">↻ IMDb · RT · MC</button></div>
       <div class="row"><button class="btn" id="malGo" title="Без ключа, через Jikan API">↻ MyAnimeList для аниме</button><button class="btn ghost" id="worldAgain">Вернуть встроенные в пустые поля</button></div></div>
     <div class="panel"><h3>🕓 Время оценок</h3><p>С этой версии каждая новая или изменённая оценка запоминает дату и время, а ещё попадает в журнал — из него строится «Хронология оценок» в статистике.</p>
       <p class="dim" style="margin:0">В журнале: <b style="color:var(--tx)">${DB.log.length}</b> ${plural(DB.log.length,"событие","события","событий")}${DB.log.length?` · последнее ${fmtAt(DB.log[DB.log.length-1].t)}`:""}</p></div>
@@ -1773,8 +1791,10 @@ function bindView(){
     DB.items.forEach(i=>{if((i.tags||[]).includes(o)){i.tags=i.tags.filter(x=>x!==o);if(nn&&!i.tags.includes(nn))i.tags.push(nn)}});if(UI.tag===o)UI.tag=nn;commit();toast(nn?"Тег переименован":"Тег удалён")}));
   $("#tmdbAgain",v)?.addEventListener("click",()=>{const n=applyTmdb(DB);commit();toast(n?`Дополнено записей: ${n}`:"Все поля уже заполнены")});
   $("#worldAgain",v)?.addEventListener("click",()=>{const n=applyWorld(DB);commit();toast(n?`Дополнено записей: ${n}`:"Все поля уже заполнены")});
-  $("#omdbKey",v)?.addEventListener("change",e=>{UI.omdbKey=e.target.value.trim();saveUI()});
-  $("#omdbGo",v)?.addEventListener("click",()=>{UI.omdbKey=$("#omdbKey",v).value.trim();saveUI();refreshWorld()});
+  $("#omdbKey",v)?.addEventListener("change",e=>{setApiKey("omdb",e.target.value);toast("Ключ OMDb сохранён")});
+  $("#omdbGo",v)?.addEventListener("click",()=>{setApiKey("omdb",$("#omdbKey",v).value);refreshWorld()});
+  $("#tmdbKeySave",v)?.addEventListener("click",async()=>{const k=$("#tmdbKey",v).value.trim();setApiKey("tmdb",k);if(!k){toast("Ключ TMDB удалён");return}
+    try{await tmdbGet("/configuration");toast("✓ Ключ TMDB работает")}catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}});
   $("#malGo",v)?.addEventListener("click",()=>refreshMal());
 }
 function renameRater(o,n){const fix=r=>{if(r&&r[o]!==undefined){r[n]=r[o];delete r[o]}};DB.items.forEach(i=>{fix(i.ratings);(i.seasons||[]).forEach(s=>fix(s.ratings))})}
@@ -1859,7 +1879,7 @@ function openEdit(id,preset){
       <button class="btn sm ghost danger" id="eNoPh" style="margin-top:6px;width:100%;justify-content:center">Убрать фото</button>
       <input type="file" id="eFile" accept="image/*" hidden></div>
     <div class="form">
-      <div class="f s6"><label>Название *</label><input class="inp" id="eTitle" value="${esc(it.title)}" required></div>
+      <div class="f s6 tfind"><label>Название * <button type="button" class="lnk" id="eFindBtn" title="Найти фильм или сериал в TMDB и заполнить поля">🔎 найти данные</button></label><input class="inp" id="eTitle" value="${esc(it.title)}" required autocomplete="off"><div class="tres" id="eFind" hidden></div><span class="hint" id="eFindSt">${isNew?(apiKey("tmdb")?"Начните вводить название — предложу варианты, остальное заполнится само":"Подключите TMDB во вкладке «Данные» — тогда данные будут подтягиваться сами"):""}</span></div>
       <div class="f s2"><label>Тип</label><select class="inp" id="eType">${DB.types.map(t=>`<option ${t===it.type?"selected":""}>${esc(t)}</option>`).join("")}</select></div>
       <div class="f s2"><label>Статус</label><select class="inp" id="eStatus"><option value="watched" ${it.status==="watched"?"selected":""}>Просмотрено</option><option value="watching" ${it.status==="watching"?"selected":""}>Смотрим сейчас</option><option value="planned" ${it.status==="planned"?"selected":""}>В планах</option></select></div>
       <div class="f s2"><label>Год выхода</label><input class="inp" id="eYear" type="number" min="1890" max="2100" value="${it.year||""}"></div>
@@ -1894,6 +1914,19 @@ function openEdit(id,preset){
   $("#eStatus",d).addEventListener("change",()=>{$("#eSave",d).textContent=isNew&&$("#eStatus",d).value==="watched"?"Далее: оценка →":"Сохранить"});
   $("#eGenQ",d).addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(!b)return;const inp=$("#eGen",d);const cur=inp.value.split(",").map(s=>s.trim()).filter(Boolean);if(!cur.includes(b.dataset.g))cur.push(b.dataset.g);inp.value=cur.join(", ")});
   const setPoster=p=>{poster=p;$("#ePoster",d).innerHTML=posterHTML({...it,title:$("#eTitle",d).value||it.title||"?",poster})};
+  let picked=null;
+  bindAutofill(d,isNew,o=>{picked=o;
+    $("#eTitle",d).value=o.title;
+    if([...$("#eType",d).options].some(x=>x.value===o.type))$("#eType",d).value=o.type;
+    $("#eSer",d).checked=o.series;if(o.year)$("#eYear",d).value=o.year;
+    if(o.series){$("#eSeas",d).value=o.seasonsTotal||"";$("#eEps",d).value=o.episodes||"";$("#eEpD",d).value=o.episodeDuration||"";$("#eSE",d).value=(o.seasonEpisodes||[]).join(", ");$("#eTot",d).value=""}
+    else if(o.duration)$("#eDur",d).value=o.duration;
+    if(o.genres.length)$("#eGen",d).value=o.genres.join(", ");
+    if(o.synopsis)$("#eSyn",d).value=o.synopsis;
+    if(o.poster&&(isNew||!poster)){setPoster(o.poster);$("#eUrl",d).value=o.poster}
+    if(o.en)$("#xEn",d).value=o.en;
+    WSRC.forEach(s=>{if(o.ext&&isNum(o.ext[s.k]))$("#x_"+s.k,d).value=o.ext[s.k]});
+    sync();$("#eSave",d).textContent=isNew&&$("#eStatus",d).value==="watched"?"Далее: оценка →":"Сохранить"});
   const takeFile=async f=>{if(!f||!f.type.startsWith("image/"))return;try{setPoster(await resizeImage(f));$("#eUrl",d).value=""}catch(e){toast("Не удалось прочитать изображение")}};
   $("#ePick",d).onclick=()=>$("#eFile",d).click();
   $("#eFile",d).onchange=e=>takeFile(e.target.files[0]);
@@ -1915,8 +1948,10 @@ function openEdit(id,preset){
     o.kind=$("#eSer",d).checked?"series":"movie";
     {const x=Object.assign({},o.ext||{});const en=$("#xEn",d).value.trim();if(en)x.en=en;else delete x.en;let ch=false;
      WSRC.forEach(s=>{const raw=$("#x_"+s.k,d).value.trim().replace(",",".").replace("%","");const v=raw===""?null:parseFloat(raw);const nv=isFinite(v)?v:null;if((x[s.k]??null)!==nv)ch=true;if(nv==null)delete x[s.k];else x[s.k]=nv});
-     if(ch){x.at=new Date().toISOString();x.src="вручную"}
+     if(ch){x.at=new Date().toISOString();x.src=picked&&picked.ext?"OMDb (авто)":"вручную"}
+     if(picked&&picked.imdbId)x.imdbId=picked.imdbId;
      if(Object.keys(x).length)o.ext=x;else delete o.ext}
+    if(picked)o.tmdb=picked.tmdb;
     if(o.kind==="series"){o.seasonEpisodes=$("#eSE",d).value.split(/[,;\s]+/).map(Number).filter(n=>n>0);if(!o.seasonEpisodes.length)delete o.seasonEpisodes;o.seasons=o.seasons||[];o.seasonsTotal=+$("#eSeas",d).value||null;o.episodes=+$("#eEps",d).value||null;o.episodeDuration=numOr($("#eEpD",d).value);o.totalDuration=+$("#eTot",d).value||null;o.duration=null}
     else{o.duration=numOr($("#eDur",d).value)}
     if(o.status==="watched"){o.order=+$("#eOrd",d).value||o.order||nextOrder();o.watchedAt=$("#eDate",d).value||o.watchedAt||null}
@@ -2051,6 +2086,96 @@ function applyTmdb(db,{silent}={}){
 }
 const tmdbUrl=it=>it.tmdb?`https://www.themoviedb.org/${it.tmdb.type}/${it.tmdb.id}?language=ru-RU`:"";
 
+/* ============ автозаполнение: TMDB (данные) + OMDb (IMDb/RT/MC) + Jikan (MAL) ============ */
+function apiKey(k){return String((DB&&DB.apiKeys&&DB.apiKeys[k])||(k==="omdb"?UI.omdbKey:"")||"").trim()}
+function setApiKey(k,v){v=String(v||"").trim();const o=Object.assign({},DB.apiKeys);if(v)o[k]=v;else delete o[k];if(Object.keys(o).length)DB.apiKeys=o;else delete DB.apiKeys;save()}
+async function tmdbGet(path,params={}){
+  const k=apiKey("tmdb");if(!k)throw new Error("нет ключа TMDB");
+  const u=new URL("https://api.themoviedb.org/3"+path);const bearer=k.length>40;
+  if(!bearer)u.searchParams.set("api_key",k);for(const p in params)u.searchParams.set(p,params[p]);
+  const r=await fetch(u,bearer?{headers:{Authorization:"Bearer "+k}}:{});
+  if(r.status===401)throw new Error("ключ TMDB не подходит");if(!r.ok)throw new Error("TMDB ответил "+r.status);return r.json();
+}
+const TG={28:["Боевик"],12:["Приключения"],16:["Мультфильм"],35:["Комедия"],80:["Криминал"],99:["Документальный"],18:["Драма"],10751:["Семейный"],14:["Фэнтези"],36:["История"],27:["Ужасы"],10402:["Музыка"],9648:["Детектив"],10749:["Мелодрама"],878:["Фантастика"],53:["Триллер"],10752:["Военный"],37:["Вестерн"],
+  10759:["Боевик","Приключения"],10762:["Детский"],10764:["Реалити-шоу"],10765:["Фантастика","Фэнтези"],10766:["Мыльная опера"],10767:["Ток-шоу"],10768:["Военный","Политика"]};
+const tmdbImg=(p,w="w500")=>p?`https://image.tmdb.org/t/p/${w}${p}`:"";
+function tmdbType(kind,d){
+  const ids=(d.genres||[]).map(g=>g.id).concat(d.genre_ids||[]);const anim=ids.includes(16);
+  const orig=[...(d.origin_country||[]),...(d.production_countries||[]).map(c=>c.iso_3166_1)];const jp=orig.includes("JP")||d.original_language==="ja";
+  const asia=["KR","CN","TW","TH","HK"].some(c=>orig.includes(c))||["ko","zh","th"].includes(d.original_language);
+  let t=kind==="tv"?(anim?(jp?"Аниме":"Мультсериал"):asia?"Дорама":"Сериал"):(anim?(jp?"Аниме":"Мультфильм"):"Фильм");
+  if(!DB.types.includes(t))t=kind==="tv"?(DB.types.includes("Сериал")?"Сериал":DB.types[0]):(DB.types.includes("Фильм")?"Фильм":DB.types[0]);
+  return t;
+}
+async function tmdbSearch(q){
+  const r=await tmdbGet("/search/multi",{query:q,language:"ru-RU",include_adult:"false"});
+  return (r.results||[]).filter(x=>x.media_type==="movie"||x.media_type==="tv").slice(0,8);
+}
+/* полные данные по выбранному: всё, что нужно форме */
+async function tmdbDetails(kind,id){
+  const d=await tmdbGet(`/${kind}/${id}`,{language:"ru-RU",append_to_response:"external_ids,translations"});
+  const tr=(d.translations?.translations||[]).find(t=>t.iso_639_1==="en")?.data||{};
+  const en=(kind==="tv"?tr.name:tr.title)||(d.original_language==="en"?(d.original_title||d.original_name):"")||d.original_title||d.original_name||"";
+  const o={tmdb:{type:kind,id:d.id},title:(kind==="tv"?d.name:d.title)||en,en,
+    year:+String(d.release_date||d.first_air_date||"").slice(0,4)||null,
+    genres:[...new Set((d.genres||[]).flatMap(g=>TG[g.id]||[]))],
+    synopsis:d.overview||tr.overview||"",poster:tmdbImg(d.poster_path),
+    imdbId:d.imdb_id||d.external_ids?.imdb_id||"",type:tmdbType(kind,d),
+    tmdbVote:isNum(d.vote_average)&&d.vote_count>20?d.vote_average:null,tmdbVotes:d.vote_count||0};
+  if(kind==="movie"){o.series=false;o.duration=d.runtime||null}
+  else{o.series=true;const ss=(d.seasons||[]).filter(s=>s.season_number>0&&s.episode_count>0).sort((a,b)=>a.season_number-b.season_number);
+    o.seasonsTotal=d.number_of_seasons||ss.length||null;o.episodes=d.number_of_episodes||null;o.seasonEpisodes=ss.map(s=>s.episode_count);
+    const rt=(d.episode_run_time||[]).filter(Boolean);const lo=Math.min(...rt),hi=Math.max(...rt);
+    o.episodeDuration=rt.length?(lo===hi?lo:`${lo}-${hi}`):(d.last_episode_to_air?.runtime||null)}
+  return o;
+}
+async function omdbById(imdbId){
+  const k=apiKey("omdb");if(!k||!imdbId)return null;
+  const r=await (await fetch(`https://www.omdbapi.com/?apikey=${encodeURIComponent(k)}&i=${encodeURIComponent(imdbId)}`)).json();
+  if(r.Response!=="True")return null;
+  const im=parseFloat(r.imdbRating),mc=parseInt(r.Metascore),rt=(r.Ratings||[]).find(x=>x.Source==="Rotten Tomatoes");
+  return {imdb:isFinite(im)?im:null,mc:isFinite(mc)?mc:null,rt:rt?parseInt(rt.Value):null};
+}
+async function malScore(q){try{const r=await (await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1`)).json();const a=r.data&&r.data[0];return a&&isNum(a.score)?a.score:null}catch(e){return null}}
+/* подключение к форме «Новая запись / Изменить» */
+function bindAutofill(d,isNew,onPick){
+  const inp=$("#eTitle",d),box=$("#eFind",d),st=$("#eFindSt",d);let t=null,seq=0,lastQ="",open=false;
+  const close=()=>{box.hidden=true;open=false};
+  const has=x=>DB.items.find(i=>i.tmdb&&i.tmdb.id===x.id&&i.tmdb.type===x.media_type);
+  async function run(q,force){
+    q=q.trim();if(q.length<2||(!force&&q===lastQ))return;lastQ=q;
+    if(!apiKey("tmdb")){st.innerHTML=`🔎 Чтобы данные подтягивались сами, добавьте ключ TMDB во вкладке <a href="#data" data-close>«Данные»</a>.`;return}
+    const my=++seq;st.textContent="🔎 Ищу…";
+    try{const R=await tmdbSearch(q);if(my!==seq)return;
+      if(!R.length){st.textContent="Ничего не нашлось — можно заполнить вручную";close();return}
+      st.textContent="Выберите вариант — остальное заполнится само";
+      box.innerHTML=R.map(x=>{const ti=x.title||x.name,or=x.original_title||x.original_name,y=String(x.release_date||x.first_air_date||"").slice(0,4),ex=has(x);
+        return `<button type="button" data-tk="${x.media_type}" data-tid="${x.id}">${x.poster_path?`<img src="${tmdbImg(x.poster_path,"w92")}" alt="">`:`<span class="noimg">?</span>`}
+          <span><b>${esc(ti)}</b>${y?` <span class="dim">${y}</span>`:""}<br><span class="dim">${or&&or!==ti?esc(or)+" · ":""}${x.media_type==="tv"?"сериал":"фильм"}${isNum(x.vote_average)&&x.vote_count>20?" · ★ "+x.vote_average.toFixed(1):""}</span>${ex?` <span class="tex">уже в списке</span>`:""}</span></button>`}).join("");
+      box.hidden=false;open=true;
+    }catch(e){if(my===seq){st.textContent="⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message);close()}}
+  }
+  inp.addEventListener("input",()=>{if(!isNew)return;clearTimeout(t);t=setTimeout(()=>run(inp.value),450)});
+  inp.addEventListener("keydown",e=>{if(e.key==="Escape"&&open){e.preventDefault();e.stopPropagation();close()}if(e.key==="Enter"){e.preventDefault();clearTimeout(t);run(inp.value,true)}});
+  $("#eFindBtn",d).addEventListener("click",()=>{clearTimeout(t);run(inp.value||"",true)});
+  d.addEventListener("click",e=>{if(open&&!e.target.closest("#eFind,#eTitle,#eFindBtn"))close()});
+  box.addEventListener("click",async e=>{const b=e.target.closest("[data-tid]");if(!b)return;close();
+    const kind=b.dataset.tk,id=+b.dataset.tid;
+    const ex=DB.items.find(i=>i.tmdb&&i.tmdb.id===id&&i.tmdb.type===kind);
+    if(ex&&isNew&&!confirm(`«${ex.title}» уже есть в списке. Всё равно добавить ещё раз?`))return;
+    st.textContent="⏳ Загружаю данные…";const my=++seq;
+    try{const o=await tmdbDetails(kind,id);if(my!==seq)return;
+      const parts=["✓ TMDB"];
+      const [om,mal]=await Promise.all([omdbById(o.imdbId).catch(()=>null),o.type==="Аниме"?malScore(o.en||o.title):null]);
+      if(om)o.ext=om;if(isNum(mal))o.ext=Object.assign(o.ext||{},{mal});
+      if(o.ext){for(const s of WSRC)if(isNum(o.ext[s.k]))parts.push(`${s.s||s.n} ${s.fmt(o.ext[s.k])}`)}
+      else if(!apiKey("omdb")&&o.imdbId)parts.push(`<span class="dim">для IMDb/RT/MC добавьте ключ OMDb во вкладке «Данные»</span>`);
+      if(isNum(o.tmdbVote))parts.push(`<span class="dim">TMDB ★ ${o.tmdbVote.toFixed(1)}</span>`);
+      onPick(o);st.innerHTML=parts.join(" · ");
+    }catch(e){if(my===seq)st.textContent="⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message)}
+  });
+}
+
 /* ============ теги ============ */
 const allTags=()=>{const m=new Map();DB.items.forEach(i=>(i.tags||[]).forEach(t=>m.set(t,(m.get(t)||0)+1)));return [...m.entries()].sort((a,b)=>b[1]-a[1]||cmpRu(a[0],b[0]))};
 const tagChips=(it,max=3)=>(it.tags||[]).length?`<div class="tags">${it.tags.slice(0,max).map(t=>`<span class="tg">#${esc(t)}</span>`).join("")}${it.tags.length>max?`<span class="tg">+${it.tags.length-max}</span>`:""}</div>`:"";
@@ -2092,7 +2217,7 @@ function applyWorld(db){
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function refreshWorld(){
-  const key=UI.omdbKey;if(!key){toast("Сначала вставьте ключ OMDb");return}
+  const key=apiKey("omdb");if(!key){toast("Сначала вставьте ключ OMDb");return}
   if(refreshWorld.busy)return;refreshWorld.busy=true;
   const L=DB.items.filter(i=>i.ext?.imdbId||i.ext?.en);let ok=0,miss=[];
   for(let k=0;k<L.length;k++){const it=L[k];
@@ -2283,21 +2408,25 @@ function shotStyle(cs,tag){
   for(let i=0;i<cs.length;i++){const p=cs[i];if(p.startsWith("animation")||p.startsWith("transition"))continue;const v=cs.getPropertyValue(p);if(v!==def[p])s+=`${p}:${v};`}
   return s;
 }
+const _imgCache=new Map();
+function inlineImg(u){if(!_imgCache.has(u))_imgCache.set(u,(async()=>{try{const ac=new AbortController();const tm=setTimeout(()=>ac.abort(),6000);const b=await (await fetch(u,{signal:ac.signal})).blob();clearTimeout(tm);
+  return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>res(null);fr.readAsDataURL(b)})}catch(e){return null}})());return _imgCache.get(u)}
 async function nodeToCanvas(node){
   const W=Math.ceil(node.scrollWidth),H=Math.ceil(node.scrollHeight);
   const clone=node.cloneNode(true);
   const src=[node,...node.querySelectorAll("*")],dst=[clone,...clone.querySelectorAll("*")];
-  const rm=[];
+  const rm=[],pend=[];
   for(let i=0;i<src.length;i++){
     const s=src[i],d=dst[i];
     if(s.hasAttribute("data-noshot")){rm.push(d);continue}
     const tag=s.tagName.toLowerCase();
     d.setAttribute("style",shotStyle(getComputedStyle(s),tag)+"animation:none;transition:none;");
-    if(tag==="img"&&!/^data:/.test(s.getAttribute("src")||"")){d.removeAttribute("src");d.removeAttribute("srcset")}
+    if(tag==="img"&&!/^data:/.test(s.getAttribute("src")||"")){const u=s.currentSrc||s.src;d.removeAttribute("src");d.removeAttribute("srcset");if(/^https?:/.test(u))pend.push(inlineImg(u).then(x=>{if(x)d.setAttribute("src",x)}))}
     if(tag==="input"||tag==="textarea")d.setAttribute("value",s.value);
     for(const pe of ["::before","::after"]){const pc=getComputedStyle(s,pe);const ct=pc.content;if(ct&&ct!=="none"&&ct!=="normal"){const sp=document.createElement("span");sp.setAttribute("style",shotStyle(pc,"span"));sp.textContent=ct.replace(/^["']|["']$/g,"");pe==="::before"?d.insertBefore(sp,d.firstChild):d.appendChild(sp)}}
   }
   rm.forEach(e=>e.remove());
+  await Promise.all(pend);
   clone.style.margin="0";clone.style.transform="none";
   const fonts=[...document.querySelectorAll("style")].map(x=>(x.textContent.match(/@font-face\{[^}]*\}/g)||[]).join("")).join("");
   const wrap=`<div xmlns="http://www.w3.org/1999/xhtml" style="width:${W}px;height:${H}px"><style>${fonts}</style>${new XMLSerializer().serializeToString(clone)}</div>`;
