@@ -438,6 +438,32 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .arcleg b{color:var(--tx3);font-variant-numeric:tabular-nums;margin-right:2px}
 .arcleg i{font-style:normal;color:var(--tx3);font-size:11px}
 .cloudb{position:relative;font-size:18px}
+.reco{margin-bottom:16px;padding:14px 16px}
+.rhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rhead h3{font-size:16px;margin:0}
+.rhead .seg button{padding:4px 10px;font-size:12.5px}
+.rhead .sp{flex:1}
+.rnote{color:var(--tx2);font-size:13.5px;margin:10px 0 0}
+.rnote a{color:var(--acc)}
+.reco .rnote+.rrow{margin-top:10px}
+.rrow{display:grid;grid-auto-flow:column;grid-auto-columns:158px;gap:12px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;margin-top:12px}
+.rc{background:var(--card2);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;scroll-snap-align:start;min-width:0}
+.rp{position:relative;display:block;aspect-ratio:2/3;background:linear-gradient(150deg,var(--line2),var(--card));overflow:hidden}
+.rp img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+.rc:hover .rp img{transform:scale(1.04)}
+.rp .ph0{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;font-weight:800;color:var(--tx3)}
+.rpct{position:absolute;left:8px;top:8px;background:rgba(10,10,14,.78);color:#fff;font-weight:800;font-size:12px;padding:3px 8px;border-radius:999px;backdrop-filter:blur(4px)}
+.rb{padding:9px 10px 10px;display:flex;flex-direction:column;gap:3px;flex:1;font-size:13.5px;line-height:1.3}
+.rb b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rb .dim{font-size:12px}
+.rwhy{font-size:11.5px;color:var(--tx3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ract{display:flex;gap:6px;margin-top:auto;padding-top:6px}
+.ract .btn.sm:first-child{flex:1;justify-content:center;padding:5px 8px}
+.ract .btn.icon{width:30px;height:30px}
+.rc.sk .rp{animation:cpulse 1s infinite alternate}
+.rc.sk .rb i{display:block;height:10px;border-radius:5px;background:var(--line);margin:4px 0}
+.rc.sk .rb i+i{width:60%}
+@media (max-width:700px){.rrow{grid-auto-columns:136px}.reco{padding:12px}}
 .tfind{position:relative}
 .tfind .lnk{background:none;border:0;padding:0 0 0 6px;color:var(--acc);font:inherit;font-weight:600;cursor:pointer}
 .tfind .hint a{color:var(--acc)}
@@ -1371,6 +1397,7 @@ function render(top){
   const y=window.scrollY;
   v.innerHTML=f();
   bindView();
+  if(UI.tab==="watched")recoEnsure();
   if(top)window.scrollTo(0,0);else window.scrollTo(0,y);
 }
 function setUI(k,v){UI[k]=v;saveUI();render()}
@@ -1418,6 +1445,7 @@ function vWatched(){
       <div class="seg" data-ui="view"><button data-v="cards" class="${UI.view==="cards"?"on":""}" title="С постерами">▦ Постеры</button><button data-v="list" class="${UI.view==="list"?"on":""}" title="Таблица">☰ Список</button></div>
     </div></div>
   ${contHTML()}
+  ${recoHTML()}
   <button class="btn fbtn" id="fBtn" style="margin-bottom:12px">⚲ Фильтры${[UI.type!=="all",UI.bucket,UI.comics!=="all",UI.genre,UI.rater!=="all"].filter(Boolean).length?" · "+[UI.type!=="all",UI.bucket,UI.comics!=="all",UI.genre,UI.rater!=="all"].filter(Boolean).length:""} ${UI.fopen?"▴":"▾"}</button>
   <div class="panel fpanel ${UI.fopen?"open":""}">
     <div class="flt" style="flex:1 1 100%"><label>Тип контента</label><div class="chips" data-ui="type">
@@ -2158,6 +2186,98 @@ async function tmdbDetails(kind,id){
     o.episodeDuration=rt.length?(lo===hi?lo:`${lo}-${hi}`):(d.last_episode_to_air?.runtime||null)}
   return o;
 }
+
+/* ============ «Может понравиться»: рекомендации TMDB по нашим лучшим оценкам ============ */
+const RECOK="kinoteka.reco.v1";
+const RECO={sig:"",st:"idle",list:[],msg:"",seeds:[]};
+const recoKey=(t,id)=>t+":"+id;
+function recoWho(){return UI.recoWho&&DB.raters.includes(UI.recoWho)?UI.recoWho:null}
+function recoSeeds(){
+  const who=recoWho();
+  return DB.items.filter(i=>i.tmdb&&i.tmdb.id&&i.status!=="planned").map(it=>({it,s:itemScore(it,who)}))
+    .filter(x=>isNum(x.s)&&x.s>=3.8).sort((a,b)=>b.s-a.s).slice(0,10);
+}
+function recoHave(){const h=new Set(),t=new Set();for(const i of DB.items){if(i.tmdb)h.add(recoKey(i.tmdb.type,i.tmdb.id));t.add(normT(i.title));if(i.ext?.en)t.add(normT(i.ext.en))}
+  for(const k of DB.recoHide||[])h.add(k);return{h,t}}
+async function recoLoad(force){
+  const seeds=recoSeeds();RECO.seeds=seeds;
+  const sig=(apiKey("tmdb")?"k":"-")+(recoWho()||"*")+"|"+seeds.map(x=>x.it.tmdb.type+x.it.tmdb.id+":"+x.s.toFixed(1)).join(",");
+  if(!force&&RECO.sig===sig&&RECO.st!=="idle")return;
+  RECO.sig=sig;
+  if(!apiKey("tmdb")){RECO.st="nokey";recoPaint();return}
+  if(!seeds.length){RECO.st="noseed";recoPaint();return}
+  if(!force){try{const c=JSON.parse(localStorage.getItem(RECOK)||"null");if(c&&c.sig===sig&&Date.now()-c.at<3*864e5){RECO.raw=c.raw;RECO.st="ok";recoBuild();recoPaint();return}}catch(e){}}
+  RECO.st="loading";recoPaint();const my=sig;
+  try{
+    const raw=[];
+    for(const {it,s} of seeds){
+      const r=await tmdbGet(`/${it.tmdb.type}/${it.tmdb.id}/recommendations`,{language:"ru-RU",page:1});
+      raw.push({from:it.id,s,res:(r.results||[]).slice(0,20).map(x=>({t:x.media_type||it.tmdb.type,id:x.id,title:x.title||x.name,orig:x.original_title||x.original_name,
+        y:String(x.release_date||x.first_air_date||"").slice(0,4),p:x.poster_path,v:x.vote_average,vc:x.vote_count,g:x.genre_ids||[],lang:x.original_language,oc:x.origin_country||[],ov:x.overview||""}))});
+      if(RECO.sig!==my)return;
+    }
+    RECO.raw=raw;RECO.st="ok";try{localStorage.setItem(RECOK,JSON.stringify({sig,at:Date.now(),raw}))}catch(e){}
+    recoBuild();
+  }catch(e){if(RECO.sig!==my)return;RECO.st="err";RECO.msg=e.message==="Failed to fetch"?"нет связи с TMDB":e.message}
+  recoPaint();
+}
+/* склейка: чем выше наша оценка источника и чем выше позиция в его рекомендациях, тем больше вес; совпадения по нескольким источникам складываются */
+function recoBuild(){
+  const {h,t}=recoHave(),M=new Map();
+  for(const {from,s,res} of RECO.raw||[]){const w=Math.max(.3,s-3);
+    res.forEach((x,rank)=>{const k=recoKey(x.t,x.id);if(h.has(k)||t.has(normT(x.title))||t.has(normT(x.orig)))return;if((x.vc||0)<30)return;
+      const m=M.get(k)||{...x,k,score:0,from:[]};m.score+=w*(1-rank/24);if(!m.from.includes(from))m.from.push(from);M.set(k,m)})}
+  const L=[...M.values()].map(m=>({...m,score:m.score*(.55+(m.v||0)/20)})).sort((a,b)=>b.score-a.score).slice(0,14);
+  const mx=L.length?L[0].score:1;L.forEach(m=>m.pct=Math.round(55+45*m.score/mx));
+  RECO.list=L;
+}
+function recoKind(x){const anim=x.g.includes(16),jp=x.oc.includes("JP")||x.lang==="ja";return x.t==="tv"?(anim?(jp?"аниме":"мультсериал"):"сериал"):(anim?(jp?"аниме":"мультфильм"):"фильм")}
+function recoInner(){
+  const who=recoWho();
+  const head=`<div class="rhead"><h3>✨ Может понравиться</h3>
+    <div class="seg sm"><button data-reco-who="" class="${!who?"on":""}">Нам</button>${DB.raters.map(n=>`<button data-reco-who="${esc(n)}" class="${who===n?"on":""}">${esc(n)}</button>`).join("")}</div>
+    <div class="sp"></div>${RECO.st==="ok"||RECO.st==="err"?`<button class="btn sm ghost" data-reco-ref title="Обновить подборку">↻</button>`:""}<button class="btn sm ghost" data-reco-tog title="${UI.recoOff?"Развернуть":"Свернуть"}">${UI.recoOff?"▾":"▴"}</button></div>`;
+  if(UI.recoOff)return head;
+  const seedNames=RECO.seeds.slice(0,4).map(x=>"«"+esc(x.it.title)+"»").join(", ");
+  let body="";
+  if(RECO.st==="nokey")body=`<p class="rnote">Добавьте ключ TMDB во вкладке <a href="#data">«Данные»</a> — и здесь появятся фильмы и сериалы, похожие на то, что вы оценили выше всего.</p>`;
+  else if(RECO.st==="noseed")body=`<p class="rnote">Пока не на что опереться: нужны записи с оценкой от 3.8${who?" у "+esc(who):""}.</p>`;
+  else if(RECO.st==="err")body=`<p class="rnote">⚠ Не удалось загрузить: ${esc(RECO.msg)}</p>`;
+  else if(RECO.st==="loading"||RECO.st==="idle")body=`<div class="rrow">${Array.from({length:7},()=>`<div class="rc sk"><div class="rp"></div><div class="rb"><i></i><i></i></div></div>`).join("")}</div>`;
+  else if(!RECO.list.length)body=`<p class="rnote">Всё похожее уже есть у вас в списке 🙂</p>`;
+  else body=`<p class="rnote">По мотивам ${seedNames}${RECO.seeds.length>4?` и ещё ${RECO.seeds.length-4}`:""} · процент — насколько сильно совпадает с вашими любимыми</p>
+    <div class="rrow">${RECO.list.map(x=>{const fr=x.from.map(id=>itemById(id)?.title).filter(Boolean);
+      return `<div class="rc" title="${esc(x.ov)}">
+        <a class="rp" href="https://www.themoviedb.org/${x.t}/${x.id}?language=ru-RU" target="_blank" rel="noopener">${x.p?`<img src="${tmdbImg(x.p,"w342")}" alt="" loading="lazy">`:`<span class="ph0">${esc(initials(x.title))}</span>`}<span class="rpct">${x.pct}%</span></a>
+        <div class="rb"><b>${esc(x.title)}</b><span class="dim">${x.y?x.y+" · ":""}${recoKind(x)}${isNum(x.v)&&x.v>0?" · ★ "+x.v.toFixed(1):""}</span>
+          <span class="rwhy">похоже на ${fr.slice(0,2).map(t=>"«"+esc(t)+"»").join(", ")}${fr.length>2?" +"+(fr.length-2):""}</span>
+          <div class="ract"><button class="btn sm" data-reco-add="${x.k}">＋ В планы</button><button class="btn sm ghost icon" data-reco-hide="${x.k}" title="Не интересно">✕</button></div></div></div>`}).join("")}</div>`;
+  return head+body;
+}
+function recoHTML(){return `<section class="panel reco" id="reco">${recoInner()}</section>`}
+function recoPaint(){const el=$("#reco");if(el)el.innerHTML=recoInner()}
+async function recoAdd(k){
+  const x=RECO.list.find(r=>r.k===k);if(!x)return;
+  const [t,id]=k.split(":");toast("Добавляю «"+x.title+"»…");
+  try{const o=await tmdbDetails(t,+id);const om=await omdbById(o.imdbId).catch(()=>null);
+    const it={id:uid("i"),title:o.title,type:o.type,kind:o.series?"series":"movie",status:"planned",year:o.year,genres:o.genres,tags:[],synopsis:o.synopsis,poster:o.poster,
+      ratings:{},order:null,watchedAt:null,seasons:[],addedAt:Date.now(),tmdb:o.tmdb,duration:o.series?null:o.duration};
+    if(o.series)Object.assign(it,{seasonsTotal:o.seasonsTotal,episodes:o.episodes,episodeDuration:o.episodeDuration,seasonEpisodes:o.seasonEpisodes,totalDuration:null});
+    const ext={};if(o.en)ext.en=o.en;if(o.imdbId)ext.imdbId=o.imdbId;if(om){for(const s of ["imdb","rt","mc"])if(isNum(om[s]))ext[s]=om[s];ext.at=new Date().toISOString();ext.src="OMDb (авто)"}
+    if(Object.keys(ext).length)it.ext=ext;
+    DB.items.push(it);RECO.list=RECO.list.filter(r=>r.k!==k);commit();toast("✓ «"+it.title+"» — в планах");
+  }catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-reco-add],[data-reco-hide],[data-reco-who],[data-reco-ref],[data-reco-tog]");if(!b||!b.closest("#reco"))return;
+  e.preventDefault();
+  if(b.dataset.recoAdd){b.disabled=true;recoAdd(b.dataset.recoAdd);return}
+  if(b.dataset.recoHide){DB.recoHide=[...new Set([...(DB.recoHide||[]),b.dataset.recoHide])];RECO.list=RECO.list.filter(r=>r.k!==b.dataset.recoHide);save();recoPaint();return}
+  if(b.dataset.recoWho!==undefined){UI.recoWho=b.dataset.recoWho;saveUI();recoLoad();return}
+  if(b.dataset.recoRef!==undefined){recoLoad(true);return}
+  if(b.dataset.recoTog!==undefined){UI.recoOff=!UI.recoOff;saveUI();recoPaint();if(!UI.recoOff)recoLoad()}
+});
+function recoEnsure(){if(UI.tab!=="watched"||UI.recoOff)return;if(RECO.st==="ok"){const before=RECO.list.length;recoBuild();if(RECO.list.length!==before)recoPaint()}recoLoad()}
 /* постеры для записей с tmdb-id, но без картинки (например, Ван Пис) */
 async function fillPosters(silent){
   if(!apiKey("tmdb")||fillPosters.busy)return 0;fillPosters.busy=true;let n=0;
