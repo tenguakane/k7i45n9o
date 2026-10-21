@@ -169,6 +169,18 @@ table.t .num{color:var(--tx3);font-variant-numeric:tabular-nums;width:40px}
 .smat .cell.add{background:transparent;border:1px dashed var(--line2);color:var(--tx3)}
 .smat .cell.add:hover{border-color:var(--acc);color:var(--acc)}
 .smat tr.avg .cell{box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.smat.svt{max-height:min(460px,60vh);overflow:auto;border:1px solid var(--line);border-radius:12px;padding:2px 4px}
+.shotting .smat.svt{max-height:none;overflow:visible}
+@media (max-width:700px){.smat.svt{max-height:none;overflow:visible}.smat.svt td:not(.l):not(.n){width:48px}.smat.svt .cell{min-width:42px}}
+.smat.svt table{width:100%}
+.smat.svt thead th{position:sticky;top:0;background:var(--bg2);z-index:1;padding:8px 4px 6px}
+.smat.svt td.n{color:var(--tx3);font-weight:700;font-size:12px;text-align:right;padding-right:4px;width:1%;font-variant-numeric:tabular-nums}
+.smat.svt td.l{text-align:left;padding:2px 8px 2px 4px;line-height:1.25}
+.smat.svt .nm{display:block;font-weight:600;color:var(--tx)}
+.smat.svt .ep{display:block;font-size:11.5px;color:var(--tx3)}
+.smat.svt td:not(.l):not(.n){width:56px}
+.smat.svt td.av .cell{box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.smat .cell.add.wide{justify-content:flex-start;padding:0 12px;font-weight:600;font-size:13px}
 .bars{display:flex;align-items:flex-end;gap:6px;height:64px;margin-top:10px}
 .bars div{flex:0 0 26px;border-radius:5px 5px 2px 2px;position:relative}
 .bars div span{position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--tx3);font-weight:700}
@@ -260,7 +272,8 @@ dialog[open]{animation:pop .2s both}
 .drop.ov{border-color:var(--acc);color:var(--acc)}
 
 /* detail */
-.det{display:grid;grid-template-columns:240px 1fr;gap:24px}
+.det{display:grid;grid-template-columns:240px minmax(0,1fr);gap:24px}
+.det>div{min-width:0}
 .det .poster{border-radius:14px;box-shadow:var(--sh)}
 .det h2{font-size:24px;line-height:1.2}
 .det .meta{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;color:var(--tx2);font-size:14px;align-items:center}
@@ -875,7 +888,7 @@ const OP_ARCS=[
  ["Зоу",751,779],["Новобранцы дозора",780,782,1],["Остров Пирожных",783,877],["Ревери",878,889],["Страна Вано",890,1085],
  ["Эггхед",1086,1155],["Эльбаф",1156,null]
 ].map(([name,a,b,f],i)=>({n:i+1,name,from:a,to:b,filler:!!f}));
-function onePieceItem(){return{id:"op1",title:"Ван Пис",type:"Аниме",kind:"series",status:"watching",year:1999,
+function onePieceItem(){return{id:"op1",title:"Ван Пис",type:"Аниме",kind:"series",status:"watching",year:1999,tmdb:{type:"tv",id:37854},
   genres:["Аниме","Приключения","Боевик","Комедия","Фэнтези"],tags:[],
   synopsis:"Монки Д. Луффи, парень с резиновым телом, собирает команду Пиратов Соломенной Шляпы и отправляется на поиски легендарного сокровища «Ван Пис», чтобы стать Королём пиратов. Вместо сезонов — арки: каждую можно оценить отдельно.",
   poster:"",duration:null,ratings:{},order:null,watchedAt:null,addedAt:Date.now(),
@@ -1172,6 +1185,7 @@ function normalize(db){
   db.collections=db.collections||[];
   db.log=Array.isArray(db.log)?db.log:[];
   if(!db.opAdded){if(!db.items.some(i=>i.id==="op1"||normT(i.title)===normT("Ван Пис")))db.items.push(onePieceItem());db.opAdded=1}
+  {const op=db.items.find(i=>i.id==="op1");if(op&&!op.tmdb)op.tmdb={type:"tv",id:37854}}
   db.version=1;return db;
 }
 
@@ -1794,7 +1808,7 @@ function bindView(){
   $("#omdbKey",v)?.addEventListener("change",e=>{setApiKey("omdb",e.target.value);toast("Ключ OMDb сохранён")});
   $("#omdbGo",v)?.addEventListener("click",()=>{setApiKey("omdb",$("#omdbKey",v).value);refreshWorld()});
   $("#tmdbKeySave",v)?.addEventListener("click",async()=>{const k=$("#tmdbKey",v).value.trim();setApiKey("tmdb",k);if(!k){toast("Ключ TMDB удалён");return}
-    try{await tmdbGet("/configuration");toast("✓ Ключ TMDB работает")}catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}});
+    try{await tmdbGet("/configuration");toast("✓ Ключ TMDB работает");fillPosters()}catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}});
   $("#malGo",v)?.addEventListener("click",()=>refreshMal());
 }
 function renameRater(o,n){const fix=r=>{if(r&&r[o]!==undefined){r[n]=r[o];delete r[o]}};DB.items.forEach(i=>{fix(i.ratings);(i.seasons||[]).forEach(s=>fix(s.ratings))})}
@@ -1822,6 +1836,23 @@ function closeDlg(id="dlg"){const d=document.getElementById(id);if(d.open)d.clos
 ["dlg","dlg2"].forEach(id=>{const d=document.getElementById(id);d.addEventListener("click",e=>{if(e.target===d)d.close();if(e.target.closest("[data-close]"))d.close()})});
 
 /* detail */
+function segTable(it){
+  const arc=isArc(it),S=it.seasons||[],nx=Math.max(0,...S.map(s=>s.n))+1;
+  const cell=(v,sn,tip)=>`<div class="cell ${isNum(v)?"":"na"}" ${isNum(v)?`style="background:${scoreColor(v)}"`:""} data-rate="${it.id}" data-season="${sn}" title="${esc(tip)}">${f1(v)}</div>`;
+  const addTip=arc?"Оценить следующую арку":"Добавить сезон";
+  const h=`<div class="dsec"><h4>${arc?"Арки":"Сезоны"}${S.length?` <span class="dim" style="font-weight:600;text-transform:none;letter-spacing:0">· оценено ${S.length}${arc?" из "+it.arcs.length:it.seasonsTotal?" из "+it.seasonsTotal:""}</span>`:""}</h4>`;
+  if(arc||S.length>8){ // вертикально: по строке на арку/сезон
+    const nxName=arc?(arcOf(it,nx)?`${nx}. ${arcOf(it,nx).name}`:""):`${nx} сезон`;
+    return h+`<div class="smat svt"><table><thead><tr><th>№</th><th class="l">${arc?"Арка":"Сезон"}</th>${DB.raters.map(n=>`<th>${esc(n)}</th>`).join("")}<th>Среднее</th></tr></thead><tbody>
+      ${S.map(sg=>{const a=arcOf(it,sg.n);return `<tr><td class="n">${sg.n}</td><td class="l"><span class="nm">${esc(arc?(a?a.name:"Арка "+sg.n):sg.n+" сезон")}</span>${a?`<span class="ep">${a.filler?"филлер · ":""}эп. ${a.from}–${a.to||"…"}</span>`:""}</td>
+        ${DB.raters.map(n=>`<td>${cell(personScore(sg.ratings[n]),sg.n,segTip(it,sg.n)+" · "+n)}</td>`).join("")}<td class="av">${cell(overallOf(sg.ratings),sg.n,segTip(it,sg.n))}</td></tr>`}).join("")}
+      ${!arc||arcOf(it,nx)?`<tr><td class="n"></td><td colspan="${DB.raters.length+2}"><div class="cell add wide" data-rate="${it.id}" data-season="${nx}" title="${addTip}">＋ ${esc(nxName)}</div></td></tr>`:""}
+      </tbody></table></div></div>`;
+  }
+  return h+`<div class="smat"><table><thead><tr><th></th>${S.map(sg=>`<th title="${esc(segTip(it,sg.n))}">${segShort(it,sg.n)}</th>`).join("")}<th></th></tr></thead><tbody>
+    ${[...DB.raters,null].map(n=>`<tr ${n?"":`class="avg"`}><th class="l">${n?esc(n):"Среднее"}</th>${S.map(sg=>`<td>${cell(n?personScore(sg.ratings[n]):overallOf(sg.ratings),sg.n,segTip(it,sg.n))}</td>`).join("")}${n?"<td></td>":`<td><div class="cell add" data-rate="${it.id}" data-season="${nx}" title="${addTip}">＋</div></td>`}</tr>`).join("")}
+    </tbody></table></div></div>`;
+}
 function openDetail(id,season){
   const it=itemById(id);if(!it)return;
   const cm=comicsMap()[it.id]||[];
@@ -1848,9 +1879,7 @@ function openDetail(id,season){
         ${DB.raters.map(n=>`<tr><td class="l">${esc(n)}</td>${CATS.map(c=>catCell(n,c.k)).join("")}</tr>`).join("")}
       </tbody></table>${useSeasonsAvg?`<p class="dim" style="font-size:12.5px">Оценки — среднее по ${arc?"аркам":"сезонам"}.</p>`:""}${ratedAtLine(R,useSeasonsAvg)}`:""}
       ${!sObj?worldBlock(it,tot):""}
-      ${ser&&!sObj?`<div class="dsec"><h4>${arc?"Арки":"Сезоны"}</h4><div class="smat"><table><thead><tr><th></th>${(it.seasons||[]).map(s=>`<th title="${esc(segTip(it,s.n))}">${segShort(it,s.n)}</th>`).join("")}<th></th></tr></thead><tbody>
-        ${[...DB.raters,null].map(n=>`<tr ${n?"":`class="avg"`}><th class="l">${n?esc(n):"Среднее"}</th>${(it.seasons||[]).map(s=>{const v=n?personScore(s.ratings[n]):overallOf(s.ratings);return `<td><div class="cell ${isNum(v)?"":"na"}" ${isNum(v)?`style="background:${scoreColor(v)}"`:""} data-rate="${it.id}" data-season="${s.n}" title="${esc(segTip(it,s.n))}">${f1(v)}</div></td>`}).join("")}${n?"<td></td>":`<td><div class="cell add" data-rate="${it.id}" data-season="${Math.max(0,...(it.seasons||[]).map(s=>s.n))+1}" title="${arc?"Оценить следующую арку":"Добавить сезон"}">＋</div></td>`}</tr>`).join("")}
-      </tbody></table></div>${arc&&(it.seasons||[]).length?`<div class="arcleg">${it.seasons.map(s=>`<span><b>${s.n}</b> ${esc(segName(it,s.n))}</span>`).join("")}</div>`:""}</div>`:""}
+      ${ser&&!sObj?segTable(it):""}
     </div></div></div>
   <div class="df"><button class="btn danger ghost" id="dDel">Удалить</button><div class="sp"></div>
     <button class="btn icon" data-shot="#detShot" data-shot-title="${esc(it.title)}${sObj?" · "+esc(segName(it,season)):""}" title="Копировать карточку картинкой">📷</button>
@@ -2128,6 +2157,15 @@ async function tmdbDetails(kind,id){
     const rt=(d.episode_run_time||[]).filter(Boolean);const lo=Math.min(...rt),hi=Math.max(...rt);
     o.episodeDuration=rt.length?(lo===hi?lo:`${lo}-${hi}`):(d.last_episode_to_air?.runtime||null)}
   return o;
+}
+/* постеры для записей с tmdb-id, но без картинки (например, Ван Пис) */
+async function fillPosters(silent){
+  if(!apiKey("tmdb")||fillPosters.busy)return 0;fillPosters.busy=true;let n=0;
+  try{for(const it of DB.items.filter(i=>i.tmdb&&i.tmdb.id&&!i.poster)){
+    try{const d=await tmdbGet(`/${it.tmdb.type}/${it.tmdb.id}`,{language:"ru-RU"});const ps=d.poster_path||(await tmdbGet(`/${it.tmdb.type}/${it.tmdb.id}`)).poster_path;
+      if(ps&&!it.poster){it.poster=tmdbImg(ps);n++}}catch(e){if(/ключ/.test(e.message))break}}}
+  finally{fillPosters.busy=false}
+  if(n){commit();if(!silent)toast(`Добавлены постеры: ${n}`)}return n;
 }
 async function omdbById(imdbId){
   const k=apiKey("omdb");if(!k||!imdbId)return null;
@@ -2411,7 +2449,8 @@ function shotStyle(cs,tag){
 const _imgCache=new Map();
 function inlineImg(u){if(!_imgCache.has(u))_imgCache.set(u,(async()=>{try{const ac=new AbortController();const tm=setTimeout(()=>ac.abort(),6000);const b=await (await fetch(u,{signal:ac.signal})).blob();clearTimeout(tm);
   return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>res(null);fr.readAsDataURL(b)})}catch(e){return null}})());return _imgCache.get(u)}
-async function nodeToCanvas(node){
+async function nodeToCanvas(node){node.classList.add("shotting");try{return await nodeToCanvas0(node)}finally{node.classList.remove("shotting")}}
+async function nodeToCanvas0(node){
   const W=Math.ceil(node.scrollWidth),H=Math.ceil(node.scrollHeight);
   const clone=node.cloneNode(true);
   const src=[node,...node.querySelectorAll("*")],dst=[clone,...clone.querySelectorAll("*")];
@@ -2490,6 +2529,7 @@ document.addEventListener("keydown",e=>{if(e.key==="/"&&!e.target.matches("input
   if(inv){const u=new URL(location.href);u.searchParams.delete("db");u.searchParams.delete("room");history.replaceState(null,"",u.pathname+u.search+u.hash);
     if(!joinCloud(inv,true))cloudConnect()}
   else cloudConnect();
+  setTimeout(()=>fillPosters(true),2500);
 })();
 </script>
 </body>
