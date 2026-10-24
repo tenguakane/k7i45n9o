@@ -2,8 +2,8 @@
    Страница: сначала сеть, без сети — последняя сохранённая копия.
    Иконки, шрифты и прочие файлы сайта: из кэша, в фоне обновляются.
    Запросы к другим сайтам (облако, TMDB, постеры) не трогаем. */
-const CACHE = "lisi-ocenki-v1";
-const CORE = ["./", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/icon.svg"];
+const CACHE = "lisi-ocenki-v2";
+const CORE = ["./", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "icon.svg"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(CORE.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
