@@ -20,7 +20,7 @@
   --tx:#e2e4e8;--tx2:#8e939d;--tx3:#5e6370;
   --acc:#8eaadc;--acc2:#6dbba1;--accTx:#131416;
   --ok:#5ea06c;--bad:#c26054;
-  --r:14px;--r2:8px;
+  --r:10px;--r2:6px;
   --sh:0 8px 28px rgba(0,0,0,.5);
   --sb:66px;--sb-open:220px;
   --hfont:"Samsung Sans","SamsungOne","Segoe UI",system-ui,-apple-system,sans-serif;
@@ -85,29 +85,25 @@
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--tx);font:15px/1.5 var(--font);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .35s ease,color .25s ease;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
-  background:
-    radial-gradient(ellipse 45% 35% at 20% 10%,color-mix(in srgb,var(--acc) 8%,transparent),transparent 70%),
-    radial-gradient(ellipse 40% 40% at 80% 60%,color-mix(in srgb,var(--acc2) 6%,transparent),transparent 70%),
-    radial-gradient(ellipse 50% 30% at 50% 90%,color-mix(in srgb,var(--acc) 4%,transparent),transparent 60%);
-  animation:bgShift 20s ease-in-out infinite alternate}
-@keyframes bgShift{0%{opacity:.7}50%{opacity:1}100%{opacity:.8}}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(120% 70% at 0% 0%,color-mix(in srgb,var(--acc) 7%,transparent),transparent 55%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:overlay}
+:root[data-theme="light"] body::after{opacity:.09;mix-blend-mode:multiply}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--acc)}
 h1,h2,h3{font-family:var(--hfont);font-weight:700;letter-spacing:-.02em;margin:0}
 
 /* ===== SIDEBAR — floating, rounded, sectored ===== */
 .sidebar{position:fixed;top:12px;left:12px;bottom:12px;width:var(--sb);z-index:40;
-  background:var(--bg2-g);backdrop-filter:blur(20px) saturate(1.3);
-  border:1px solid color-mix(in srgb,var(--acc) 10%,var(--line));border-radius:18px;
+  background:var(--bg2-g);backdrop-filter:blur(18px) saturate(1.2);
+  border:1px solid var(--line);border-radius:14px;
   display:flex;flex-direction:column;overflow:hidden;
   transition:width .24s cubic-bezier(.4,0,.2,1),background .35s ease,border-color .3s;
-  box-shadow:0 8px 32px rgba(0,0,0,.35)}
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 10px 30px rgba(0,0,0,.28)}
 .sidebar:hover{width:var(--sb-open)}
 
 /* sector: logo */
 .sb-logo{display:flex;align-items:center;justify-content:center;height:56px;flex:none;padding:10px;border-bottom:1px solid var(--line)}
-.sb-logo svg{width:32px;height:32px;flex:none;filter:drop-shadow(0 2px 8px color-mix(in srgb,var(--fox1) 35%,transparent))}
+.sb-logo svg{width:32px;height:32px;flex:none}
 /* fox dynamic colors */
 .fox-body{fill:var(--fox1)}.fox-ear{fill:var(--foxEar)}.fox-belly{fill:var(--foxBelly)}.fox-eye{fill:var(--foxEye)}
 
@@ -118,7 +114,10 @@ h1,h2,h3{font-family:var(--hfont);font-weight:700;letter-spacing:-.02em;margin:0
 .sidebar nav.tabs::-webkit-scrollbar{display:none}
 .sidebar nav.tabs a{color:var(--tx2);text-decoration:none;padding:9px 11px;border-radius:10px;font-weight:600;font-size:13.5px;white-space:nowrap;display:flex;gap:10px;align-items:center;transition:color .15s,background .15s;overflow:hidden}
 .sidebar nav.tabs a:hover{color:var(--tx);background:color-mix(in srgb,var(--tx) 6%,transparent)}
-.sidebar nav.tabs a.on{color:var(--accTx);background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 80%,var(--acc2)));box-shadow:0 2px 10px color-mix(in srgb,var(--acc) 30%,transparent)}
+.sidebar nav.tabs a{position:relative}
+.sidebar nav.tabs a.on{color:var(--tx);background:color-mix(in srgb,var(--tx) 8%,transparent)}
+.sidebar nav.tabs a.on::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--acc)}
+.sidebar nav.tabs a.on .ic{color:var(--acc)}
 .sidebar nav.tabs a .ic{font-size:17px;flex:none;width:24px;text-align:center}
 .sidebar nav.tabs a .ln{opacity:0;transition:opacity .18s;white-space:nowrap}
 .sidebar:hover nav.tabs a .ln{opacity:1}
@@ -139,10 +138,11 @@ h1,h2,h3{font-family:var(--hfont);font-weight:700;letter-spacing:-.02em;margin:0
 .sb-actions .sb-btn.pri:hover{background:color-mix(in srgb,var(--acc) 10%,transparent)}
 /* cloud status dot inside sidebar btn */
 .sb-actions .sb-btn.cloudb{position:relative}
-.sb-actions .sb-btn.cloudb i{position:absolute;left:30px;top:8px;width:8px;height:8px;border-radius:50%;background:var(--tx3);box-shadow:0 0 0 2px var(--bg2)}
-.sb-actions .sb-btn.cloudb[data-st="ok"] i{background:var(--ok)}
-.sb-actions .sb-btn.cloudb[data-st="sync"] i,.sb-actions .sb-btn.cloudb[data-st="conn"] i{background:var(--acc);animation:cpulse .8s infinite alternate}
-.sb-actions .sb-btn.cloudb[data-st="err"] i{background:var(--bad)}
+.sb-actions .sb-btn .sb-ic{position:relative;display:inline-flex;align-items:center;justify-content:center;height:20px}
+.sb-actions .sb-btn.cloudb .sb-dot{position:absolute;right:1px;bottom:0;width:7px;height:7px;border-radius:50%;background:var(--tx3);box-shadow:0 0 0 2px var(--bg2)}
+.sb-actions .sb-btn.cloudb[data-st="ok"] .sb-dot{background:var(--ok)}
+.sb-actions .sb-btn.cloudb[data-st="sync"] .sb-dot,.sb-actions .sb-btn.cloudb[data-st="conn"] .sb-dot{background:var(--acc);animation:cpulse .8s infinite alternate}
+.sb-actions .sb-btn.cloudb[data-st="err"] .sb-dot{background:var(--bad)}
 
 /* ===== LAYOUT ===== */
 .wrap{max-width:none;padding:0 28px}
@@ -150,64 +150,66 @@ header{display:none}
 main{margin-left:calc(var(--sb) + 24px);padding:22px 28px 90px}
 
 /* controls — modern */
-.btn{border:1px solid var(--line);background:var(--card);padding:8px 16px;border-radius:10px;cursor:pointer;font-weight:600;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;transition:all .2s cubic-bezier(.4,0,.2,1);white-space:nowrap;position:relative;overflow:hidden}
-.btn::after{content:"";position:absolute;inset:0;background:currentColor;opacity:0;transition:opacity .2s;border-radius:inherit;pointer-events:none}
-.btn:hover{border-color:var(--line2);background:var(--card2);transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.btn:hover::after{opacity:.04}
-.btn:active{transform:translateY(0);box-shadow:none}
-.btn.pri{background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 80%,var(--acc2)));border-color:transparent;color:var(--accTx);box-shadow:0 2px 12px color-mix(in srgb,var(--acc) 30%,transparent)}
-.btn.pri:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 4px 16px color-mix(in srgb,var(--acc) 40%,transparent)}
+.btn{border:1px solid var(--line);background:var(--card);padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;transition:background .15s,border-color .15s,color .15s;white-space:nowrap;position:relative}
+.btn:hover{border-color:var(--line2);background:var(--card2)}
+.btn:active{background:var(--line)}
+.btn:focus-visible,.chip:focus-visible,.seg button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--accTx)}
+.btn.pri:hover{background:var(--acc);border-color:var(--acc);filter:brightness(1.07)}
 .btn.ghost{background:transparent;border-color:transparent}
 .btn.ghost:hover{background:color-mix(in srgb,var(--tx) 6%,transparent);border-color:transparent;box-shadow:none}
-.btn.sm{padding:6px 12px;font-size:13px;border-radius:8px}
+.btn.sm{padding:5px 11px;font-size:13px;border-radius:6px}
 .btn.danger{color:var(--bad)}
-.btn.icon{width:36px;height:36px;padding:0;justify-content:center;border-radius:10px}
+.btn.icon{width:34px;height:34px;padding:0;justify-content:center;border-radius:8px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:1px solid var(--line);background:var(--card);padding:6px 14px;border-radius:20px;cursor:pointer;font-weight:600;font-size:13px;color:var(--tx2);transition:all .2s cubic-bezier(.4,0,.2,1);display:inline-flex;gap:6px;align-items:center}
-.chip:hover{color:var(--tx);border-color:var(--line2);background:var(--card2);transform:translateY(-1px)}
-.chip.on{background:color-mix(in srgb,var(--acc) 16%,var(--card));border-color:color-mix(in srgb,var(--acc) 45%,transparent);color:var(--acc);box-shadow:0 0 0 1px color-mix(in srgb,var(--acc) 12%,transparent)}
+.chip{border:1px solid var(--line);background:transparent;padding:5px 12px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13px;color:var(--tx2);transition:background .15s,border-color .15s,color .15s;display:inline-flex;gap:6px;align-items:center}
+.chip:hover{color:var(--tx);border-color:var(--line2)}
+.chip.on{background:var(--tx);border-color:var(--tx);color:var(--bg)}
+.chip.on small{color:var(--bg);opacity:.6}
 .chip small{color:var(--tx3);font-weight:600}
-.seg{display:inline-flex;background:var(--card-gs);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px}
-.seg button{border:0;background:transparent;padding:6px 14px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13px;color:var(--tx3);transition:all .2s cubic-bezier(.4,0,.2,1);position:relative}
+.seg{display:inline-flex;background:var(--card-gs);border:1px solid var(--line);border-radius:9px;padding:2px;gap:2px}
+.seg button{border:0;background:transparent;padding:5px 12px;border-radius:7px;cursor:pointer;font-weight:600;font-size:13px;color:var(--tx3);transition:background .15s,color .15s;position:relative}
 .seg button:hover{color:var(--tx2)}
-.seg button.on{background:var(--card2);color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.15),inset 0 0 0 1px var(--line)}
-.inp,select.inp,textarea.inp{background:var(--card-g2);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:10px;padding:9px 14px;outline:none;transition:border-color .2s,box-shadow .2s}
-.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 15%,transparent)}
+.seg button.on{background:var(--card2);color:var(--tx);box-shadow:inset 0 0 0 1px var(--line2)}
+.inp,select.inp,textarea.inp{background:var(--card-g2);border:1px solid var(--line);border-radius:8px;padding:9px 14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
 select.inp{cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238e939d' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
 .search{position:relative;flex:1;min-width:200px;max-width:460px}
-.search input{width:100%;padding-left:38px;border-radius:12px}
-.search::before{content:"⌕";position:absolute;left:13px;top:50%;transform:translateY(-52%);color:var(--tx3);font-size:18px;transition:color .2s}
+.search input{width:100%;padding-left:38px;border-radius:8px}
+.search::before{content:"";position:absolute;left:12px;top:50%;width:17px;height:17px;transform:translateY(-50%);background:currentColor;color:var(--tx3);-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;transition:color .15s}
+.search{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%227%22/%3E%3Cpath d=%22M20 20l-4-4%22/%3E%3C/svg%3E")}
 .search:focus-within::before{color:var(--acc)}
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
 .toolbar .sp{flex:1}
 .flt{display:flex;flex-direction:column;gap:6px}
-.flt label{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--tx3);font-weight:700}
-.panel{background:var(--card-g);backdrop-filter:blur(14px);border:1px solid color-mix(in srgb,var(--acc) 8%,var(--line));border-radius:16px;padding:18px;transition:background .3s,border-color .3s}
+.flt label{font-size:12.5px;color:var(--tx3);font-weight:600}
+.panel{background:var(--card-g);border:1px solid var(--line);border-radius:12px;padding:18px;transition:background .3s,border-color .3s}
 .fpanel{display:flex;flex-wrap:wrap;gap:16px 26px;margin-bottom:18px}
 .ptitle{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap}
 .ptitle h1{font-size:26px;letter-spacing:-.02em}
 .ptitle p{margin:4px 0 0;color:var(--tx2)}
 .muted{color:var(--tx2)}.dim{color:var(--tx3)}
-.empty{padding:50px 20px;text-align:center;color:var(--tx3);border:1px dashed var(--line2);border-radius:16px;font-size:14px;background:var(--card-ge);backdrop-filter:blur(8px)}
+.empty{padding:50px 20px;text-align:center;color:var(--tx3);border:1px dashed var(--line2);border-radius:12px;font-size:14px;background:var(--card-ge)}
 
 /* summary strip */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
-.kpi{background:var(--card-gk);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--acc) 6%,var(--line));border-radius:14px;padding:16px 18px;transition:all .3s;position:relative;overflow:hidden}
-.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--acc),var(--acc2));opacity:.5;border-radius:14px 14px 0 0}
-.kpi b{display:block;font-family:var(--hfont);font-size:24px;font-weight:700;margin-top:4px;letter-spacing:-.01em}
-.kpi span{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.kpi{background:var(--card-gk);border:1px solid var(--line);border-radius:10px;padding:14px 16px;position:relative}
+.kpi b{display:block;font-family:var(--hfont);font-size:26px;font-weight:700;margin-top:2px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12.5px;color:var(--tx3);font-weight:600}
 .kpi em{font-style:normal;color:var(--tx2);font-size:13px}
 
 /* score badge */
-.sc{display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1;vertical-align:middle;box-sizing:border-box;min-width:42px;height:28px;padding:0 8px;border-radius:8px;font-weight:800;font-size:14px;color:#111;font-variant-numeric:tabular-nums;flex:none;box-shadow:0 2px 8px color-mix(in srgb,currentColor 10%,transparent)}
-.sc.big{min-width:54px;height:38px;font-size:18px;border-radius:8px;font-family:var(--hfont);font-weight:700}
+.sc{display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1;vertical-align:middle;box-sizing:border-box;min-width:42px;height:28px;padding:0 8px;border-radius:6px;font-weight:800;font-size:14px;color:#111;font-variant-numeric:tabular-nums;flex:none}
+.sc.big{min-width:44px;height:30px;font-size:16px;border-radius:6px;font-family:var(--hfont);font-weight:700}
 .sc.na{background:var(--card2)!important;color:var(--tx3);border:1px dashed var(--line2)}
 .sc.sm{min-width:34px;height:22px;font-size:12px;border-radius:5px}
 
 /* poster grid */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--gridMin),1fr));gap:16px}
-.card{position:relative;background:var(--card-g);backdrop-filter:blur(14px);border:1px solid color-mix(in srgb,var(--acc) 8%,var(--line));border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.4,0,.2,1),box-shadow .25s cubic-bezier(.4,0,.2,1),border-color .2s;display:flex;flex-direction:column;animation:fade .3s both}
-.card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(0,0,0,.35),0 0 0 1px color-mix(in srgb,var(--acc) 12%,transparent);border-color:color-mix(in srgb,var(--acc) 18%,var(--line))}
+.card{position:relative;background:var(--card-g);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column}
+.card:hover{border-color:var(--line2);background:var(--card2-g)}
+.card .poster img{transition:opacity .35s ease,transform .4s ease}
+.card:hover .poster img{transform:scale(1.025)}
 @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
 .poster{aspect-ratio:2/3;position:relative;overflow:hidden;background:var(--card2)}
 .poster img{width:100%;height:100%;object-fit:cover;display:block}
@@ -216,14 +218,14 @@ select.inp{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.5));pointer-events:none}
 .ph .pt{position:relative;z-index:1;margin-top:auto}
 .ph .pt{font-weight:700;font-size:14px;line-height:1.25;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-.card .rk{position:absolute;top:8px;left:8px;background:rgba(19,20,22,.78);backdrop-filter:blur(6px);color:#fff;font-weight:800;font-size:12px;padding:3px 8px;border-radius:6px}
+.card .rk{position:absolute;top:8px;left:8px;background:rgba(15,16,18,.72);color:#fff;font-weight:700;font-size:12px;padding:2px 7px;border-radius:5px;font-variant-numeric:tabular-nums}
 .card .sct{position:absolute;top:8px;right:8px}
 .card .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1}
 .card .t{font-weight:700;line-height:1.25;font-size:14.5px}
 .card .m{font-size:12.5px;color:var(--tx3);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .card .pr{display:flex;gap:8px;margin-top:auto;padding-top:6px;font-size:12px;color:var(--tx2);align-items:center;flex-wrap:wrap}
 .card .pr span{display:inline-flex;gap:4px;align-items:center}
-.tag{display:inline-block;padding:2px 9px;border-radius:6px;background:var(--card2-g);border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--tx2);transition:all .15s}
+.tag{display:inline-block;padding:1px 8px;border-radius:5px;background:var(--card2-g);border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--tx2);transition:all .15s}
 .tag.acc{background:color-mix(in srgb,var(--acc2) 16%,transparent);border-color:color-mix(in srgb,var(--acc2) 35%,transparent);color:var(--tx)}
 .tag.am{background:color-mix(in srgb,var(--acc) 14%,transparent);border-color:color-mix(in srgb,var(--acc) 35%,transparent);color:var(--tx)}
 .gen{font-size:12px;color:var(--tx3)}
@@ -239,14 +241,14 @@ select.inp{cursor:pointer;appearance:none;-webkit-appearance:none;background-ima
 .grid.hide-scores .card .pr{display:none}
 table.t.hide-scores .cv{visibility:hidden}
 table.t.hide-scores .sc{visibility:hidden}
-.hide-sc-btn{font-size:17px;width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);border-radius:10px;cursor:pointer;color:var(--tx2);transition:all .2s}
+.hide-sc-btn{font-size:17px;width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--card);border-radius:8px;cursor:pointer;color:var(--tx2);transition:all .2s}
 .hide-sc-btn:hover{color:var(--tx);border-color:var(--line2);background:var(--card2)}
-.hide-sc-btn.on{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.hide-sc-btn.on{color:var(--bg);border-color:var(--tx);background:var(--tx)}
 
 /* table */
-.tbl-wrap{overflow-x:auto;border:1px solid color-mix(in srgb,var(--acc) 8%,var(--line));border-radius:var(--r);background:var(--card-g);backdrop-filter:blur(14px)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--card-g)}
 table.t{width:100%;border-collapse:collapse;font-size:14px}
-table.t th{position:sticky;top:0;background:var(--card2);color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;text-align:left;padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:default}
+table.t th{position:sticky;top:0;background:var(--card2);color:var(--tx3);font-size:12px;font-weight:600;text-align:left;padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:default}
 table.t th.s{cursor:pointer}
 table.t th.s:hover{color:var(--tx)}
 table.t td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -264,14 +266,14 @@ table.t .num{color:var(--tx3);font-variant-numeric:tabular-nums;width:40px}
 .cv{font-variant-numeric:tabular-nums;color:var(--tx2);font-weight:600}
 
 /* series */
-.ser{background:var(--card-g);backdrop-filter:blur(14px);border:1px solid color-mix(in srgb,var(--acc) 8%,var(--line));border-radius:var(--r);padding:16px;margin-bottom:14px;display:grid;grid-template-columns:110px 1fr;gap:18px;animation:fade .25s both}
+.ser{background:var(--card-g);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px;display:grid;grid-template-columns:110px 1fr;gap:18px;animation:fade .25s both}
 .ser .poster{border-radius:8px;cursor:pointer}
 .ser h3{font-size:17px;cursor:pointer}
 .ser .hd{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
 .ser .meta{color:var(--tx3);font-size:13px;margin-top:4px;display:flex;flex-wrap:wrap;gap:8px}
 .smat{margin-top:12px;overflow-x:auto}
 .smat table{border-collapse:separate;border-spacing:3px;font-size:13px}
-.smat th{color:var(--tx3);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:2px 4px;text-align:center;white-space:nowrap}
+.smat th{color:var(--tx3);font-weight:600;font-size:12px;padding:2px 4px;text-align:center;white-space:nowrap}
 .smat th.l{text-align:left;padding-right:12px}
 .smat td{padding:0}
 .smat .cell{min-width:46px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1;font-weight:800;color:#111;cursor:pointer;transition:transform .12s;font-variant-numeric:tabular-nums}
@@ -300,13 +302,13 @@ table.t .num{color:var(--tx3);font-variant-numeric:tabular-nums;width:40px}
 .plan .card .act{display:flex;gap:6px;margin-top:8px}
 .plan .card .act .btn{flex:1;justify-content:center}
 .prog{height:5px;border-radius:3px;background:var(--card2);overflow:hidden}
-.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));border-radius:3px}
+.prog i{display:block;height:100%;background:var(--acc);border-radius:3px}
 
 /* comics */
-.cphase{margin-bottom:16px;background:var(--card-g);backdrop-filter:blur(14px);border:1px solid color-mix(in srgb,var(--acc) 8%,var(--line));border-radius:var(--r);overflow:hidden;animation:fade .25s both}
+.cphase{margin-bottom:16px;background:var(--card-g);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;animation:fade .25s both}
 .cphase .hd{display:flex;align-items:center;gap:16px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:linear-gradient(90deg,color-mix(in srgb,var(--pc) 18%,transparent),transparent 60%)}
 .cphase .hd h3{font-size:16px;display:flex;gap:10px;align-items:center}
-.cphase .hd h3 i{width:10px;height:10px;border-radius:50%;background:var(--pc);box-shadow:0 0 8px var(--pc)}
+.cphase .hd h3 i{width:10px;height:10px;border-radius:50%;background:var(--pc)}
 .cphase .st{display:flex;gap:16px;margin-left:auto;font-size:13px;color:var(--tx2);align-items:center;flex-wrap:wrap}
 .cphase .st b{color:var(--tx)}
 .cphase .pbar{width:120px}
@@ -330,8 +332,9 @@ table.t .num{color:var(--tx3);font-variant-numeric:tabular-nums;width:40px}
 .uni button.on.d{background:linear-gradient(135deg,#0470e0,#0a3680);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(4,112,224,.25)}
 
 /* stats */
-.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
-.sbox{background:var(--card-g);backdrop-filter:blur(14px);border:1px solid color-mix(in srgb,var(--acc) 8%,var(--line));border-radius:var(--r);padding:16px 18px;animation:fade .25s both}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:14px}
+.sgrid>*{min-width:0}
+.sbox{background:var(--card-g);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;animation:fade .25s both}
 .sbox h3{font-size:14.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .hb{display:grid;grid-template-columns:110px 1fr 46px;gap:10px;align-items:center;font-size:13.5px;margin:7px 0}
 .hb .tr{height:8px;background:var(--card2);border-radius:4px;overflow:hidden}
@@ -361,19 +364,19 @@ table.t .num{color:var(--tx3);font-variant-numeric:tabular-nums;width:40px}
 .gsub>div{border-top:1px solid var(--line);padding-top:2px}
 
 /* dialogs */
-dialog{border:1px solid color-mix(in srgb,var(--acc) 12%,var(--line));background:var(--bg2-gd);backdrop-filter:blur(24px) saturate(1.3);color:var(--tx);border-radius:22px;padding:0;max-width:min(860px,calc(100vw - 24px));width:100%;max-height:calc(100vh - 30px);box-shadow:0 24px 80px rgba(0,0,0,.5),0 0 0 1px color-mix(in srgb,var(--line) 40%,transparent)}
-dialog::backdrop{background:rgba(10,10,14,.55);backdrop-filter:blur(12px) saturate(.7)}
-dialog[open]{animation:dialogIn .28s cubic-bezier(.34,1.56,.64,1) both}
-@keyframes dialogIn{from{opacity:0;transform:translateY(12px) scale(.96)}}
-.dh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg2-gdh);z-index:2;border-radius:22px 22px 0 0}
+dialog{border:1px solid var(--line2);background:var(--bg2-gd);backdrop-filter:blur(22px) saturate(1.2);color:var(--tx);border-radius:14px;padding:0;max-width:min(860px,calc(100vw - 24px));width:100%;max-height:calc(100vh - 30px);box-shadow:0 24px 80px rgba(0,0,0,.5),0 0 0 1px color-mix(in srgb,var(--line) 40%,transparent)}
+dialog::backdrop{background:rgba(8,8,10,.6);backdrop-filter:blur(4px)}
+dialog[open]{animation:dialogIn .18s ease-out both}
+@keyframes dialogIn{from{opacity:0;transform:translateY(6px)}}
+.dh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg2-gdh);z-index:2;border-radius:14px 14px 0 0}
 .dh h2{font-size:18px}
 .db{padding:20px 22px}
-.df{display:flex;gap:8px;justify-content:flex-end;padding:16px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--bg2-gdh);flex-wrap:wrap;border-radius:0 0 22px 22px}
+.df{display:flex;gap:8px;justify-content:flex-end;padding:16px 22px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--bg2-gdh);flex-wrap:wrap;border-radius:0 0 14px 14px}
 .df .sp{flex:1}
 .form{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px 16px}
 .form .f{display:flex;flex-direction:column;gap:6px;grid-column:span 3}
 .form .f.s2{grid-column:span 2}.form .f.s1{grid-column:span 1}.form .f.s6{grid-column:span 6}.form .f.s4{grid-column:span 4}
-.form label{font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.form label{font-size:12.5px;color:var(--tx3);font-weight:600}
 .form .hint{font-size:12px;color:var(--tx3)}
 .chk{display:flex;gap:10px;align-items:center;cursor:pointer;font-weight:600;transition:color .15s}
 .chk:hover{color:var(--tx)}
@@ -391,13 +394,13 @@ dialog[open]{animation:dialogIn .28s cubic-bezier(.34,1.56,.64,1) both}
 .det .meta{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;color:var(--tx2);font-size:14px;align-items:center}
 .det .syn{color:var(--tx2);margin:0 0 16px;white-space:pre-wrap}
 .det .scores{display:flex;gap:18px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
-.det .scores div{display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center;font-size:12px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.det .scores div{display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center;font-size:12.5px;color:var(--tx3);font-weight:600}
 .ctbl{border-collapse:separate;border-spacing:3px;font-size:13px}
-.ctbl th{color:var(--tx3);font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;padding:0 4px}
+.ctbl th{color:var(--tx3);font-size:12px;font-weight:600;padding:0 4px}
 .ctbl th.l{text-align:left}
 .ctbl td.l{font-weight:700;padding-right:10px}
 .dsec{margin-top:18px}
-.dsec h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);margin:0 0 8px}
+.dsec h4{font-size:13px;font-weight:600;color:var(--tx2);margin:0 0 8px}
 
 /* rate */
 .rtbl{width:100%;border-collapse:separate;border-spacing:5px}
@@ -410,17 +413,17 @@ dialog[open]{animation:dialogIn .28s cubic-bezier(.34,1.56,.64,1) both}
 .rres{display:flex;align-items:center;gap:14px;justify-content:flex-end;margin-top:6px;font-weight:700;color:var(--tx2)}
 .qp{display:flex;gap:4px;justify-content:center;margin-top:10px;flex-wrap:wrap}
 .qp button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:700;font-size:13px;transition:all .15s}
-.qp button:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--card));transform:translateY(-1px)}
-.ghint{margin-top:12px;background:var(--card-gk);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--tx2);min-height:44px}
+.qp button:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--card))}
+.ghint{margin-top:12px;background:var(--card-gk);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--tx2);min-height:44px}
 .ghint b{color:var(--tx)}
 
 /* === THEME PICKER PANEL === */
 .theme-picker{position:fixed;z-index:50;display:none;flex-direction:column;gap:4px;padding:8px;
   background:color-mix(in srgb,var(--bg2) 75%,transparent);backdrop-filter:blur(24px) saturate(1.4);
-  border:1px solid color-mix(in srgb,var(--acc) 15%,var(--line));border-radius:16px;
-  box-shadow:0 12px 48px rgba(0,0,0,.4);min-width:180px;animation:tpIn .2s cubic-bezier(.34,1.56,.64,1) both}
+  border:1px solid var(--line2);border-radius:12px;
+  box-shadow:0 12px 40px rgba(0,0,0,.35);min-width:180px;animation:tpIn .15s ease-out both}
 .theme-picker.open{display:flex}
-@keyframes tpIn{from{opacity:0;transform:scale(.92) translateY(6px)}}
+@keyframes tpIn{from{opacity:0;transform:translateY(4px)}}
 .theme-picker .tp-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border:none;background:transparent;
   border-radius:10px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--tx2);transition:all .15s;white-space:nowrap}
 .theme-picker .tp-item:hover{background:color-mix(in srgb,var(--tx) 8%,transparent);color:var(--tx)}
@@ -431,16 +434,17 @@ dialog[open]{animation:dialogIn .28s cubic-bezier(.34,1.56,.64,1) both}
 .theme-picker .tp-item.on .tp-check{opacity:1}
 
 /* FAB — floating add button */
-.fab{position:fixed;right:24px;bottom:28px;z-index:45;width:56px;height:56px;border-radius:50%;border:1px solid color-mix(in srgb,var(--acc) 30%,transparent);background:color-mix(in srgb,var(--acc) 80%,transparent);backdrop-filter:blur(12px);color:var(--accTx);font-size:28px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px color-mix(in srgb,var(--acc) 35%,rgba(0,0,0,.4));transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,background .2s}
-.fab:hover{transform:scale(1.1) rotate(90deg);box-shadow:0 8px 32px color-mix(in srgb,var(--acc) 45%,rgba(0,0,0,.5));background:var(--acc)}
-.fab:active{transform:scale(.95) rotate(90deg)}
+.fab{position:fixed;right:24px;bottom:28px;z-index:45;width:52px;height:52px;border-radius:50%;border:0;background:var(--acc);color:var(--accTx);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.35);transition:filter .15s}
+.fab .ico{width:22px;height:22px}
+.fab:hover{filter:brightness(1.08)}
+.fab:active{filter:brightness(.95)}
 
 /* grid size slider */
 .grid-sizer{display:flex;align-items:center;gap:8px}
 .grid-sizer input[type="range"]{width:90px;accent-color:var(--acc);height:4px;cursor:pointer}
 .grid-sizer .gs-label{font-size:12px;color:var(--tx3);font-weight:600;min-width:20px;text-align:center}
 
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:color-mix(in srgb,var(--tx) 88%,transparent);backdrop-filter:blur(16px) saturate(1.4);color:var(--bg);padding:12px 20px;border-radius:14px;font-weight:700;opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:100;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.35);border:1px solid color-mix(in srgb,var(--acc) 10%,transparent)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:600;opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:100;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 .toast.on{opacity:1;transform:translateX(-50%)}
 .fbtn{display:none!important}
 
@@ -453,8 +457,8 @@ dialog[open]{animation:dialogIn .28s cubic-bezier(.34,1.56,.64,1) both}
 .ed-list .row .inp{flex:1}
 
 /* ===== tab switch crossfade ===== */
-#view.tab-in{animation:tabIn .32s cubic-bezier(.2,.7,.2,1) both}
-@keyframes tabIn{from{opacity:0;transform:translateY(8px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+#view.tab-in{animation:tabIn .2s ease-out both}
+@keyframes tabIn{from{opacity:0}to{opacity:1}}
 
 /* ===== skeleton shimmer while posters load ===== */
 .sk{background:var(--card2)}
@@ -476,23 +480,23 @@ tr.lazy-s td{padding:0;border:0}
 
 /* ===== card groups ===== */
 .grp{margin-bottom:14px}
-.grp-h{display:flex;align-items:center;gap:10px;width:100%;border:1px solid color-mix(in srgb,var(--acc) 8%,var(--line));background:var(--card-gk);backdrop-filter:blur(10px);border-radius:12px;padding:10px 14px;cursor:pointer;text-align:left;margin-bottom:12px;transition:background .2s,border-color .2s}
-.grp-h:hover{border-color:color-mix(in srgb,var(--acc) 25%,var(--line))}
-.grp-h b{font-family:var(--hfont);font-size:15.5px}
+.grp-h{display:flex;align-items:baseline;gap:10px;width:100%;border:0;border-bottom:1px solid var(--line);background:transparent;border-radius:0;padding:8px 2px;cursor:pointer;text-align:left;margin-bottom:12px;transition:background .2s,border-color .2s}
+.grp-h:hover{border-color:var(--line2)}
+.grp-h b{font-family:var(--hfont);font-size:17px;letter-spacing:-.01em}
 .grp-h small{color:var(--tx3);font-weight:600;font-size:12.5px;margin-left:auto}
-.grp-ar{color:var(--acc);font-size:13px;transition:transform .22s ease;width:14px;text-align:center}
+.grp-ar{color:var(--tx3);font-size:12px;transition:transform .22s ease;width:14px;text-align:center}
 .grp.closed .grp-ar{transform:rotate(-90deg)}
 .grp.closed .grp-h{margin-bottom:0}
 .grp-b{animation:fade .25s both}
 
 /* ===== drag-and-drop reorder ===== */
-.reorder-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;margin-bottom:16px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--acc) 45%,transparent);background:color-mix(in srgb,var(--acc) 9%,transparent);color:var(--tx);font-weight:600;font-size:13.5px}
+.reorder-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px 10px 16px;margin-bottom:16px;border-radius:10px;border:1px solid var(--line2);background:var(--card-g);color:var(--tx);font-size:13.5px}
 .reorder-bar .btn{margin-left:auto}
 .grid.reorder .card{cursor:grab;user-select:none;-webkit-user-select:none;animation:none}
 .grid.reorder .card:hover{transform:none}
 .grid.reorder.dragging .card{transition:transform .2s ease}
 .grid.reorder .card.drag-src{opacity:.25;outline:2px dashed var(--acc);outline-offset:-2px}
-.drag-ghost{position:fixed;left:0;top:0;z-index:200;pointer-events:none;box-shadow:0 22px 60px rgba(0,0,0,.5),0 0 0 2px var(--acc);opacity:.95;cursor:grabbing}
+.drag-ghost{position:fixed;left:0;top:0;z-index:200;pointer-events:none;box-shadow:0 18px 40px rgba(0,0,0,.45);opacity:.96;cursor:grabbing}
 .drag-h{display:none;position:absolute;left:6px;bottom:6px;z-index:2;width:34px;height:34px;place-items:center;border-radius:9px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);color:#fff;font-size:18px;touch-action:none}
 .grid.reorder .drag-h{display:grid}
 
@@ -510,7 +514,7 @@ tr.lazy-s td{padding:0;border:0}
 .tc-line{fill:none;stroke:var(--acc2);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
 .tc-dot{fill:var(--acc2);stroke:var(--bg2);stroke-width:2}
 .tc-hit:hover rect{fill:color-mix(in srgb,var(--tx) 6%,transparent)}
-.tc-hit:hover .tc-bar{fill:color-mix(in srgb,var(--acc) 80%,#fff)}
+.tc-hit:hover .tc-bar{fill:var(--tx)}
 .tc-hit:hover .tc-dot{r:6}
 .tdet{margin-top:14px}
 .tdet summary{cursor:pointer;color:var(--tx2);font-size:13px;font-weight:600}
@@ -518,15 +522,15 @@ tr.lazy-s td{padding:0;border:0}
 
 /* ===== global search ===== */
 dialog.gs{max-width:min(620px,calc(100vw - 24px));margin-top:12vh;margin-bottom:auto;padding:0;overflow:hidden}
-dialog.gs[open]{animation:gsIn .22s cubic-bezier(.34,1.4,.64,1) both}
-@keyframes gsIn{from{opacity:0;transform:translateY(-10px) scale(.97)}}
+dialog.gs[open]{animation:gsIn .15s ease-out both}
+@keyframes gsIn{from{opacity:0;transform:translateY(-4px)}}
 .gs-box{display:flex;flex-direction:column;max-height:70vh}
 .gs-in{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
 .gs-in span{font-size:20px;color:var(--acc)}
 .gs-in input{flex:1;border:0;background:transparent;outline:none;font-size:17px;color:var(--tx);padding:4px 0}
 .gs kbd{font:700 11px/1 var(--font);padding:4px 6px;border-radius:5px;border:1px solid var(--line2);background:var(--card2-g);color:var(--tx2)}
 .gs-res{overflow-y:auto;padding:6px 8px 10px;min-height:80px}
-.gs-g{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--tx3);font-weight:700;padding:12px 10px 6px}
+.gs-g{font-size:12.5px;color:var(--tx3);font-weight:600;padding:12px 10px 6px}
 .gs-g small{color:var(--tx3);opacity:.7}
 .gs-r{display:flex;align-items:center;gap:12px;width:100%;padding:7px 10px;border:0;background:transparent;border-radius:10px;cursor:pointer;text-align:left;color:var(--tx)}
 .gs-r.on{background:color-mix(in srgb,var(--acc) 15%,transparent)}
@@ -543,6 +547,35 @@ dialog.gs[open]{animation:gsIn .22s cubic-bezier(.34,1.4,.64,1) both}
 @media (prefers-reduced-motion:reduce){
   #view.tab-in,.sk::before,.card.sk .poster::before,dialog.gs[open],.grp-b{animation:none}
 }
+
+/* ===== icons (line, 24px grid, 1.8 stroke) ===== */
+.ico{display:inline-block;width:1.15em;height:1.15em;flex:none;vertical-align:-.2em;background:currentColor;-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat}
+.ico-watched{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%224%22 width=%2218%22 height=%2216%22 rx=%222%22/%3E%3Cpath d=%22M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4%22/%3E%3C/svg%3E")}
+.ico-series{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%227%22 width=%2218%22 height=%2213%22 rx=%222%22/%3E%3Cpath d=%22M8 3l4 4 4-4%22/%3E%3C/svg%3E")}
+.ico-plan{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%225%22 width=%2218%22 height=%2216%22 rx=%222%22/%3E%3Cpath d=%22M3 10h18M8 3v4M16 3v4M8 14h3%22/%3E%3C/svg%3E")}
+.ico-comics{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M13 3L5 14h6l-1 7 8-11h-6z%22/%3E%3C/svg%3E")}
+.ico-stats{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M4 20V11M10 20V5M16 20v-6M21 20H3%22/%3E%3C/svg%3E")}
+.ico-taste{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%229%22 cy=%2212%22 r=%226%22/%3E%3Ccircle cx=%2215%22 cy=%2212%22 r=%226%22/%3E%3C/svg%3E")}
+.ico-world{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22/%3E%3Cpath d=%22M3 12h18M12 3c2.4 2.6 3.6 5.6 3.6 9s-1.2 6.4-3.6 9c-2.4-2.6-3.6-5.6-3.6-9S9.6 5.6 12 3z%22/%3E%3C/svg%3E")}
+.ico-guide{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 5.5A2.5 2.5 0 0 1 7.5 3H19v15H7.5A2.5 2.5 0 0 0 5 20.5z%22/%3E%3Cpath d=%22M5 20.5A2.5 2.5 0 0 1 7.5 18H19v3H7.5%22/%3E%3C/svg%3E")}
+.ico-data{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M4 7h9M17 7h3M4 17h3M11 17h9%22/%3E%3Ccircle cx=%2215%22 cy=%227%22 r=%222%22/%3E%3Ccircle cx=%229%22 cy=%2217%22 r=%222%22/%3E%3C/svg%3E")}
+.ico-cloud{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M7.5 19h9.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.6 1.4A3.4 3.4 0 0 0 7.5 19z%22/%3E%3C/svg%3E")}
+.ico-search{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2211%22 cy=%2211%22 r=%227%22/%3E%3Cpath d=%22M20 20l-4-4%22/%3E%3C/svg%3E")}
+.ico-theme{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22/%3E%3Cpath d=%22M12 3a9 9 0 0 1 0 18z%22 fill=%22%23000%22/%3E%3C/svg%3E")}
+.ico-cam{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z%22/%3E%3Ccircle cx=%2212%22 cy=%2213.5%22 r=%223.2%22/%3E%3C/svg%3E")}
+.ico-eye{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223%22/%3E%3C/svg%3E")}
+.ico-eyeoff{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%223%22/%3E%3Cpath d=%22M4 4l16 16%22/%3E%3C/svg%3E")}
+.ico-rows{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M4 6h16M4 12h16M4 18h16%22/%3E%3C/svg%3E")}
+.ico-move{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 4v16M8 8l4-4 4 4M8 16l4 4 4-4%22/%3E%3C/svg%3E")}
+.ico-gsmall{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%224%22 y=%224%22 width=%226.5%22 height=%226.5%22 rx=%221%22/%3E%3Crect x=%2213.5%22 y=%224%22 width=%226.5%22 height=%226.5%22 rx=%221%22/%3E%3Crect x=%224%22 y=%2213.5%22 width=%226.5%22 height=%226.5%22 rx=%221%22/%3E%3Crect x=%2213.5%22 y=%2213.5%22 width=%226.5%22 height=%226.5%22 rx=%221%22/%3E%3C/svg%3E")}
+.ico-glarge{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%224%22 y=%224%22 width=%2216%22 height=%2216%22 rx=%221.5%22/%3E%3C/svg%3E")}
+.ico-plus{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 5v14M5 12h14%22/%3E%3C/svg%3E")}
+.ico-snow{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.6L12 6.5l2.5-1.9M9.5 19.4l2.5-1.9 2.5 1.9%22/%3E%3C/svg%3E")}
+.sidebar nav.tabs a .ic .ico,.sb-actions .sb-btn .sb-ic .ico{width:20px;height:20px;vertical-align:middle}
+.hide-sc-btn .ico,.btn.icon .ico{width:18px;height:18px}
+.grid-sizer .gs-label .ico{width:14px;height:14px}
+.gs-in .ico{width:20px;height:20px;color:var(--tx3)}
+.gs-ci .ico{width:18px;height:18px;color:var(--tx3)}
 
 /* ===== MOBILE ===== */
 @media (max-width:820px){
@@ -579,7 +612,8 @@ dialog.gs[open]{animation:gsIn .22s cubic-bezier(.34,1.4,.64,1) both}
   .sidebar nav.tabs a .ic{font-size:18px}
   .sidebar nav.tabs a .ln{display:none!important;opacity:1}
   .sidebar nav.tabs a .sn{display:inline}
-  .sidebar nav.tabs a.on{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)}
+  .sidebar nav.tabs a.on{background:transparent;color:var(--tx)}
+  .sidebar nav.tabs a.on::before{left:30%;right:30%;top:0;bottom:auto;width:auto;height:2px;border-radius:0 0 2px 2px}
   .hide-m{display:none}
   .toast{bottom:84px}
   .fpanel{display:none}.fpanel.open{display:flex}.fbtn{display:inline-flex!important}
@@ -615,21 +649,20 @@ nav.tabs a.on .nb{background:var(--accTx);color:var(--acc)}
 .cont-h h3{font-size:16px}
 .cont-h .nb{margin:0}
 .cont-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity}
-.ccard{flex:0 0 360px;scroll-snap-align:start;display:flex;gap:12px;background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 8%,var(--card)),var(--card) 70%);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--acc) 28%,var(--line));border-radius:var(--r);padding:12px;cursor:pointer;transition:transform .15s,box-shadow .15s;animation:fade .25s both}
-.ccard:hover{transform:translateY(-2px);box-shadow:var(--sh)}
-.ccard.nx{background:var(--card);border-color:var(--line)}
+.ccard{flex:0 0 360px;scroll-snap-align:start;display:flex;gap:12px;background:var(--card-g);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:var(--r);padding:12px;cursor:pointer;transition:border-color .15s,background .15s}
+.ccard:hover{background:var(--card2-g)}
+.ccard.nx{border-left-color:var(--line2)}
 .ccard .mini{width:66px;height:99px;border-radius:8px}
 .ccard .mini .ph .ini{font-size:20px}
 .ccard .frz-b{margin-left:auto;color:var(--tx3);font-size:16px}
-.ccard .frz-b:hover{color:#7cc8ff}
-.frz{margin-top:8px;border:1px dashed color-mix(in srgb,#7cc8ff 30%,var(--line));border-radius:12px;background:var(--card-gs);backdrop-filter:blur(8px)}
+.ccard .frz-b:hover{color:var(--tx)}
+.frz{margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--card-gs)}
 .frz summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:9px 14px;font-weight:700;font-size:13.5px;color:var(--tx2);user-select:none}
 .frz summary::-webkit-details-marker{display:none}
 .frz summary::after{content:"▾";margin-left:auto;color:var(--tx3);transition:transform .2s}
 .frz:not([open]) summary::after{transform:rotate(-90deg)}
-.frz-ic{color:#7cc8ff;font-size:15px}
-.frz-n{font-size:11.5px;padding:1px 8px;border-radius:10px;background:color-mix(in srgb,#7cc8ff 18%,transparent);color:var(--tx)}
-.frz-hint{font-weight:500;color:var(--tx3);font-size:12.5px}
+.frz-ic{color:var(--tx3)}
+.frz-n{font-size:12px;color:var(--tx3);font-weight:600}
 .frz-row{display:flex;flex-direction:column;gap:6px;padding:0 10px 10px}
 .frz-c{display:flex;align-items:center;gap:12px;padding:6px 8px;border-radius:10px;cursor:pointer;transition:background .15s}
 .frz-c:hover{background:color-mix(in srgb,var(--tx) 5%,transparent)}
@@ -637,7 +670,6 @@ nav.tabs a.on .nb{background:var(--accTx);color:var(--acc)}
 .frz-t{flex:1;min-width:0;display:flex;flex-direction:column}
 .frz-t b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .frz-t small{color:var(--tx3);font-size:12.5px}
-@media (max-width:820px){.frz-hint{display:none}}
 .cb{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .ct{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cm{font-size:13px;color:var(--tx2)}
@@ -645,7 +677,7 @@ nav.tabs a.on .nb{background:var(--accTx);color:var(--acc)}
 .cact{display:flex;gap:6px;margin-top:auto;flex-wrap:wrap}
 .cact .btn{padding:5px 10px}
 .stt.c{color:var(--acc2);border-color:color-mix(in srgb,var(--acc2) 40%,transparent);background:color-mix(in srgb,var(--acc2) 10%,transparent)}
-.pgbox{background:var(--card-g2);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 14px;display:flex;flex-direction:column;gap:8px}
+.pgbox{background:var(--card-g2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 14px;display:flex;flex-direction:column;gap:8px}
 .pgbox .row{justify-content:space-between}
 .stepper{display:inline-flex;align-items:center;gap:6px}
 .stepper .inp{width:80px;text-align:center;font-weight:700}
@@ -673,7 +705,7 @@ nav.tabs a.on .nb{background:var(--accTx);color:var(--acc)}
 .tt2 td,.tt2 th{padding:6px 8px}table.t.tt2 th{white-space:normal;letter-spacing:.03em}.tt2{min-width:0}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .ccoll{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;cursor:pointer;position:relative;transition:transform .18s,box-shadow .18s;animation:fade .25s both}
-.ccoll:hover{transform:translateY(-2px);box-shadow:var(--sh);border-color:var(--cc)}
+.ccoll:hover{border-color:var(--cc)}
 .cc-cover{display:grid;aspect-ratio:16/10;background:linear-gradient(135deg,color-mix(in srgb,var(--cc) 30%,var(--card2)),var(--card2));gap:2px;overflow:hidden}
 .cc-cover.n1{grid-template-columns:1fr}.cc-cover.n2{grid-template-columns:1fr 1fr}.cc-cover.n3{grid-template-columns:1fr 1fr 1fr}.cc-cover.n4{grid-template-columns:repeat(4,1fr)}
 .cc-cover.empty{place-items:center;font-size:44px}
@@ -704,7 +736,7 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .wsc{display:inline-flex;align-items:center;justify-content:center;line-height:1;min-width:34px;height:22px;padding:0 6px;border-radius:5px;font-size:12px;font-weight:800;border:1.5px solid var(--tx3);color:var(--tx);font-variant-numeric:tabular-nums;vertical-align:middle}
 .wrow{display:flex;flex-wrap:wrap;gap:8px}
 .wpill{display:flex;flex-direction:column;gap:2px;padding:7px 12px;border-radius:10px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--wc,var(--line2));min-width:84px}
-.wpill span{font-size:11px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.wpill span{font-size:12px;color:var(--tx3);font-weight:600}
 .wpill b{font-family:var(--hfont);font-size:19px;line-height:1.1;font-variant-numeric:tabular-nums}
 .wpill.tot{border-left-color:var(--acc)}
 .arcleg{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:12px;color:var(--tx2)}
@@ -748,10 +780,10 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .tres .dim{font-size:12.5px}
 .tres .tex{display:inline-block;margin-top:2px;font-size:11.5px;font-weight:700;color:var(--acc);border:1px solid currentColor;border-radius:5px;padding:0 7px}
 /* header cloud btn (mobile fallback) */
-.cloudb i{position:absolute;right:4px;bottom:5px;width:9px;height:9px;border-radius:50%;background:var(--tx3);box-shadow:0 0 0 2px var(--bg)}
-.cloudb[data-st="ok"] i{background:var(--ok)}
-.cloudb[data-st="sync"] i,.cloudb[data-st="conn"] i{background:var(--acc);animation:cpulse .8s infinite alternate}
-.cloudb[data-st="err"] i{background:var(--bad)}
+
+
+
+
 @keyframes cpulse{to{opacity:.3}}
 .dgrid .cloudp{grid-column:1/-1;border-color:color-mix(in srgb,var(--acc) 40%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 6%,var(--card)),var(--card) 60%)}
 .cstat{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
@@ -772,13 +804,13 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
   <div class="sb-logo"><svg viewBox="0 0 64 64" aria-hidden="true"><path class="fox-body" d="M5 6 L23 23 H41 L59 6 L57 31 C55.5 45 45 54 32 59 C19 54 8.5 45 7 31 Z"/><path class="fox-ear" d="M11 13 L21 23.5 L12.5 27 Z M53 13 L43 23.5 L51.5 27 Z"/><path class="fox-belly" d="M7 31 C14 35.5 22 39 32 43 C42 39 50 35.5 57 31 C55.5 45 45 54 32 59 C19 54 8.5 45 7 31 Z"/><circle class="fox-eye" cx="22.5" cy="32" r="2.8"/><circle class="fox-eye" cx="41.5" cy="32" r="2.8"/><path class="fox-eye" d="M27.5 51.5 Q32 48.5 36.5 51.5 Q32 57 27.5 51.5 Z"/></svg></div>
   <div class="tabsw" id="tabsW"><button class="tarr l" data-d="l" aria-label="Прокрутить вкладки влево" title="Назад">‹</button><nav class="tabs" id="tabs"></nav><button class="tarr r" data-d="r" aria-label="Прокрутить вкладки вправо" title="Ещё вкладки">›</button></div>
   <div class="sb-actions">
-    <button class="sb-btn cloudb" id="cloudBtn" data-st="off" title="Облако"><span class="sb-ic">☁</span><span class="sb-ln">Облако</span><i></i></button>
-    <button class="sb-btn" id="searchBtn" title="Поиск (Ctrl+K)"><span class="sb-ic">🔍</span><span class="sb-ln">Поиск</span></button>
-    <button class="sb-btn" id="themeBtn" title="Тема"><span class="sb-ic">🌑</span><span class="sb-ln">Тема</span></button>
+    <button class="sb-btn cloudb" id="cloudBtn" data-st="off" title="Облако"><span class="sb-ic"><i class="ico ico-cloud"></i><i class="sb-dot"></i></span><span class="sb-ln">Облако</span></button>
+    <button class="sb-btn" id="searchBtn" title="Поиск (Ctrl+K)"><span class="sb-ic"><i class="ico ico-search"></i></span><span class="sb-ln">Поиск</span></button>
+    <button class="sb-btn" id="themeBtn" title="Тема"><span class="sb-ic"><i class="ico ico-theme"></i></span><span class="sb-ln">Тема</span></button>
   </div>
 </aside>
 <main id="view"></main>
-<button class="fab" id="fabBtn" title="Добавить">＋</button>
+<button class="fab" id="fabBtn" title="Добавить" aria-label="Добавить запись"><i class="ico ico-plus"></i></button>
 <div class="theme-picker" id="themePicker"></div>
 
 <dialog id="dlg"></dialog>
@@ -1221,7 +1253,7 @@ const cmpRu=(a,b)=>String(a).localeCompare(String(b),"ru");
 function plural(n,a,b,c){n=Math.abs(n)%100;const m=n%10;if(n>10&&n<20)return c;if(m>1&&m<5)return b;if(m===1)return a;return c}
 function fmtDur(min){if(!isNum(min)||min<=0)return"";min=Math.round(min);const h=Math.floor(min/60),m=min%60;if(!h)return m+" мин";if(min>=60*48){return Math.round(min/60)+" ч"}return h+" ч"+(m?" "+m+" мин":"")}
 function hoursStr(min){if(!min)return"0 ч";const h=min/60;return (h>=100?Math.round(h):Math.round(h*10)/10).toString().replace(".",",")+" ч"}
-function scoreColor(v){if(!isNum(v))return"";const t=Math.max(0,Math.min(1,(v-1)/4));const h=Math.round(t*135);const l=dark()?62:56;return`hsl(${h} 72% ${l}%)`}
+function scoreColor(v){if(!isNum(v))return"";const t=Math.max(0,Math.min(1,(v-1)/4));const h=Math.round(t*130);const l=dark()?60:52;return`hsl(${h} 58% ${l}%)`}
 function dark(){return document.documentElement.dataset.theme!=="light"}
 function scBadge(v,cls=""){return isNum(v)?`<span class="sc ${cls}" style="background:${scoreColor(v)}">${f1(v)}</span>`:`<span class="sc na ${cls}">—</span>`}
 function hashStr(s){let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
@@ -1572,20 +1604,20 @@ function frozenList(){return contList(true).filter(x=>x.it.frozen).sort((a,b)=>(
 function canFreeze(it){return contList(true).some(x=>x.it===it)}
 function frozenHTML(F){
   if(!F.length)return"";
-  return `<details class="frz"${UI.frzOpen?" open":""}><summary><span class="frz-ic">❄</span> Заморожено <span class="frz-n">${F.length}</span><span class="frz-hint">— отложено на потом, в «Продолжить» не показывается</span></summary>
-    <div class="frz-row">${F.map(({it,kind,next})=>`<div class="frz-c" data-open="${it.id}"><div class="mini">${posterHTML(it,false)}</div><div class="frz-t"><b>${esc(it.title)}</b><small>${kind==="w"?esc(progLabel(it,true)||"в процессе"):isArc(it)?"следующая арка не начата":`ждёт сезона ${next}`}${it.frozenAt?` · с ${fmtAt(new Date(it.frozenAt).toISOString(),false)}`:""}</small></div><button class="btn sm" data-unfreeze="${it.id}" title="Вернуть в «Продолжить просмотр»">↺ Разморозить</button></div>`).join("")}</div>
+  return `<details class="frz"${UI.frzOpen?" open":""}><summary title="Эти сериалы не показываются в «Продолжить просмотр»"><i class="ico ico-snow frz-ic"></i> Заморожено <span class="frz-n">${F.length}</span></summary>
+    <div class="frz-row">${F.map(({it,kind,next})=>`<div class="frz-c" data-open="${it.id}"><div class="mini">${posterHTML(it,false)}</div><div class="frz-t"><b>${esc(it.title)}</b><small>${kind==="w"?esc(progLabel(it,true)||"в процессе"):isArc(it)?"следующая арка не начата":`ждёт сезона ${next}`}${it.frozenAt?` · с ${fmtAt(new Date(it.frozenAt).toISOString(),false)}`:""}</small></div><button class="btn sm" data-unfreeze="${it.id}" title="Вернуть в «Продолжить просмотр»">Разморозить</button></div>`).join("")}</div>
   </details>`;
 }
 function contHTML(){
   const L=contList(),F=frozenList();if(!L.length&&!F.length)return"";
   if(!L.length)return `<section class="cont">${frozenHTML(F)}</section>`;
-  return `<section class="cont"><div class="cont-h"><h3>▶ Продолжить просмотр</h3><span class="nb">${L.length}</span></div><div class="cont-row">${L.map(({it,kind,next},i)=>{
+  return `<section class="cont"><div class="cont-h"><h3>Продолжить просмотр</h3><span class="nb">${L.length}</span></div><div class="cont-row">${L.map(({it,kind,next},i)=>{
     const pc=kind==="w"?progPct(it):null;
     return `<div class="ccard ${kind==="n"?"nx":""}" data-open="${it.id}" style="animation-delay:${i*30}ms"><div class="mini">${posterHTML(it,false)}</div><div class="cb">
       <div class="ct">${esc(it.title)}</div>
       <div class="cm">${kind==="w"?esc(progLabel(it)):isArc(it)?`Арка «${esc(segName(it,next))}» ещё не начата`:`Сезон ${next} ещё не начат · всего ${it.seasonsTotal}`}</div>
       ${kind==="w"?`<div class="prog"><i style="width:${pc!=null?(pc*100).toFixed(1):0}%"></i></div><div class="cm2">${pc!=null?`Просмотрено ${Math.round(pc*100)}%`:"Укажите число серий, чтобы видеть процент"}</div>`:`<div class="prog"><i style="width:${((next-1)/it.seasonsTotal*100).toFixed(1)}%"></i></div>`}
-      <div class="cact">${kind==="w"?`<button class="btn sm pri" data-ep="${it.id}">＋1 серия</button>${it.progress?.season!=null?`<button class="btn sm" data-sdone="${it.id}">${segW(it,"done")}</button>`:""}<button class="btn sm ghost" data-prog="${it.id}" title="Изменить прогресс">✎</button><button class="btn sm ghost" data-finish="${it.id}" title="Досмотрели полностью">✓</button>`:`<button class="btn sm pri" data-start="${it.id}" data-sn="${next}">▶ ${isArc(it)?"Начать арку":"Начать сезон "+next}</button>`}<button class="btn sm ghost frz-b" data-freeze="${it.id}" title="Заморозить: пока не продолжаем, убрать из списка">❄</button></div>
+      <div class="cact">${kind==="w"?`<button class="btn sm pri" data-ep="${it.id}">＋1 серия</button>${it.progress?.season!=null?`<button class="btn sm" data-sdone="${it.id}">${segW(it,"done")}</button>`:""}<button class="btn sm ghost" data-prog="${it.id}" title="Изменить прогресс">✎</button><button class="btn sm ghost" data-finish="${it.id}" title="Досмотрели полностью">✓</button>`:`<button class="btn sm pri" data-start="${it.id}" data-sn="${next}">▶ ${isArc(it)?"Начать арку":"Начать сезон "+next}</button>`}<button class="btn sm ghost frz-b" data-freeze="${it.id}" title="Заморозить: пока не продолжаем, убрать из списка" aria-label="Заморозить"><i class="ico ico-snow"></i></button></div>
     </div></div>`}).join("")}</div>${frozenHTML(F)}</section>`;
 }
 function setFrozen(id,on,inDlg){
@@ -1593,7 +1625,7 @@ function setFrozen(id,on,inDlg){
   if(on){it.frozen=true;it.frozenAt=Date.now()}else{delete it.frozen;delete it.frozenAt}
   commit();
   if(inDlg)openDetail(id,null);
-  toast(on?`❄ «${it.title}» заморожено — лежит в блоке «Заморожено»`:`↺ «${it.title}» снова в «Продолжить просмотр»`);
+  toast(on?`Заморожено: «${it.title}»`:`Разморожено: «${it.title}»`);
 }
 function bumpEp(id){
   const it=itemById(id);if(!it)return;delete it.frozen;delete it.frozenAt;
@@ -1690,7 +1722,7 @@ function mcuNum(e){const c=e.comics.find(c=>c.franchise==="MCU");return c?c.num:
 /* ============ router / shell ============ */
 function renderTabs(){
   const nav=$("#tabs"),x=nav.scrollLeft;
-  nav.innerHTML=TABS.map(t=>`<a href="#${t.id}" class="${UI.tab===t.id?"on":""}" draggable="false"><span class="ic">${t.ic}</span><span class="ln">${t.n}</span><span class="sn">${t.s}</span>${t.id==="plan"&&DB&&contList().length?`<span class="nb" title="Продолжить просмотр">${contList().length}</span>`:""}</a>`).join("");
+  nav.innerHTML=TABS.map(t=>`<a href="#${t.id}" class="${UI.tab===t.id?"on":""}" draggable="false"><span class="ic"><i class="ico ico-${t.id}"></i></span><span class="ln">${t.n}</span><span class="sn">${t.s}</span>${t.id==="plan"&&DB&&contList().length?`<span class="nb" title="Продолжить просмотр">${contList().length}</span>`:""}</a>`).join("");
   nav.scrollLeft=x;tabsArrows();
   if(renderTabs.last!==UI.tab){renderTabs.last=UI.tab;const a=$("a.on",nav);if(a){const l=a.offsetLeft-nav.offsetLeft,r=l+a.offsetWidth;if(l<nav.scrollLeft+30||r>nav.scrollLeft+nav.clientWidth-30)nav.scrollTo({left:l-nav.clientWidth/2+a.offsetWidth/2,behavior:"smooth"})}}
 }
@@ -1772,11 +1804,11 @@ function wHeaderHTML(st){
   return `<div class="ptitle"><div><h1>Просмотрено</h1><p>${st.all.length} ${plural(st.all.length,"запись","записи","записей")} · оценки ${DB.raters.map(esc).join(" и ")}</p></div>
     <div class="row">
       ${segHTML("mode",[["whole","Сериалы целиком"],["seasons","По сезонам"]],UI.mode)}
-      ${segHTML("view",[["cards","▦ Карточки","С постерами"],["posters","🖼 Постеры","Только постеры"],["list","☰ Список","Таблица"]],UI.view)}
-      ${UI.view!=="list"?`<div class="grid-sizer"><span class="gs-label">◧</span><input type="range" min="110" max="280" step="10" value="${UI.gridSize||178}" id="gridSlider" aria-label="Размер карточек"><span class="gs-label">◨</span></div>`:""}
-      <button class="hide-sc-btn${UI.hideScores?" on":""}" id="hideScBtn" title="${UI.hideScores?"Показать оценки":"Скрыть оценки"}">${UI.hideScores?"◉":"◎"}</button>
-      ${UI.view==="cards"?`<button class="hide-sc-btn show-m${UI.compact?" on":""}" id="compactBtn" title="${UI.compact?"Обычные карточки":"Компактные карточки"}">▤</button>`:""}
-      ${UI.view!=="list"?`<button class="hide-sc-btn${UI.reorder?" on":""}" id="reorderBtn" title="${UI.reorder?"Готово":"Переставить карточки"}">⇅</button>`:""}
+      ${segHTML("view",[["cards","Карточки","С постерами"],["posters","Постеры","Только постеры"],["list","Список","Таблица"]],UI.view)}
+      ${UI.view!=="list"?`<div class="grid-sizer"><span class="gs-label"><i class="ico ico-gsmall"></i></span><input type="range" min="110" max="280" step="10" value="${UI.gridSize||178}" id="gridSlider" aria-label="Размер карточек"><span class="gs-label"><i class="ico ico-glarge"></i></span></div>`:""}
+      <button class="hide-sc-btn${UI.hideScores?" on":""}" id="hideScBtn" title="${UI.hideScores?"Показать оценки":"Скрыть оценки"}"><i class="ico ico-${UI.hideScores?"eyeoff":"eye"}"></i></button>
+      ${UI.view==="cards"?`<button class="hide-sc-btn show-m${UI.compact?" on":""}" id="compactBtn" title="${UI.compact?"Обычные карточки":"Компактные карточки"}"><i class="ico ico-rows"></i></button>`:""}
+      ${UI.view!=="list"?`<button class="hide-sc-btn${UI.reorder?" on":""}" id="reorderBtn" title="${UI.reorder?"Готово":"Переставить карточки"}"><i class="ico ico-move"></i></button>`:""}
     </div></div>`;
 }
 function wFiltersHTML(st){
@@ -1805,7 +1837,7 @@ function wToolbarHTML(st){
     ${selectHTML("group",GROUPS,UI.group||"none")}
     ${wHasFilters()?`<button class="btn ghost sm" id="resetF">✕ Сбросить фильтры</button>`:""}
     <div class="sp"></div>
-    <button class="btn sm" data-shot="#wlist" data-shot-title="Просмотрено${st.rater?" · топ "+esc(st.rater):""}${UI.type!=="all"?" · "+esc(UI.type):""}${UI.tag?" · #"+esc(UI.tag):""}" title="Скопировать список картинкой">📷 Картинкой</button>
+    <button class="btn sm" data-shot="#wlist" data-shot-title="Просмотрено${st.rater?" · топ "+esc(st.rater):""}${UI.type!=="all"?" · "+esc(UI.type):""}${UI.tag?" · #"+esc(UI.tag):""}" title="Скопировать список картинкой"><i class="ico ico-cam"></i> Картинкой</button>
     <span class="muted" style="font-size:13.5px">Показано <b>${st.list.length}</b> · средняя <b>${f2(avg(scores))}</b> ${DB.raters.map(n=>`· ${esc(n)} <b>${f2(rAvg(n))}</b>`).join(" ")}${mins?` · ≈ ${hoursStr(mins)}`:""}</span>
   </div>`;
 }
@@ -1816,7 +1848,7 @@ function vWatched(){
   else if(UI.reorder&&UI.view!=="list")body=gridHTML(st.list,st.rk,st.sc,UI.view==="posters","all",true);
   else body=groupedHTML(st);
   return `${wHeaderHTML(st)}
-  ${UI.reorder?`<div class="reorder-bar">⇅ Режим перестановки — перетащите карточку на новое место${matchMedia("(pointer:coarse)").matches?" (тяните за ⠿)":""}. <button class="btn sm pri" id="reorderDone">Готово</button></div>`:`${contHTML()}${recoHTML()}`}
+  ${UI.reorder?`<div class="reorder-bar"><span>Перетащите карточку на новое место${matchMedia("(pointer:coarse)").matches?", взявшись за значок ⠿":""}. Порядок сохраняется сразу после отпускания.</span><button class="btn sm pri" id="reorderDone">Готово</button></div>`:`${contHTML()}${recoHTML()}`}
   ${wFiltersHTML(st)}
   ${wToolbarHTML(st)}
   <div id="wlist">${body}</div>`;
@@ -1859,7 +1891,7 @@ function groupedHTML(st){
 function entryKey(e){return e.it.id+(e.season!=null?":"+e.season:"")}
 function cardHTML(e,i,rk,sc,reorder){
   const it=e.it,r=rk.get(e);
-  return `<div class="card${it.poster?" sk":""}" ${reorder?`data-id="${esc(it.id)}"`:`data-open="${entryKey(e)}"`} style="animation-delay:${Math.min(i%LAZY_BATCH,24)*12}ms">
+  return `<div class="card${it.poster?" sk":""}" ${reorder?`data-id="${esc(it.id)}"`:`data-open="${entryKey(e)}"`}>
       <div class="poster">${posterHTML(it)}${r?`<span class="rk">#${r}</span>`:""}<span class="sct">${scBadge(sc(e),"big")}</span>${reorder?`<span class="drag-h" aria-hidden="true">⠿</span>`:""}</div>
       <div class="body">
         <div class="t">${esc(e.title)}</div>
@@ -1944,7 +1976,7 @@ function bindReorder(v){
     if(!d.on){if(Math.hypot(e.clientX-d.sx,e.clientY-d.sy)<6)return;d.on=true;
       d.ghost=d.c.cloneNode(true);d.ghost.className+=" drag-ghost";Object.assign(d.ghost.style,{width:d.w+"px",height:d.h+"px",animation:"none"});
       document.body.appendChild(d.ghost);d.c.classList.add("drag-src");g.classList.add("dragging")}
-    d.ghost.style.transform=`translate(${e.clientX-d.ox}px,${e.clientY-d.oy}px) rotate(2deg) scale(1.04)`;
+    d.ghost.style.transform=`translate(${e.clientX-d.ox}px,${e.clientY-d.oy}px)`;
     autoScroll(e.clientY);
     const el=document.elementFromPoint(e.clientX,e.clientY),t=el&&el.closest(".grid.reorder .card");
     if(!t||t===d.c)return;
@@ -2009,7 +2041,7 @@ function serCard(it,i){
     <div style="min-width:0">
       <div class="hd"><div><h3 data-open="${it.id}">${esc(it.title)}</h3>
         <div class="meta"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}<span>${arc?"Оценено арок":"Просмотрено сезонов"}: ${seasonsRated(it).length}${it.seasonsTotal?" из "+it.seasonsTotal:""}</span>${it.status==="watching"?`<span class="stt c" style="padding:1px 8px">Смотрим · ${esc(progLabel(it,true))}</span>`:""}${durLine(it)?`<span>${esc(durLine(it))}</span>`:""}</div></div>
-        <div class="row"><button class="btn sm ghost" data-shot=".ser" data-noshot title="Копировать картинкой">📷</button>${scBadge(itemScore(it),"big")}${arc?`<button class="btn sm" data-rate="${it.id}" data-season="${nextArc?nextN:1}">＋ ${nextArc?"Арка: "+esc(nextArc.name):"Оценить арку"}</button>`:canAdd?`<button class="btn sm" data-rate="${it.id}" data-season="${nextN}">＋ Сезон ${nextN}</button>`:""}</div></div>
+        <div class="row"><button class="btn sm ghost" data-shot=".ser" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button>${scBadge(itemScore(it),"big")}${arc?`<button class="btn sm" data-rate="${it.id}" data-season="${nextArc?nextN:1}">＋ ${nextArc?"Арка: "+esc(nextArc.name):"Оценить арку"}</button>`:canAdd?`<button class="btn sm" data-rate="${it.id}" data-season="${nextN}">＋ Сезон ${nextN}</button>`:""}</div></div>
       ${arc&&!cols.length?`<p class="dim" style="margin:12px 0 0;font-size:13.5px">Вместо сезонов здесь ${it.arcs.length} арок аниме — от «${esc(it.arcs[0].name)}» до «${esc(it.arcs[it.arcs.length-1].name)}». Нажмите «＋ Арка», чтобы поставить оценку первой арке; следующие появятся в таблице по мере оценки.</p>`:`<div class="smat"><table><thead><tr><th></th>${cols.map(n=>`<th title="${esc(segTip(it,n))}">${segShort(it,n)}</th>`).join("")}<th title="Оценка сериала целиком (отдельная)">Целиком</th><th title="Итог: оценка целиком, а если её нет — среднее по ${arc?"аркам":"сезонам"}">Итог</th></tr></thead><tbody>${rows}${avgRow}</tbody></table></div>`}
       ${arcLegend}
       ${cols.length>1?`<div class="bars">${bars}</div><div style="height:16px"></div>`:""}
@@ -2029,7 +2061,7 @@ function vPlan(){
   <div class="toolbar">
     <div class="chips" data-ui="planType"><button class="chip ${UI.planType==="all"?"on":""}" data-v="all">Все</button>${Object.keys(tp).map(t=>`<button class="chip ${UI.planType===t?"on":""}" data-v="${esc(t)}">${esc(t)} <small>${tp[t]}</small></button>`).join("")}</div>
     <div class="sp"></div>
-    <button class="btn sm" data-shot="#plist" data-shot-title="Планы" title="Скопировать планы картинкой">📷</button><select class="inp" data-uis="planSort">${[["added","По дате добавления"],["title","По названию"],["dur","По длительности"],["year","По году"]].map(([k,n])=>`<option value="${k}" ${UI.planSort===k?"selected":""}>${n}</option>`).join("")}</select>
+    <button class="btn sm" data-shot="#plist" data-shot-title="Планы" title="Скопировать планы картинкой"><i class="ico ico-cam"></i></button><select class="inp" data-uis="planSort">${[["added","По дате добавления"],["title","По названию"],["dur","По длительности"],["year","По году"]].map(([k,n])=>`<option value="${k}" ${UI.planSort===k?"selected":""}>${n}</option>`).join("")}</select>
   </div>
   <div id="plist">${list.length?`<div class="grid plan">${list.map((it,i)=>`<div class="card" data-open="${it.id}" style="animation-delay:${Math.min(i,24)*12}ms">
      <div class="poster">${posterHTML(it)}</div>
@@ -2076,7 +2108,7 @@ function vComics(){
     return `<div class="cphase" style="--pc:${s.c};animation-delay:${si*30}ms"><div class="hd"><h3><i></i>${esc(s.n)}</h3>
       <div class="st"><span>${ww.length}/${s.rows.length}</span><div class="prog pbar"><i style="width:${pct}%;background:${s.c}"></i></div><span><b>${pct}%</b></span>
         <span>Сред ${scBadge(avg(ww.map(x=>x.score)),"sm")}</span>${DB.raters.map(n=>`<span>${esc(n)} ${scBadge(avg(ww.map(x=>x.per[n])),"sm")}</span>`).join("")}
-        <button class="btn sm ghost" data-shot=".cphase" data-noshot title="Копировать картинкой">📷</button><button class="btn sm ghost" data-cadd="${s.fr}" data-phase="${s.phase?s.phase.id:""}" data-noshot>＋</button></div></div>
+        <button class="btn sm ghost" data-shot=".cphase" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><button class="btn sm ghost" data-cadd="${s.fr}" data-phase="${s.phase?s.phase.id:""}" data-noshot>＋</button></div></div>
       ${[...s.rows].sort(ord).map(c=>{const x=catStatus(c);return `<div class="crow ${x.st==="w"?"w":""}">
         <span class="n">${c.franchise==="MCU"?c.num:c.num}</span>
         <span class="ttl" ${x.it?`data-open="${x.it.id}${c.link.season!=null&&x.st==="w"?":"+c.link.season:""}"`:`data-cedit="${c.id}"`}>${esc(c.title)}${c.link?.season!=null?` <span class="dim">· ${c.link.season} сезон</span>`:""}</span>
@@ -2116,7 +2148,7 @@ function vStats(){
   // trend by watch order
   const tr=W.filter(i=>isNum(itemScore(i))&&i.order).sort((a,b)=>a.order-b.order);
   const svg=trendSVG(tr);
-  return `<div class="ptitle"><div><h1>Статистика</h1><p>Сериалы учитываются целиком (оценка целиком или среднее по сезонам)</p></div><button class="btn sm" data-shot="#statsKpi" data-shot-title="Лисьи оценки — сводка">📷 Сводка</button></div>
+  return `<div class="ptitle"><div><h1>Статистика</h1><p>Сериалы учитываются целиком (оценка целиком или среднее по сезонам)</p></div><button class="btn sm" data-shot="#statsKpi" data-shot-title="Лисьи оценки — сводка"><i class="ico ico-cam"></i> Сводка</button></div>
   <div class="kpis" id="statsKpi">
     <div class="kpi"><span>Просмотрено</span><b>${W.length}</b><em>${seasons.length} сезонов оценено</em></div>
     <div class="kpi"><span>Средняя оценка</span><b>${f2(avg(sc))}</b><em>медиана ${f2(median(sc))}</em></div>
@@ -2126,22 +2158,22 @@ function vStats(){
     <div class="kpi"><span>В планах</span><b>${DB.items.filter(i=>i.status==="planned").length}</b><em>≈ ${hoursStr(DB.items.filter(i=>i.status==="planned").reduce((s,i)=>s+(totalMinutes(i)||0),0))}</em></div>
   </div>
   <div class="sgrid">
-    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button><h3>По типу контента</h3>
+    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><h3>По типу контента</h3>
       <div style="overflow-x:auto"><table class="t" style="font-size:13.5px"><thead><tr><th>Тип</th><th class="c">Кол-во</th><th class="c">Средняя</th>${R.map(r=>`<th class="c">${esc(r)}</th>`).join("")}<th class="c">Время</th></tr></thead><tbody>
       ${byType.map(x=>`<tr style="cursor:default"><td><b>${esc(x.t)}</b><div class="prog" style="margin-top:5px;width:${Math.max(8,x.n/maxN*100)}%"><i style="width:100%"></i></div></td><td class="c">${x.n}</td><td class="c">${scBadge(x.avg,"sm")}</td>${R.map(r=>`<td class="c cv">${f2(x.per[r])}</td>`).join("")}<td class="c dim">${x.mins?hoursStr(x.mins):"—"}</td></tr>`).join("")}
       </tbody></table></div></div>
-    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button><h3>Категории <span class="lg">${R.map((r,i)=>`<span><i style="background:${rc[i%4]}"></i>${esc(r)}</span>`).join("")}</span></h3>
+    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><h3>Категории <span class="lg">${R.map((r,i)=>`<span><i style="background:${rc[i%4]}"></i>${esc(r)}</span>`).join("")}</span></h3>
       ${CATS.map(c=>`<div style="margin:10px 0 12px"><div style="font-size:13px;font-weight:700;margin-bottom:4px">${c.ic} ${c.n}</div>${R.map((r,i)=>{const v=catAvg(r,c.k);return `<div class="hb" style="margin:3px 0"><span class="dim" style="font-size:12px">${esc(r)}</span><div class="tr"><i style="width:${(v||0)/5*100}%;background:${rc[i%4]}"></i></div><b>${f2(v)}</b></div>`}).join("")}</div>`).join("")}
     </div>
-    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button><h3>Распределение итоговых оценок</h3>
+    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><h3>Распределение итоговых оценок</h3>
       ${dist.map(x=>`<div class="hb"><span>${x.n}</span><div class="tr"><i style="width:${x.v/maxD*100}%;background:${scoreColor(x.n==="5"?5:x.n==="0–2"?1.2:parseFloat(x.n)+.5)}"></i></div><b>${x.v}</b></div>`).join("")}
       <div class="dsec"><h4>Оценки в порядке просмотра</h4>${svg}</div>
     </div>
-    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button><h3>Жанры</h3>${gl.length?gl.map(x=>`<div class="hb"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.g)}</span><div class="tr"><i style="width:${x.n/maxG*100}%;background:linear-gradient(90deg,var(--acc2),var(--acc))"></i></div><b>${x.n}</b></div>`).join(""):`<p class="dim">Жанры пока не указаны у просмотренного. Их можно добавить в карточке.</p>`}</div>
-    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button><h3>Лучшее</h3><div class="lst">${ranked.slice(0,8).map(i=>lrow(i,scBadge(itemScore(i),"sm"))).join("")}</div></div>
-    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button><h3>Худшее</h3><div class="lst">${ranked.slice(-8).reverse().map(i=>lrow(i,scBadge(itemScore(i),"sm"))).join("")}</div></div>
-    ${R.length>=2?`<div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button><h3>Самые большие расхождения <span class="dim" style="font-size:12px;font-family:var(--font)">полное совпадение: ${agree}</span></h3><div class="lst">${dis.map(x=>lrow(x.i,`<span class="dim" style="font-size:12px">${esc(R[0])}</span>${scBadge(x.a,"sm")}<span class="dim" style="font-size:12px">${esc(R[1])}</span>${scBadge(x.b,"sm")}`)).join("")||`<p class="dim">Нет данных</p>`}</div></div>`:""}
-    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button><h3>Кто строже</h3>${R.map((r,i)=>{const others=R.filter(x=>x!==r);const higher=W.filter(it=>{const a=itemScore(it,r);return isNum(a)&&others.every(o=>{const b=itemScore(it,o);return isNum(b)&&a>b+0.04})}).length;return `<div class="hb"><span>${esc(r)}</span><div class="tr"><i style="width:${W.length?higher/W.length*100:0}%;background:${rc[i%4]}"></i></div><b>${higher}</b></div>`}).join("")}<p class="dim" style="font-size:12.5px;margin:10px 0 0">Сколько раз оценка была выше, чем у остальных</p></div>
+    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><h3>Жанры</h3>${gl.length?gl.map(x=>`<div class="hb"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.g)}</span><div class="tr"><i style="width:${x.n/maxG*100}%;background:linear-gradient(90deg,var(--acc2),var(--acc))"></i></div><b>${x.n}</b></div>`).join(""):`<p class="dim">Жанры пока не указаны у просмотренного. Их можно добавить в карточке.</p>`}</div>
+    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><h3>Лучшее</h3><div class="lst">${ranked.slice(0,8).map(i=>lrow(i,scBadge(itemScore(i),"sm"))).join("")}</div></div>
+    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><h3>Худшее</h3><div class="lst">${ranked.slice(-8).reverse().map(i=>lrow(i,scBadge(itemScore(i),"sm"))).join("")}</div></div>
+    ${R.length>=2?`<div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><h3>Самые большие расхождения <span class="dim" style="font-size:12px;font-family:var(--font)">полное совпадение: ${agree}</span></h3><div class="lst">${dis.map(x=>lrow(x.i,`<span class="dim" style="font-size:12px">${esc(R[0])}</span>${scBadge(x.a,"sm")}<span class="dim" style="font-size:12px">${esc(R[1])}</span>${scBadge(x.b,"sm")}`)).join("")||`<p class="dim">Нет данных</p>`}</div></div>`:""}
+    <div class="sbox"><button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button><h3>Кто строже</h3>${R.map((r,i)=>{const others=R.filter(x=>x!==r);const higher=W.filter(it=>{const a=itemScore(it,r);return isNum(a)&&others.every(o=>{const b=itemScore(it,o);return isNum(b)&&a>b+0.04})}).length;return `<div class="hb"><span>${esc(r)}</span><div class="tr"><i style="width:${W.length?higher/W.length*100:0}%;background:${rc[i%4]}"></i></div><b>${higher}</b></div>`}).join("")}<p class="dim" style="font-size:12.5px;margin:10px 0 0">Сколько раз оценка была выше, чем у остальных</p></div>
     ${timeBox(W)}
     ${logBox()}
   </div>`;
@@ -2191,9 +2223,9 @@ function timeDraw(root){$$("[data-tc]",root||document).forEach(el=>{el.innerHTML
 window.addEventListener("resize",()=>{clearTimeout(timeDraw.t);timeDraw.t=setTimeout(()=>timeDraw(),150)});
 function timeBox(W){
   const per=UI.stPer==="year"?"year":"month",{pts,rows}=timeSeries(W,per);TC_ROWS=rows;
-  const sh=`<button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button>`;
+  const sh=`<button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button>`;
   const head=`<h3>Динамика по времени ${segHTML("stPer",[["month","Месяцы"],["year","Годы"]],per)}</h3>`;
-  if(!rows.length)return `<div class="sbox wide">${sh}${head}<p class="dim" style="margin:0">Пока не у кого взять дату. Укажите «Дату просмотра» в карточке фильма или поставьте новую оценку — время каждой оценки сохраняется, и здесь появятся графики по месяцам и годам.</p></div>`;
+  if(!rows.length)return `<div class="sbox wide">${sh}${head}<p class="dim" style="margin:0">Дат пока нет. График строится по полю «Дата просмотра» в карточке и по времени новых оценок.</p></div>`;
   const busiest=rows.reduce((a,b)=>b.n>a.n?b:a),best=rows.filter(r=>r.n>=2&&isNum(r.avg)).reduce((a,b)=>!a||b.avg>a.avg?b:a,null);
   return `<div class="sbox wide">${sh}${head}
     <div class="tstats"><span>С датой: <b>${pts.length}</b> из ${W.length}</span><span>Самый насыщенный период: <b>${esc(busiest.full)}</b> (${busiest.n})</span>${best?`<span>Лучший по оценкам: <b>${esc(best.full)}</b> ${scBadge(best.avg,"sm")}</span>`:""}</div>
@@ -2203,7 +2235,7 @@ function timeBox(W){
   </div>`;
 }
 function logBox(){
-  const L=DB.log||[];const sh=`<button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой">📷</button>`;
+  const L=DB.log||[];const sh=`<button class="btn sm ghost shotbtn" data-shot=".sbox" data-noshot title="Копировать картинкой"><i class="ico ico-cam"></i></button>`;
   if(!L.length)return `<div class="sbox">${sh}<h3>Хронология оценок</h3><p class="dim" style="margin:0">Время теперь фиксируется у каждой новой оценки. Как только появятся новые оценки, здесь будет видно, по каким месяцам, дням недели и часам вы оцениваете.</p></div>`;
   const now=new Date(),months=[];for(let k=11;k>=0;k--){const d=new Date(now.getFullYear(),now.getMonth()-k,1);months.push({y:d.getFullYear(),m:d.getMonth(),n:0,l:d.toLocaleDateString("ru-RU",{month:"short"}).replace(".","").slice(0,3)})}
   const wd=[0,0,0,0,0,0,0],hr=Array(24).fill(0);
@@ -2445,9 +2477,9 @@ function openDetail(id,season){
       ${ser&&!sObj?segTable(it):""}
     </div></div></div>
   <div class="df"><button class="btn danger ghost" id="dDel">Удалить</button><div class="sp"></div>
-    <button class="btn icon" data-shot="#detShot" data-shot-title="${esc(it.title)}${sObj?" · "+esc(segName(it,season)):""}" title="Копировать карточку картинкой">📷</button>
+    <button class="btn icon" data-shot="#detShot" data-shot-title="${esc(it.title)}${sObj?" · "+esc(segName(it,season)):""}" title="Копировать карточку картинкой"><i class="ico ico-cam"></i></button>
     <button class="btn" data-tags="${it.id}" title="Теги">🏷</button>
-    ${canFreeze(it)?(it.frozen?`<button class="btn" data-unfreeze="${it.id}">↺ Разморозить</button>`:`<button class="btn" data-freeze="${it.id}" title="Пока не продолжаем — убрать из «Продолжить просмотр»">❄ Заморозить</button>`):""}
+    ${canFreeze(it)?(it.frozen?`<button class="btn" data-unfreeze="${it.id}">Разморозить</button>`:`<button class="btn" data-freeze="${it.id}" title="Пока не продолжаем — убрать из «Продолжить просмотр»"><i class="ico ico-snow"></i> Заморозить</button>`):""}
     <button class="btn" data-edit="${it.id}">✎ Изменить</button>
     ${it.status==="planned"&&ser?`<button class="btn" data-start="${it.id}">▶ Начать смотреть</button>`:""}${it.status==="watched"&&ser&&it.seasonsTotal&&Math.max(0,...(it.seasons||[]).map(s=>s.n))<it.seasonsTotal?`<button class="btn" data-start="${it.id}" data-sn="${Math.max(0,...(it.seasons||[]).map(s=>s.n))+1}">▶ Продолжить</button>`:""}${it.status==="watching"?`<button class="btn" data-finish="${it.id}">✓ Досмотрели</button>`:""}
     ${it.status==="planned"?`<button class="btn pri" data-finish="${it.id}">✓ Просмотрено</button>`:`<button class="btn pri" data-rate="${it.id}" data-season="${sObj?season:"whole"}">★ ${sObj?(arc?"Оценить арку":"Оценить сезон"):ser?"Оценить целиком":"Изменить оценку"}</button>`}</div>`;
@@ -2770,7 +2802,7 @@ function recoBuild(){
 function recoKind(x){const anim=x.g.includes(16),jp=x.oc.includes("JP")||x.lang==="ja";return x.t==="tv"?(anim?(jp?"аниме":"мультсериал"):"сериал"):(anim?(jp?"аниме":"мультфильм"):"фильм")}
 function recoInner(){
   const who=recoWho();
-  const head=`<div class="rhead"><h3>✨ Может понравиться</h3>
+  const head=`<div class="rhead"><h3>Может понравиться</h3>
     <div class="seg sm"><button data-reco-who="" class="${!who?"on":""}">Нам</button>${DB.raters.map(n=>`<button data-reco-who="${esc(n)}" class="${who===n?"on":""}">${esc(n)}</button>`).join("")}</div>
     <div class="sp"></div>${RECO.st==="ok"||RECO.st==="err"?`<button class="btn sm ghost" data-reco-ref title="Обновить подборку">↻</button>`:""}<button class="btn sm ghost" data-reco-tog title="${UI.recoOff?"Развернуть":"Свернуть"}">${UI.recoOff?"▾":"▴"}</button></div>`;
   if(UI.recoOff)return head;
@@ -2973,7 +3005,7 @@ function vWorld(){
     <div class="th-l"><div class="th-n" style="color:${cA}">${who?esc(who):"Мы"}</div><div class="th-avg">${f2(mu)}</div><div class="dim">наша средняя</div></div>
     <div class="th-c"><div class="th-ring" style="--p:${pct}"><b>${pct}%</b></div><div class="th-cap">совпадаем с миром ±0,5<br>(с поправкой на нашу щедрость)</div></div>
     <div class="th-r"><div class="th-n" style="color:${cB}">${src==="all"?"Мир":esc(WSRC.find(s=>s.k===src).n)}</div><div class="th-avg">${f2(mw)}</div><div class="dim">средняя мира</div></div>
-    <button class="btn sm ghost shotbtn" data-shot=".thero" data-shot-title="Мы и мир" data-noshot>📷</button>
+    <button class="btn sm ghost shotbtn" data-shot=".thero" data-shot-title="Мы и мир" data-noshot><i class="ico ico-cam"></i></button>
   </div>
   <div class="kpis">
     <div class="kpi"><span>Корреляция</span><b>${r==null?"—":r.toFixed(2).replace(".",",")}</b><em>${rTxt}</em></div>
@@ -2982,18 +3014,18 @@ function vWorld(){
     <div class="kpi"><span>Сравнено</span><b>${P.length}</b><em>${noData?`без мировых данных: ${noData}`:"все записи с данными"}</em></div>
   </div>
   <div class="sgrid">
-    <div class="sbox shot"><h3>Карта: мир ↔ мы <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3><div class="lg" style="margin:-6px 0 8px"><span><i style="background:${cA}"></i>нам нравится больше</span><span><i style="background:${cB}"></i>миру больше</span><span><i style="background:var(--tx2)"></i>совпадаем</span></div>${worldScatter(P,shift,cA,cB,src)}</div>
-    <div class="sbox shot"><h3>По источникам <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3>${WSRC.map(s=>{const Q=E.map(x=>({u:ours(x),w:worldScore(x.it,s.k)})).filter(q=>isNum(q.u)&&isNum(q.w));if(Q.length<3)return"";const rr=pearson(Q.map(q=>q.u),Q.map(q=>q.w));const a=avg(Q.map(q=>q.u)),b=avg(Q.map(q=>q.w));return `<div class="tcat"><div class="tcat-h"><span style="color:${s.c}">● ${s.n}</span><span class="dim">${Q.length} зап. · r = ${rr==null?"—":rr.toFixed(2).replace(".",",")}</span></div>
+    <div class="sbox shot"><h3>Карта: мир ↔ мы <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3><div class="lg" style="margin:-6px 0 8px"><span><i style="background:${cA}"></i>нам нравится больше</span><span><i style="background:${cB}"></i>миру больше</span><span><i style="background:var(--tx2)"></i>совпадаем</span></div>${worldScatter(P,shift,cA,cB,src)}</div>
+    <div class="sbox shot"><h3>По источникам <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3>${WSRC.map(s=>{const Q=E.map(x=>({u:ours(x),w:worldScore(x.it,s.k)})).filter(q=>isNum(q.u)&&isNum(q.w));if(Q.length<3)return"";const rr=pearson(Q.map(q=>q.u),Q.map(q=>q.w));const a=avg(Q.map(q=>q.u)),b=avg(Q.map(q=>q.w));return `<div class="tcat"><div class="tcat-h"><span style="color:${s.c}">● ${s.n}</span><span class="dim">${Q.length} зап. · r = ${rr==null?"—":rr.toFixed(2).replace(".",",")}</span></div>
       <div class="hb" style="margin:3px 0"><span class="dim" style="font-size:12px">${who?esc(who):"Мы"}</span><div class="tr"><i style="width:${a/5*100}%;background:${cA}"></i></div><b>${f2(a)}</b></div>
       <div class="hb" style="margin:3px 0"><span class="dim" style="font-size:12px">${s.s||s.n}</span><div class="tr"><i style="width:${b/5*100}%;background:${s.c}"></i></div><b>${f2(b)}</b></div></div>`}).join("")}
       <p class="dim" style="font-size:12.5px;margin:10px 0 0">r — насколько порядок наших оценок совпадает с порядком у источника (1 — идеально, 0 — никак).</p></div>
-    <div class="sbox shot"><h3>Нам нравится больше, чем миру <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3><div class="lst">${up.map(x=>row(x,`<span class="dim" style="font-size:12px">+${f1(x.rel)}</span>${pair(x)}`)).join("")||`<p class="dim">Таких нет</p>`}</div></div>
-    <div class="sbox shot"><h3>Миру нравится больше, чем нам <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3><div class="lst">${down.map(x=>row(x,`<span class="dim" style="font-size:12px">${f1(x.rel)}</span>${pair(x)}`)).join("")||`<p class="dim">Таких нет</p>`}</div></div>
-    <div class="sbox shot"><h3>По типам <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3>${gt(grp(it=>[it.type]),"Тип")}</div>
-    <div class="sbox shot"><h3>По жанрам <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3>${gt(grp(it=>it.genres).slice(0,12),"Жанр")}</div>
+    <div class="sbox shot"><h3>Нам нравится больше, чем миру <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3><div class="lst">${up.map(x=>row(x,`<span class="dim" style="font-size:12px">+${f1(x.rel)}</span>${pair(x)}`)).join("")||`<p class="dim">Таких нет</p>`}</div></div>
+    <div class="sbox shot"><h3>Миру нравится больше, чем нам <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3><div class="lst">${down.map(x=>row(x,`<span class="dim" style="font-size:12px">${f1(x.rel)}</span>${pair(x)}`)).join("")||`<p class="dim">Таких нет</p>`}</div></div>
+    <div class="sbox shot"><h3>По типам <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3>${gt(grp(it=>[it.type]),"Тип")}</div>
+    <div class="sbox shot"><h3>По жанрам <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3>${gt(grp(it=>it.genres).slice(0,12),"Жанр")}</div>
   </div>
   <p class="dim" style="font-size:12.5px;margin:14px 0 18px">«Больше/меньше, чем миру» считается с поправкой на общий сдвиг: мы в среднем ставим на ${f2(Math.abs(shift)).replace(".",",")} ${shift>=0?"выше":"ниже"}, поэтому сравниваем не сырые числа, а то, насколько запись выделяется у нас и у мира.</p>
-  <div class="toolbar"><h3 style="font-size:16px">Все записи</h3><div class="sp"></div><select class="inp" data-uis="wSort">${[["rel","По расхождению"],["u","По нашей оценке"],["w","По мировой оценке"],["title","По названию"]].map(([k,n])=>`<option value="${k}" ${(UI.wSort||"rel")===k?"selected":""}>${n}</option>`).join("")}</select><button class="btn sm" data-shot="#wtbl" data-shot-title="Мы и мир">📷</button></div>
+  <div class="toolbar"><h3 style="font-size:16px">Все записи</h3><div class="sp"></div><select class="inp" data-uis="wSort">${[["rel","По расхождению"],["u","По нашей оценке"],["w","По мировой оценке"],["title","По названию"]].map(([k,n])=>`<option value="${k}" ${(UI.wSort||"rel")===k?"selected":""}>${n}</option>`).join("")}</select><button class="btn sm" data-shot="#wtbl" data-shot-title="Мы и мир"><i class="ico ico-cam"></i></button></div>
   <div id="wtbl" class="tbl-wrap"><table class="t"><thead><tr><th>Название</th><th class="c">${who?esc(who):"Мы"}</th>${WSRC.map(s=>`<th class="c">${s.s||s.n}</th>`).join("")}<th class="c">Мир</th><th class="c" title="С поправкой на общий сдвиг">Δ</th></tr></thead><tbody>
     ${T.map(x=>`<tr data-open="${x.it.id}"><td><div class="tt"><div class="mini">${posterHTML(x.it,false)}</div><div><b>${esc(x.it.title)}</b>${x.it.ext?.en?`<div class="gen">${esc(x.it.ext.en)}</div>`:""}</div></div></td><td class="c">${scBadge(x.u,"sm")}</td>${WSRC.map(s=>`<td class="c">${cell(x.it,s.k)}</td>`).join("")}<td class="c"><span class="wsc">${f1(x.w)}</span></td><td class="c" style="font-weight:800;color:${Math.abs(x.rel)<.25?"var(--tx2)":x.rel>0?"var(--ok)":"var(--bad)"}">${x.rel>0?"+":""}${f1(x.rel)}</td></tr>`).join("")}
   </tbody></table></div>`;
@@ -3052,7 +3084,7 @@ function vTaste(){
     <div class="th-l"><div class="th-n" style="color:${cA}">${esc(A)}</div><div class="th-avg">${f2(avg(P.map(x=>x.a)))}</div><div class="dim">средняя</div></div>
     <div class="th-c"><div class="th-ring" style="--p:${pct}"><b>${pct}%</b></div><div class="th-cap">оценки отличаются<br>не больше чем на 0,5</div></div>
     <div class="th-r"><div class="th-n" style="color:${cB}">${esc(B)}</div><div class="th-avg">${f2(avg(P.map(x=>x.b)))}</div><div class="dim">средняя</div></div>
-    <button class="btn sm ghost shotbtn" data-shot=".thero" data-shot-title="Вкусы: ${esc(A)} и ${esc(B)}" data-noshot>📷</button>
+    <button class="btn sm ghost shotbtn" data-shot=".thero" data-shot-title="Вкусы: ${esc(A)} и ${esc(B)}" data-noshot><i class="ico ico-cam"></i></button>
   </div>
   <div class="kpis">
     <div class="kpi"><span>Корреляция</span><b>${r==null?"—":r.toFixed(2).replace(".",",")}</b><em>${rTxt}</em></div>
@@ -3061,18 +3093,18 @@ function vTaste(){
     <div class="kpi"><span>Кто щедрее</span><b style="font-size:17px;line-height:1.3">${harsh}</b></div>
   </div>
   <div class="sgrid">
-    <div class="sbox shot"><h3>Карта оценок <span class="row" style="gap:6px"><span class="lg"><span><i style="background:${cA}"></i>${esc(A)} выше</span><span><i style="background:${cB}"></i>${esc(B)} выше</span></span><button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></span></h3>${tasteScatter(P,A,B,cA,cB)}</div>
-    <div class="sbox shot"><h3>По категориям <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3>
+    <div class="sbox shot"><h3>Карта оценок <span class="row" style="gap:6px"><span class="lg"><span><i style="background:${cA}"></i>${esc(A)} выше</span><span><i style="background:${cB}"></i>${esc(B)} выше</span></span><button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></span></h3>${tasteScatter(P,A,B,cA,cB)}</div>
+    <div class="sbox shot"><h3>По категориям <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3>
       ${cats.map(x=>`<div class="tcat"><div class="tcat-h"><span>${x.c.ic} ${x.c.n}</span><span class="dim">расхождение ${f2(x.ad).replace(".",",")}</span></div>
         <div class="hb" style="margin:3px 0"><span class="dim" style="font-size:12px">${esc(A)}</span><div class="tr"><i style="width:${(x.a||0)/5*100}%;background:${cA}"></i></div><b>${f2(x.a)}</b></div>
         <div class="hb" style="margin:3px 0"><span class="dim" style="font-size:12px">${esc(B)}</span><div class="tr"><i style="width:${(x.b||0)/5*100}%;background:${cB}"></i></div><b>${f2(x.b)}</b></div></div>`).join("")}
       <p class="dim" style="font-size:12.5px;margin:10px 0 0">Сильнее всего расходитесь в категории «${[...cats].sort((x,y)=>(y.ad||0)-(x.ad||0))[0].c.n}», меньше всего — «${[...cats].sort((x,y)=>(x.ad||9)-(y.ad||9))[0].c.n}».</p></div>
-    <div class="sbox shot"><h3>По жанрам <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3>${gtable(genres.slice(0,12),"Жанр")}</div>
-    <div class="sbox shot"><h3>По типам <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3>${gtable(types,"Тип")}</div>
-    <div class="sbox shot"><h3>${esc(A)} ставит выше <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3><div class="lst">${mA.map(x=>row(x,`<span class="dim" style="font-size:12px">+${f1(x.d)}</span>${pair(x)}`)).join("")||`<p class="dim">Нет таких</p>`}</div></div>
-    <div class="sbox shot"><h3>${esc(B)} ставит выше <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3><div class="lst">${mB.map(x=>row(x,`<span class="dim" style="font-size:12px">+${f1(-x.d)}</span>${pair(x)}`)).join("")||`<p class="dim">Нет таких</p>`}</div></div>
-    <div class="sbox shot"><h3>Любим оба <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3><div class="lst">${love.slice(0,8).map(x=>row(x,pair(x))).join("")||`<p class="dim">Нет записей, где оба поставили 4,7+</p>`}</div></div>
-    <div class="sbox shot"><h3>Не зашло обоим <button class="btn sm ghost" data-shot=".sbox" data-noshot>📷</button></h3><div class="lst">${meh.slice(0,8).map(x=>row(x,pair(x))).join("")||`<p class="dim">Нет записей, где оба поставили 3,2 и ниже</p>`}</div></div>
+    <div class="sbox shot"><h3>По жанрам <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3>${gtable(genres.slice(0,12),"Жанр")}</div>
+    <div class="sbox shot"><h3>По типам <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3>${gtable(types,"Тип")}</div>
+    <div class="sbox shot"><h3>${esc(A)} ставит выше <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3><div class="lst">${mA.map(x=>row(x,`<span class="dim" style="font-size:12px">+${f1(x.d)}</span>${pair(x)}`)).join("")||`<p class="dim">Нет таких</p>`}</div></div>
+    <div class="sbox shot"><h3>${esc(B)} ставит выше <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3><div class="lst">${mB.map(x=>row(x,`<span class="dim" style="font-size:12px">+${f1(-x.d)}</span>${pair(x)}`)).join("")||`<p class="dim">Нет таких</p>`}</div></div>
+    <div class="sbox shot"><h3>Любим оба <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3><div class="lst">${love.slice(0,8).map(x=>row(x,pair(x))).join("")||`<p class="dim">Нет записей, где оба поставили 4,7+</p>`}</div></div>
+    <div class="sbox shot"><h3>Не зашло обоим <button class="btn sm ghost" data-shot=".sbox" data-noshot><i class="ico ico-cam"></i></button></h3><div class="lst">${meh.slice(0,8).map(x=>row(x,pair(x))).join("")||`<p class="dim">Нет записей, где оба поставили 3,2 и ниже</p>`}</div></div>
   </div>`;
 }
 function tasteScatter(P,A,B,cA,cB){
@@ -3197,7 +3229,7 @@ function gsResultsHTML(){
   for(const g of order){const L=GS.res.filter(x=>x.g===g);if(!L.length)continue;
     html+=`<div class="gs-g">${g} <small>${L.length}</small></div>`;
     html+=L.map(x=>{const i=GS.res.indexOf(x);idx++;return `<button class="gs-r${i===GS.sel?" on":""}" data-gi="${i}" role="option" aria-selected="${i===GS.sel}">
-      <span class="mini">${x.it?posterHTML(x.it,false):`<span class="gs-ci">🦸</span>`}</span>
+      <span class="mini">${x.it?posterHTML(x.it,false):`<span class="gs-ci"><i class="ico ico-comics"></i></span>`}</span>
       <span class="gs-t"><b>${esc(x.title)}</b><small>${esc(x.sub)}</small></span>
       ${x.kind==="item"&&isNum(x.sc)?scBadge(x.sc,"sm"):""}</button>`}).join("");
   }
@@ -3206,7 +3238,7 @@ function gsResultsHTML(){
 function gsPaint(){const b=$("#gsRes");if(!b)return;b.innerHTML=gsResultsHTML();const on=$(".gs-r.on",b);if(on)on.scrollIntoView({block:"nearest"})}
 function gsOpen(){
   const d=$("#gsDlg");if(!DB||d.open)return;
-  d.innerHTML=`<div class="gs-box"><div class="gs-in"><span>⌕</span><input id="gsQ" placeholder="Поиск по всей коллекции…" autocomplete="off" spellcheck="false" aria-label="Глобальный поиск"><kbd>Esc</kbd></div><div class="gs-res" id="gsRes" role="listbox"></div><div class="gs-ft"><span><kbd>↑</kbd><kbd>↓</kbd> выбор</span><span><kbd>Enter</kbd> открыть</span><span><kbd>Ctrl</kbd><kbd>K</kbd> поиск</span></div></div>`;
+  d.innerHTML=`<div class="gs-box"><div class="gs-in"><i class="ico ico-search"></i><input id="gsQ" placeholder="Поиск по всей коллекции…" autocomplete="off" spellcheck="false" aria-label="Глобальный поиск"><kbd>Esc</kbd></div><div class="gs-res" id="gsRes" role="listbox"></div><div class="gs-ft"><span><kbd>↑</kbd><kbd>↓</kbd> выбор</span><span><kbd>Enter</kbd> открыть</span><span><kbd>Ctrl</kbd><kbd>K</kbd> поиск</span></div></div>`;
   GS.q="";GS.res=[];GS.sel=0;d.showModal();gsPaint();
   const q=$("#gsQ",d);q.focus();
   q.addEventListener("input",()=>{GS.q=q.value.trim();GS.res=gsSearch(GS.q);GS.sel=0;gsPaint()});
@@ -3238,8 +3270,8 @@ const THEME_IC={"dark":"🌑","light":"☀","warm":"🦊","ocean":"🌊","forest
 const THEME_NAME={"dark":"Тёмная","light":"Светлая","warm":"Тёплая","ocean":"Океан","forest":"Лес","glass":"Стекло","neon":"Неон"};
 const THEME_DOT={"dark":"#8eaadc","light":"#4a6fa5","warm":"#cf8a2e","ocean":"#56c8d8","forest":"#6dbba1","glass":"#a8c0f0","neon":"#c77dff"};
 const THEME_META={"dark":"#131416","light":"#f0f1f3","warm":"#100e0b","ocean":"#0a1620","forest":"#0c1410","glass":"#10121a","neon":"#0e0a18"};
-function applyTheme(){const t=THEMES.includes(UI.theme)?UI.theme:"dark";document.documentElement.dataset.theme=t;$("#themeColor")?.setAttribute("content",THEME_META[t]||"#131416");const tb=$("#themeBtn");const ic=THEME_IC[t]||"🌑";if(tb.querySelector(".sb-ic")){tb.querySelector(".sb-ic").textContent=ic}else{tb.textContent=ic};if(UI.gridSize){document.documentElement.style.setProperty("--gridMin",UI.gridSize+"px")};renderThemePicker()}
-function renderThemePicker(){const p=$("#themePicker");if(!p)return;p.innerHTML=THEMES.map(t=>`<button class="tp-item${UI.theme===t?" on":""}" data-t="${t}"><span class="tp-dot" style="background:${THEME_DOT[t]}"></span><span class="tp-ic">${THEME_IC[t]}</span>${THEME_NAME[t]}<span class="tp-check">✓</span></button>`).join("");p.querySelectorAll(".tp-item").forEach(b=>b.onclick=()=>{UI.theme=b.dataset.t;saveUI();applyTheme();render()})}
+function applyTheme(){const t=THEMES.includes(UI.theme)?UI.theme:"dark";document.documentElement.dataset.theme=t;$("#themeColor")?.setAttribute("content",THEME_META[t]||"#131416");const tb=$("#themeBtn");const ti=tb.querySelector(".ico-theme");if(ti)ti.style.color=THEME_DOT[t];if(UI.gridSize){document.documentElement.style.setProperty("--gridMin",UI.gridSize+"px")};renderThemePicker()}
+function renderThemePicker(){const p=$("#themePicker");if(!p)return;p.innerHTML=THEMES.map(t=>`<button class="tp-item${UI.theme===t?" on":""}" data-t="${t}"><span class="tp-dot" style="background:${THEME_DOT[t]}"></span>${THEME_NAME[t]}<span class="tp-check">✓</span></button>`).join("");p.querySelectorAll(".tp-item").forEach(b=>b.onclick=()=>{UI.theme=b.dataset.t;saveUI();applyTheme();render()})}
 function toggleThemePicker(){const p=$("#themePicker");const btn=$("#themeBtn");if(p.classList.contains("open")){p.classList.remove("open");return}const r=btn.getBoundingClientRect();const isMob=window.innerWidth<=820;if(isMob){p.style.left="auto";p.style.right="8px";p.style.top=(r.bottom+6)+"px";p.style.bottom="auto"}else{p.style.left=(r.right+10)+"px";p.style.bottom=(window.innerHeight-r.bottom)+"px";p.style.top="auto";p.style.right="auto"}p.classList.add("open")}
 document.addEventListener("click",e=>{const p=$("#themePicker");if(p&&p.classList.contains("open")&&!p.contains(e.target)&&e.target.id!=="themeBtn"&&!e.target.closest("#themeBtn")){p.classList.remove("open")}})
 $("#cloudBtn").onclick=()=>{location.hash="data";if(UI.tab==="data")render();setTimeout(()=>$("#cloudP")?.scrollIntoView({behavior:"smooth",block:"center"}),60)};
