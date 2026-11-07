@@ -905,6 +905,14 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .plan .card .act .btn.icon,.plan .card .act .btn[data-start]{flex:0 0 30px;width:30px;padding:0}
 .plan .card .seenrow{margin-top:auto;padding-top:6px}
 .plan .card .seenrow+.act{margin-top:0}
+.gridbar{display:flex;justify-content:flex-end;margin:0 0 10px}
+.fpanel{padding:10px 14px;gap:8px 22px;align-items:flex-end;margin-bottom:12px}
+.fpanel .flt{gap:4px}
+.fpanel .flt label{font-size:11.5px}
+.fpanel .inp{padding:5px 28px 5px 10px;font-size:13px;min-height:0;height:32px}
+.fpanel .seg button{padding:4px 11px}
+.fpanel .chip{padding:3px 10px;font-size:12.5px}
+.reco{margin-bottom:16px}
 </style>
 </head>
 <body>
@@ -1306,7 +1314,6 @@ const BUCKETS=[
   {k:"02",n:"0–2",f:v=>v<2}];
 const TABS=[
   {id:"watched",n:"Просмотрено",s:"Список",ic:"🎞"},
-  {id:"series",n:"Сериалы",s:"Сериалы",ic:"📺"},
   {id:"plan",n:"Планы",s:"Планы",ic:"🗓"},
   {id:"catalog",n:"Каталог",s:"Каталог",ic:"🔥"},
   {id:"comics",n:"Кинокомиксы",s:"Комиксы",ic:"💥"},
@@ -1857,13 +1864,13 @@ window.addEventListener("hashchange",route);
 function render(top){
   renderTabs();
   const v=$("#view");
-  const f={watched:vWatched,series:vSeries,plan:vPlan,comics:vComics,analytics:vAnalytics,catalog:vCatalog,guide:vGuide,data:vData}[UI.tab]||vWatched;
+  const f={watched:vWatched,plan:vPlan,comics:vComics,analytics:vAnalytics,catalog:vCatalog,guide:vGuide,data:vData}[UI.tab]||vWatched;
   const y=window.scrollY,switched=render.lastTab!==UI.tab;render.lastTab=UI.tab;
   v.innerHTML=f();
   if(switched){v.classList.remove("tab-in");void v.offsetWidth;v.classList.add("tab-in")}
   bindView();
   skeletonBind(v);lazyObserve(v);bindReorder(v);timeDraw(v);
-  if(UI.tab==="watched"&&!UI.reorder)recoEnsure();
+  if(UI.tab==="catalog")recoEnsure();
   if(UI.tab==="catalog")catEnsure();
   if(UI.tab==="plan")planEnsure();
   if(top)window.scrollTo(0,0);else window.scrollTo(0,y);
@@ -1920,7 +1927,6 @@ function wHeaderHTML(st){
     <div class="row">
       ${segHTML("mode",[["whole","Сериалы целиком"],["seasons","По сезонам"]],UI.mode)}
       ${segHTML("view",[["cards","Карточки","С постерами"],["posters","Постеры","Только постеры"],["list","Список","Таблица"]],UI.view)}
-      ${UI.view!=="list"?`<div class="grid-sizer"><span class="gs-label"><i class="ico ico-gsmall"></i></span><input type="range" min="110" max="280" step="10" value="${UI.gridSize||178}" id="gridSlider" aria-label="Размер карточек"><span class="gs-label"><i class="ico ico-glarge"></i></span></div>`:""}
       <button class="hide-sc-btn${UI.hideScores?" on":""}" id="hideScBtn" title="${UI.hideScores?"Показать оценки":"Скрыть оценки"}"><i class="ico ico-${UI.hideScores?"eyeoff":"eye"}"></i></button>
       ${UI.view==="cards"?`<button class="hide-sc-btn show-m${UI.compact?" on":""}" id="compactBtn" title="${UI.compact?"Обычные карточки":"Компактные карточки"}"><i class="ico ico-rows"></i></button>`:""}
       ${UI.view!=="list"?`<button class="hide-sc-btn${UI.reorder?" on":""}" id="reorderBtn" title="${UI.reorder?"Готово":"Переставить карточки"}"><i class="ico ico-move"></i></button>`:""}
@@ -1930,11 +1936,10 @@ function wFiltersHTML(st){
   const sc=st.sc,typesPresent={};st.all.forEach(e=>typesPresent[e.it.type]=(typesPresent[e.it.type]||0)+1);
   const genres=[...new Set(DB.items.flatMap(i=>i.genres))].sort(cmpRu);
   const bc={};BUCKETS.forEach(b=>bc[b.k]=st.all.filter(e=>{if(UI.type!=="all"&&e.it.type!==UI.type)return false;if(!comicsMatch(e,UI.comics))return false;const v=sc(e);return isNum(v)&&b.f(v)}).length);
-  const n=wActiveFilters(),tags=allTags();
+  UI.bucket=null;const n=wActiveFilters(),tags=allTags();
   return `<button class="btn fbtn" id="fBtn" style="margin-bottom:12px">⚲ Фильтры${n?" · "+n:""} ${UI.fopen?"▴":"▾"}</button>
   <div class="panel fpanel ${UI.fopen?"open":""}">
-    ${fltHTML("Тип контента",`<div class="chips" data-ui="type">${chipHTML("all","Все",UI.type==="all",st.all.length)}${DB.types.filter(t=>typesPresent[t]).map(t=>chipHTML(t,esc(t),UI.type===t,typesPresent[t])).join("")}</div>`,"flex:1 1 100%")}
-    ${fltHTML("Оценка",`<div class="chips" data-ui="bucket">${BUCKETS.map(b=>chipHTML(b.k,b.n,UI.bucket===b.k,bc[b.k])).join("")}</div>`)}
+    ${fltHTML("Тип контента",`<div class="chips" data-ui="type">${chipHTML("all","Все",UI.type==="all",st.all.length)}${DB.types.filter(t=>typesPresent[t]).map(t=>chipHTML(t,esc(t),UI.type===t,typesPresent[t])).join("")}</div>`)}
     ${fltHTML("Кинокомиксы",selectHTML("comics",[["all","Все"],["any","Только кинокомиксы"],["marvel","Marvel (все)"],["MCU","Marvel · MCU"],["CLASSIC","Marvel · Классика"],["XMEN","Marvel · Люди Икс"],["DC","DC"],["none","Без кинокомиксов"]],UI.comics))}
     ${fltHTML("Чей топ",segHTML("rater",[["all","Общий"],...DB.raters.map(r=>[r,esc(r)])],UI.rater))}
     ${fltHTML("Жанр",selectHTML("genre",[["","Любой"],...genres.map(g=>[g,esc(g)])],UI.genre))}
@@ -1963,9 +1968,10 @@ function vWatched(){
   else if(UI.reorder&&UI.view!=="list")body=gridHTML(st.list,st.rk,st.sc,UI.view==="posters","all",true);
   else body=groupedHTML(st);
   return `${wHeaderHTML(st)}
-  ${UI.reorder?`<div class="reorder-bar"><span>Перетащите карточку на новое место${matchMedia("(pointer:coarse)").matches?", взявшись за значок ⠿":""}. Порядок сохраняется сразу после отпускания.</span><button class="btn sm pri" id="reorderDone">Готово</button></div>`:`${contHTML()}${recoHTML()}`}
+  ${UI.reorder?`<div class="reorder-bar"><span>Перетащите карточку на новое место${matchMedia("(pointer:coarse)").matches?", взявшись за значок ⠿":""}. Порядок сохраняется сразу после отпускания.</span><button class="btn sm pri" id="reorderDone">Готово</button></div>`:`${contHTML()}`}
   ${wFiltersHTML(st)}
   ${wToolbarHTML(st)}
+  ${UI.view!=="list"?`<div class="gridbar"><div class="grid-sizer" title="Размер карточек"><span class="gs-label"><i class="ico ico-gsmall"></i></span><input type="range" min="110" max="280" step="10" value="${UI.gridSize||178}" id="gridSlider" aria-label="Размер карточек"><span class="gs-label"><i class="ico ico-glarge"></i></span></div></div>`:""}
   <div id="wlist">${body}</div>`;
 }
 
@@ -2327,7 +2333,7 @@ async function planEnsure(){
 function planCard(it,U){
   const upc=isUpcoming(it),u=U.of.get(it.id);
   return `<div class="card${upc?" upc":""}" data-open="${it.id}">
-     <div class="poster">${posterHTML(it)}<div class="pb">${upc?`<span class="up">🚧 Скоро</span>`:""}${seenBadge(it)}</div></div>
+     <div class="poster">${posterHTML(it)}<div class="pb">${upc?`<span class="up">🚧 Скоро</span>`:""}</div></div>
      <div class="body"><div class="t">${esc(it.title)}</div>
        <div class="m"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}${extChip(it)}</div>
        ${upc?`<div class="rel">${esc(relLabel(it))}</div>`:""}
@@ -2561,6 +2567,7 @@ function vCatalog(){
   const y0=new Date().getFullYear();
   const years=Array.from({length:y0-1989},(_,i)=>y0+1-i);
   return `<div class="ptitle"><div><h1>Каталог</h1><p>Что сейчас смотрят: популярное из TMDB — фильмы, сериалы, аниме, дорамы. Наведите на постер — добавить в планы или сразу оценить.</p></div></div>
+  ${recoHTML()}
   <div class="chips catcats" data-ui="catCat">${CAT_CATS.map(c=>`<button class="chip ${UI.catCat===c.k?"on":""}" data-v="${c.k}">${c.n}</button>`).join("")}</div>
   <div class="toolbar catbar">
     <input class="inp" id="catQ" type="search" placeholder="🔎 Найти по названию (по всему TMDB)…" value="${esc(UI.catQ||"")}" style="min-width:220px;flex:1 1 220px;max-width:360px" autocomplete="off">
@@ -3386,7 +3393,7 @@ document.addEventListener("click",e=>{
   if(b.dataset.recoRef!==undefined){recoLoad(true);return}
   if(b.dataset.recoTog!==undefined){UI.recoOff=!UI.recoOff;saveUI();recoPaint();if(!UI.recoOff)recoLoad()}
 });
-function recoEnsure(){if(UI.tab!=="watched"||UI.recoOff)return;if(RECO.st==="ok"){const before=RECO.list.length;recoBuild();if(RECO.list.length!==before)recoPaint()}recoLoad()}
+function recoEnsure(){if(UI.tab!=="catalog"||UI.recoOff)return;if(RECO.st==="ok"){const before=RECO.list.length;recoBuild();if(RECO.list.length!==before)recoPaint()}recoLoad()}
 /* постеры для записей с tmdb-id, но без картинки (например, Ван Пис) */
 async function fillPosters(silent){
   if(!apiKey("tmdb")||fillPosters.busy)return 0;fillPosters.busy=true;let n=0;
