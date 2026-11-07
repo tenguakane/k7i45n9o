@@ -123,6 +123,9 @@ h1,h2,h3{font-family:var(--hfont);font-weight:700;letter-spacing:-.02em;margin:0
 .sidebar:hover nav.tabs a .ln{opacity:1}
 .sidebar nav.tabs a .sn{display:none}
 .sidebar nav.tabs a .nb{margin-left:auto}
+@media (min-width:821px){
+  .sidebar:not(:hover) nav.tabs a .nb{position:absolute;left:28px;top:5px;margin:0;min-width:16px;height:16px;padding:0 4px;font-size:10px;border-radius:8px;box-shadow:0 0 0 2px var(--bg2)}
+}
 .sidebar nav.tabs.drag{cursor:grabbing}
 .sidebar nav.tabs.drag a{pointer-events:none}
 .sidebar nav.tabs a{user-select:none;-webkit-user-drag:none}
@@ -299,7 +302,7 @@ table.t .num{color:var(--tx3);font-variant-numeric:tabular-nums;width:40px}
 .bars div span{position:absolute;bottom:-17px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--tx3);font-weight:700}
 
 /* plan */
-.plan .card .act{display:flex;gap:6px;margin-top:8px}
+.plan .card .act{display:flex;gap:6px;margin-top:auto;padding-top:8px}
 .plan .card .act .btn{flex:1;justify-content:center}
 .prog{height:5px;border-radius:3px;background:var(--card2);overflow:hidden}
 .prog i{display:block;height:100%;background:var(--acc);border-radius:3px}
@@ -327,15 +330,15 @@ table.t .num{color:var(--tx3);font-variant-numeric:tabular-nums;width:40px}
 .stt.p{color:var(--acc);border-color:color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--acc) 8%,transparent)}
 .stt.n{color:var(--tx3)}
 .uni{display:flex;gap:10px;margin-bottom:18px}
-.uni button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:12px 22px;cursor:pointer;font-family:var(--hfont);font-weight:700;font-size:18px;letter-spacing:.01em;color:var(--tx2);transition:.15s}
-.uni button.on.m{background:linear-gradient(135deg,#c42528,#8a0b10);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(196,37,40,.25)}
-.uni button.on.d{background:linear-gradient(135deg,#0470e0,#0a3680);color:#fff;border-color:transparent;box-shadow:0 6px 20px rgba(4,112,224,.25)}
+.uni button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:var(--r);padding:9px 18px;cursor:pointer;font-family:var(--hfont);font-weight:700;font-size:18px;letter-spacing:.01em;color:var(--tx2);transition:.15s}
+.uni button.on.m{background:#b8191e;color:#fff;border-color:#b8191e}
+.uni button.on.d{background:#0a5cc2;color:#fff;border-color:#0a5cc2}
 
 /* stats */
 .sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:14px}
 .sgrid>*{min-width:0}
 .sbox{background:var(--card-g);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;animation:fade .25s both}
-.sbox h3{font-size:14.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sbox h3{font-size:14.5px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:6px 10px;flex-wrap:wrap}
 .hb{display:grid;grid-template-columns:110px 1fr 46px;gap:10px;align-items:center;font-size:13.5px;margin:7px 0}
 .hb .tr{height:8px;background:var(--card2);border-radius:4px;overflow:hidden}
 .hb .tr i{display:block;height:100%;border-radius:4px}
@@ -571,6 +574,9 @@ dialog.gs[open]{animation:gsIn .15s ease-out both}
 .ico-glarge{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%224%22 y=%224%22 width=%2216%22 height=%2216%22 rx=%221.5%22/%3E%3C/svg%3E")}
 .ico-plus{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 5v14M5 12h14%22/%3E%3C/svg%3E")}
 .ico-snow{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.6L12 6.5l2.5-1.9M9.5 19.4l2.5-1.9 2.5 1.9%22/%3E%3C/svg%3E")}
+.ico-edit{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M4 20h4L19 9l-4-4L4 16z%22/%3E%3Cpath d=%22M13.5 6.5l4 4%22/%3E%3C/svg%3E")}
+.ico-check{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 12.5l4.5 4.5L19 7.5%22/%3E%3C/svg%3E")}
+.ico-play{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M7 5v14l12-7z%22/%3E%3C/svg%3E")}
 .sidebar nav.tabs a .ic .ico,.sb-actions .sb-btn .sb-ic .ico{width:20px;height:20px;vertical-align:middle}
 .hide-sc-btn .ico,.btn.icon .ico{width:18px;height:18px}
 .grid-sizer .gs-label .ico{width:14px;height:14px}
@@ -606,9 +612,19 @@ dialog.gs[open]{animation:gsIn .15s ease-out both}
   .sb-actions .sb-btn .sb-ln{display:none!important}
   .sb-actions .sb-btn{padding:8px 10px}
   .sidebar{backdrop-filter:none;background:transparent}
-  .sidebar .tabsw{flex-direction:row;overflow:visible;border-bottom:none;flex:1;background:var(--bg2-g);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3)}
-  .sidebar nav.tabs{flex-direction:row;gap:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));justify-content:space-between;overflow:visible;background:transparent;backdrop-filter:none}
-  .sidebar nav.tabs a{flex-direction:column;gap:2px;font-size:10.5px;padding:6px 6px;border-radius:8px;flex:1;min-width:56px;justify-content:center;align-items:center}
+  .sidebar .tabsw{flex-direction:row;overflow:visible;border-bottom:none;flex:1;min-width:0;background:var(--bg2-g);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3)}
+  .sidebar nav.tabs{flex-direction:row;gap:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));justify-content:space-between;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;background:transparent;backdrop-filter:none}
+  .sidebar nav.tabs{min-width:0;width:100%}
+  .sidebar nav.tabs::-webkit-scrollbar{display:none}
+  .tabsw.cr nav.tabs{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+  .tabsw.cl nav.tabs{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px)}
+  .tabsw.cl.cr nav.tabs{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent)}
+  .rhead h3{flex:1}
+  .rhead .sp{display:none}
+  .rhead .seg{order:5;flex-basis:100%;display:flex}
+  .rhead .seg button{flex:1}
+  .sidebar nav.tabs a{flex-direction:column;gap:2px;font-size:10px;padding:6px 2px;border-radius:8px;flex:1 0 58px;min-width:58px;justify-content:center;align-items:center}
+  .sidebar nav.tabs a .nb{position:absolute;top:2px;left:calc(50% + 5px);margin:0;min-width:16px;height:16px;padding:0 4px;font-size:10px;border-radius:8px;box-shadow:0 0 0 2px var(--bg2)}
   .sidebar nav.tabs a .ic{font-size:18px}
   .sidebar nav.tabs a .ln{display:none!important;opacity:1}
   .sidebar nav.tabs a .sn{display:inline}
@@ -643,19 +659,23 @@ dialog.gs[open]{animation:gsIn .15s ease-out both}
 /* header removed */
 
 .nb{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:5px;background:var(--acc2);color:#fff;font-size:11px;font-weight:700;margin-left:2px}
-nav.tabs a.on .nb{background:var(--accTx);color:var(--acc)}
 .cont{margin:0 0 22px}
 .cont-h{display:flex;gap:10px;align-items:center;margin-bottom:10px}
 .cont-h h3{font-size:16px}
 .cont-h .nb{margin:0}
 .cont-row{display:flex;gap:12px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity}
-.ccard{flex:0 0 360px;scroll-snap-align:start;display:flex;gap:12px;background:var(--card-g);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:var(--r);padding:12px;cursor:pointer;transition:border-color .15s,background .15s}
+.ccard{flex:0 0 340px;min-height:125px;scroll-snap-align:start;display:flex;gap:12px;background:var(--card-g);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:var(--r);padding:12px;cursor:pointer;transition:border-color .15s,background .15s}
 .ccard:hover{background:var(--card2-g)}
 .ccard.nx{border-left-color:var(--line2)}
 .ccard .mini{width:66px;height:99px;border-radius:8px}
 .ccard .mini .ph .ini{font-size:20px}
-.ccard .frz-b{margin-left:auto;color:var(--tx3);font-size:16px}
-.ccard .frz-b:hover{color:var(--tx)}
+.ch{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.ch .ct{flex:1;min-width:0;padding-top:3px}
+.ctools{display:flex;gap:2px;flex:none;margin:-2px -4px 0 0}
+.ctool{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:var(--tx3);cursor:pointer;transition:background .15s,color .15s}
+.ctool:hover{background:color-mix(in srgb,var(--tx) 8%,transparent);color:var(--tx)}
+.ctool:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.ctool .ico{width:16px;height:16px}
 .frz{margin-top:8px;border:1px solid var(--line);border-radius:10px;background:var(--card-gs)}
 .frz summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:9px 14px;font-weight:700;font-size:13.5px;color:var(--tx2);user-select:none}
 .frz summary::-webkit-details-marker{display:none}
@@ -674,8 +694,8 @@ nav.tabs a.on .nb{background:var(--accTx);color:var(--acc)}
 .ct{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cm{font-size:13px;color:var(--tx2)}
 .cm2{font-size:11.5px;color:var(--tx3)}
-.cact{display:flex;gap:6px;margin-top:auto;flex-wrap:wrap}
-.cact .btn{padding:5px 10px}
+.cact{display:flex;gap:6px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+.cact .btn{padding:5px 10px;flex:1 1 auto;justify-content:center}
 .stt.c{color:var(--acc2);border-color:color-mix(in srgb,var(--acc2) 40%,transparent);background:color-mix(in srgb,var(--acc2) 10%,transparent)}
 .pgbox{background:var(--card-g2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:0 0 14px;display:flex;flex-direction:column;gap:8px}
 .pgbox .row{justify-content:space-between}
@@ -1613,11 +1633,11 @@ function contHTML(){
   if(!L.length)return `<section class="cont">${frozenHTML(F)}</section>`;
   return `<section class="cont"><div class="cont-h"><h3>Продолжить просмотр</h3><span class="nb">${L.length}</span></div><div class="cont-row">${L.map(({it,kind,next},i)=>{
     const pc=kind==="w"?progPct(it):null;
-    return `<div class="ccard ${kind==="n"?"nx":""}" data-open="${it.id}" style="animation-delay:${i*30}ms"><div class="mini">${posterHTML(it,false)}</div><div class="cb">
-      <div class="ct">${esc(it.title)}</div>
+    return `<div class="ccard ${kind==="n"?"nx":""}" data-open="${it.id}"><div class="mini">${posterHTML(it,false)}</div><div class="cb">
+      <div class="ch"><div class="ct" title="${esc(it.title)}">${esc(it.title)}</div><div class="ctools">${kind==="w"?`<button class="ctool" data-prog="${it.id}" title="Изменить прогресс" aria-label="Изменить прогресс"><i class="ico ico-edit"></i></button><button class="ctool" data-finish="${it.id}" title="Досмотрели полностью" aria-label="Досмотрели полностью"><i class="ico ico-check"></i></button>`:""}<button class="ctool" data-freeze="${it.id}" title="Заморозить: пока не продолжаем, убрать из списка" aria-label="Заморозить"><i class="ico ico-snow"></i></button></div></div>
       <div class="cm">${kind==="w"?esc(progLabel(it)):isArc(it)?`Арка «${esc(segName(it,next))}» ещё не начата`:`Сезон ${next} ещё не начат · всего ${it.seasonsTotal}`}</div>
       ${kind==="w"?`<div class="prog"><i style="width:${pc!=null?(pc*100).toFixed(1):0}%"></i></div><div class="cm2">${pc!=null?`Просмотрено ${Math.round(pc*100)}%`:"Укажите число серий, чтобы видеть процент"}</div>`:`<div class="prog"><i style="width:${((next-1)/it.seasonsTotal*100).toFixed(1)}%"></i></div>`}
-      <div class="cact">${kind==="w"?`<button class="btn sm pri" data-ep="${it.id}">＋1 серия</button>${it.progress?.season!=null?`<button class="btn sm" data-sdone="${it.id}">${segW(it,"done")}</button>`:""}<button class="btn sm ghost" data-prog="${it.id}" title="Изменить прогресс">✎</button><button class="btn sm ghost" data-finish="${it.id}" title="Досмотрели полностью">✓</button>`:`<button class="btn sm pri" data-start="${it.id}" data-sn="${next}">▶ ${isArc(it)?"Начать арку":"Начать сезон "+next}</button>`}<button class="btn sm ghost frz-b" data-freeze="${it.id}" title="Заморозить: пока не продолжаем, убрать из списка" aria-label="Заморозить"><i class="ico ico-snow"></i></button></div>
+      <div class="cact">${kind==="w"?`<button class="btn sm pri" data-ep="${it.id}">＋1 серия</button>${it.progress?.season!=null?`<button class="btn sm" data-sdone="${it.id}">${segW(it,"done")}</button>`:""}`:`<button class="btn sm pri" data-start="${it.id}" data-sn="${next}">▶ ${isArc(it)?"Начать арку":"Начать сезон "+next}</button>`}</div>
     </div></div>`}).join("")}</div>${frozenHTML(F)}</section>`;
 }
 function setFrozen(id,on,inDlg){
@@ -2063,13 +2083,13 @@ function vPlan(){
     <div class="sp"></div>
     <button class="btn sm" data-shot="#plist" data-shot-title="Планы" title="Скопировать планы картинкой"><i class="ico ico-cam"></i></button><select class="inp" data-uis="planSort">${[["added","По дате добавления"],["title","По названию"],["dur","По длительности"],["year","По году"]].map(([k,n])=>`<option value="${k}" ${UI.planSort===k?"selected":""}>${n}</option>`).join("")}</select>
   </div>
-  <div id="plist">${list.length?`<div class="grid plan">${list.map((it,i)=>`<div class="card" data-open="${it.id}" style="animation-delay:${Math.min(i,24)*12}ms">
+  <div id="plist">${list.length?`<div class="grid plan">${list.map((it,i)=>`<div class="card" data-open="${it.id}">
      <div class="poster">${posterHTML(it)}</div>
      <div class="body"><div class="t">${esc(it.title)}</div>
        <div class="m"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}${extChip(it)}</div>
        ${it.genres.length?`<div class="gen">${it.genres.map(esc).join(", ")}</div>`:""}
        ${durLine(it)?`<div class="gen">⏱ ${esc(durLine(it))}</div>`:""}
-       <div class="act">${it.kind==="series"?`<button class="btn sm" data-start="${it.id}" title="Начать смотреть" style="flex:0 0 auto">▶</button>`:""}<button class="btn sm pri" data-finish="${it.id}">✓ Просмотрено</button><button class="btn sm icon" data-edit="${it.id}" title="Изменить" style="flex:0 0 30px;height:30px">✎</button></div>
+       <div class="act">${it.kind==="series"?`<button class="btn sm" data-start="${it.id}" title="Начать смотреть" aria-label="Начать смотреть" style="flex:0 0 30px;height:30px;padding:0;justify-content:center"><i class="ico ico-play"></i></button>`:""}<button class="btn sm pri" data-finish="${it.id}">✓ Просмотрено</button><button class="btn sm icon" data-edit="${it.id}" title="Изменить" aria-label="Изменить" style="flex:0 0 30px;height:30px"><i class="ico ico-edit"></i></button></div>
      </div></div>`).join("")}</div>`:`<div class="empty">План пуст. Добавьте что-нибудь посмотреть!</div>`}</div>`;
 }
 
@@ -2115,7 +2135,7 @@ function vComics(){
         <span class="yr">${c.year||""}</span>
         <span>${x.st==="w"?`<span class="stt w">✓ Просмотрено</span>`:x.st==="p"?`<span class="stt p">В планах</span>`:x.st==="c"?`<span class="stt c">Смотрим</span>`:`<span class="stt n">Не отмечено</span>`}</span>
         <span class="rs">${x.st==="w"?scBadge(x.score,"sm")+DB.raters.map(n=>`<span title="${esc(n)}">${scBadge(x.per[n],"sm")}</span>`).join(""):""}</span>
-        <span class="acts">${x.st==="n"?`<button class="btn sm" data-cplan="${c.id}">В планы</button>`:""}${x.st==="p"?`<button class="btn sm pri" data-finish="${x.it.id}" ${c.link.season!=null?`data-fseason="${c.link.season}"`:""}>✓</button>`:""}<button class="btn sm ghost" data-cedit="${c.id}" title="Изменить / связать">✎</button></span>
+        <span class="acts">${x.st==="n"?`<button class="btn sm" data-cplan="${c.id}">В планы</button>`:""}${x.st==="p"?`<button class="btn sm pri" data-finish="${x.it.id}" ${c.link.season!=null?`data-fseason="${c.link.season}"`:""}>✓</button>`:""}<button class="btn sm ghost" data-cedit="${c.id}" title="Изменить / связать" aria-label="Изменить / связать"><i class="ico ico-edit"></i></button></span>
       </div>`}).join("")||`<div class="crow"><span></span><span class="dim">Пусто</span></div>`}</div>`}).join("")}`;
 }
 
