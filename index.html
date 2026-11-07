@@ -898,6 +898,13 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .lnk2{background:none;border:0;padding:0;color:var(--acc);font:inherit;cursor:pointer;text-decoration:underline}
 @media (hover:none){.ccact{opacity:1;transform:none;padding-top:22px}.cx{opacity:1}.cc:hover .cs{opacity:1}}
 @media (max-width:700px){.ccgrid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px}.ccact button{font-size:11.5px;padding:5px 6px}}
+/* карточки планов: кнопки не вылезают, «Видели» всегда над кнопкой «Просмотрено» */
+.plan .card .act{min-width:0}
+.plan .card .act .btn{min-width:0;white-space:nowrap}
+.plan .card .act .btn.pri{padding:5px 8px}
+.plan .card .act .btn.icon,.plan .card .act .btn[data-start]{flex:0 0 30px;width:30px;padding:0}
+.plan .card .seenrow{margin-top:auto;padding-top:6px}
+.plan .card .seenrow+.act{margin-top:0}
 </style>
 </head>
 <body>
