@@ -921,6 +921,71 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .ppi:hover{border-color:var(--acc)}
 .ppi img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block}
 .ppi span{font-size:11.5px;padding:2px 8px 6px;color:var(--tx3)}
+.ico-quiz{--m:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%224%22/%3E%3Ccircle cx=%228.5%22 cy=%228.5%22 r=%221%22/%3E%3Ccircle cx=%2215.5%22 cy=%228.5%22 r=%221%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%221%22/%3E%3Ccircle cx=%228.5%22 cy=%2215.5%22 r=%221%22/%3E%3Ccircle cx=%2215.5%22 cy=%2215.5%22 r=%221%22/%3E%3C/svg%3E")}
+/* ===== викторина ===== */
+.c0{--qc:var(--acc)}.c1{--qc:var(--acc2)}.c2{--qc:#d4a320}
+h3.c0,h3.c1,b.c0,b.c1{color:var(--qc)}
+.qbar{display:inline-block;height:6px;border-radius:3px;background:var(--line);overflow:hidden;min-width:60px;vertical-align:middle}
+.qbar i{display:block;height:100%;background:var(--qc,var(--acc));border-radius:3px;transition:width .3s}
+.qz-set{max-width:760px}
+.qz{max-width:980px}
+.qz-load{padding:60px 0;text-align:center;color:var(--tx3)}
+.qz-top{display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap;font-size:14px;color:var(--tx2)}
+.qz-top .sp{flex:1}
+.qz-kind{font-weight:700;color:var(--tx)}
+.qz-sc{display:flex;gap:8px}
+.qz-sc span{padding:2px 10px;border:1px solid var(--line);border-radius:999px;font-size:13px}
+.qz-sc span.hot{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.qz-prog{height:4px;border-radius:2px;background:var(--line);margin:10px 0 18px;overflow:hidden}
+.qz-prog i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.qz-body{display:flex;gap:26px;align-items:flex-start}
+.qz-body.wide{flex-direction:column}
+.qz-img{flex:0 0 250px;border-radius:var(--r);overflow:hidden;background:var(--card2);border:1px solid var(--line)}
+.qz-img.small{flex-basis:150px}
+.qz-img.wide{flex:none;width:100%;max-width:760px}
+.qz-img img{display:block;width:100%;height:auto}
+.qz-img.bad{display:none}
+.qz-main{flex:1;min-width:0;width:100%}
+.qz-main h2{font-size:21px;letter-spacing:-.01em;margin-bottom:14px}
+.qz-text{margin:0 0 16px;padding:12px 16px;border-left:3px solid var(--acc);background:var(--card2);border-radius:0 var(--r) var(--r) 0;line-height:1.55;color:var(--tx2)}
+.qz-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}@media(max-width:560px){.qz-opts{grid-template-columns:1fr}}
+.qzo{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:var(--r);padding:12px 14px;font:inherit;font-weight:600;cursor:pointer;transition:all .15s}
+.qzo:hover:not(:disabled){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 10%,var(--card))}
+.qzo kbd{flex:0 0 24px;height:24px;display:grid;place-items:center;border-radius:6px;background:var(--line);font:700 12px inherit;color:var(--tx3)}
+.qzo:disabled{cursor:default}
+.qzo.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--card))}
+.qzo.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,var(--card))}
+.qzo.dim{opacity:.5}
+.qz-rev{display:flex;gap:14px;align-items:center;margin-top:16px;padding:12px 14px;border-radius:var(--r);border:1px solid var(--line);background:var(--card2)}
+.qz-rev.ok{border-color:var(--ok)}.qz-rev.bad{border-color:var(--bad)}
+.qz-rp img{width:54px;border-radius:6px;display:block}
+.qz-done{max-width:640px;text-align:center}
+.qz-res{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.qz-rc{flex:1 1 180px;max-width:240px;padding:16px;border:1px solid var(--line);border-radius:var(--r);background:var(--card2)}
+.qz-rc.win{border-color:#d4a320;box-shadow:0 0 0 1px #d4a320 inset}
+.qz-rc .big{display:block;font-size:44px;font-weight:800;margin:6px 0}
+.qz-rc small{font-size:20px;color:var(--tx3)}
+.qz-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:16px}
+.qk .big{font-size:44px;font-weight:800;margin:6px 0 2px}
+.qk .qbar{display:block;width:100%}
+.qz-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;margin:16px 0}
+.qz-grid2 .panel,.qz-kpis+.panel,.panel+.panel{margin-bottom:0}
+.qz-t td,.qz-t th{padding:7px 10px}
+.qcell{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.qcell .qbar{flex:1;min-width:50px}
+.qz-hl{display:flex;flex-direction:column;gap:4px;margin:0 0 10px;font-size:13.5px;color:var(--tx2)}
+.qz-dyn{width:100%;height:auto;max-height:200px}
+.qz-dyn .gl{stroke:var(--line);stroke-width:1}
+.qz-dyn .gt{fill:var(--tx3);font-size:10px}
+.qz-dyn .ln{stroke:var(--qc);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.qz-leg{display:flex;gap:16px;font-size:13px;flex-wrap:wrap;align-items:center}
+.qz-leg i{display:inline-block;width:12px;height:3px;border-radius:2px;background:var(--qc);margin-right:6px;vertical-align:middle}
+.qz-recent{display:flex;flex-wrap:wrap;gap:6px}
+.qr{padding:3px 10px;border-radius:999px;font-size:12.5px;border:1px solid var(--line)}
+.qr.ok{border-color:color-mix(in srgb,var(--ok) 60%,var(--line))}.qr.bad{border-color:color-mix(in srgb,var(--bad) 60%,var(--line))}
+#view .panel+.panel{margin-top:16px}
+@media(max-width:700px){.qz-body{flex-direction:column}.qz-img{flex-basis:auto;width:100%;max-width:260px}.qz-grid2{grid-template-columns:1fr}}
+.qz-grid2+.panel{margin-bottom:16px}
 </style>
 </head>
 <body>
@@ -1324,6 +1389,7 @@ const TABS=[
   {id:"watched",n:"Просмотрено",s:"Список",ic:"🎞"},
   {id:"plan",n:"Планы",s:"Планы",ic:"🗓"},
   {id:"catalog",n:"Каталог",s:"Каталог",ic:"🔥"},
+  {id:"quiz",n:"Викторина",s:"Викторина",ic:"🎲"},
   {id:"comics",n:"Кинокомиксы",s:"Комиксы",ic:"💥"},
   {id:"analytics",n:"Аналитика",s:"Аналитика",ic:"📊"},
   {id:"guide",n:"Как оценивать",s:"Гайд",ic:"📖"},
@@ -1401,7 +1467,7 @@ let saveT=null;
 function save(){clearTimeout(saveT);saveT=setTimeout(()=>{IDB.setMany(CLOUD&&CLOUD.room?{db:DB,cloud:{room:CLOUD.room,base:SY.base}}:{db:DB});cloudPush()},250)}
 function commit(){save();render()}
 const UIK="kinoteka.ui.v1";
-let UI={sub:"stats",hiddenTabs:["comics"],catCat:"movie",catSort:"popular",catGenre:"",catYear:"",catHide:true,catQ:"",planView:"list",planSeen:"all",planUni:"",tab:"watched",type:"all",comics:"all",bucket:null,rater:"all",sort:"order",dir:-1,mode:"whole",view:"cards",q:"",genre:"",uni:"marvel",cOrder:"num",planType:"all",planSort:"added",serType:"all",serQ:"",theme:"dark",tag:"",tA:"",tB:"",wSrc:"all",wWho:"all",wSort:"rel",omdbKey:"",gridSize:178,hideScores:false,group:"none",gColl:{},compact:false,stPer:"month"};
+let UI={qzSub:"play",qzWho:"turn",qzLen:"10",qzProj:"asked",sub:"stats",hiddenTabs:["comics"],catCat:"movie",catSort:"popular",catGenre:"",catYear:"",catHide:true,catQ:"",planView:"list",planSeen:"all",planUni:"",tab:"watched",type:"all",comics:"all",bucket:null,rater:"all",sort:"order",dir:-1,mode:"whole",view:"cards",q:"",genre:"",uni:"marvel",cOrder:"num",planType:"all",planSort:"added",serType:"all",serQ:"",theme:"dark",tag:"",tA:"",tB:"",wSrc:"all",wWho:"all",wSort:"rel",omdbKey:"",gridSize:178,hideScores:false,group:"none",gColl:{},compact:false,stPer:"month"};
 try{Object.assign(UI,JSON.parse(localStorage.getItem(UIK)||"{}"))}catch(e){}
 UI.reorder=false;
 function tabHidden(id){return id!=="data"&&Array.isArray(UI.hiddenTabs)&&UI.hiddenTabs.includes(id)}
@@ -1872,7 +1938,7 @@ window.addEventListener("hashchange",route);
 function render(top){
   renderTabs();
   const v=$("#view");
-  const f={watched:vWatched,plan:vPlan,comics:vComics,analytics:vAnalytics,catalog:vCatalog,guide:vGuide,data:vData}[UI.tab]||vWatched;
+  const f={watched:vWatched,plan:vPlan,comics:vComics,analytics:vAnalytics,catalog:vCatalog,quiz:vQuiz,guide:vGuide,data:vData}[UI.tab]||vWatched;
   const y=window.scrollY,switched=render.lastTab!==UI.tab;render.lastTab=UI.tab;
   v.innerHTML=f();
   if(switched){v.classList.remove("tab-in");void v.offsetWidth;v.classList.add("tab-in")}
@@ -2677,6 +2743,267 @@ async function catSimilarFor(it){
     catSimilar(best.media_type,best.id,it.title);
   }catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}
 }
+
+/* ============ VIEW: викторина ============ */
+const QZ_KINDS=[["poster","🖼 По постеру","Угадай фильм по постеру"],["frame","🎞 По кадру","Угадай проект по кадру"],["plot","📝 По описанию","Угадай по описанию сюжета"],["year","📅 Год выхода","В каком году вышел проект?"],["genre","🎭 Жанр","Какой жанр у этого проекта?"],["duel","⚖️ Кто оценил выше","Кто из вас поставил оценку выше?"]];
+const QZ={state:"idle",q:null,res:[],used:new Set(),n:10,bd:{},kinds:[],err:""};
+const qzShuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const qzPick=a=>a[Math.floor(Math.random()*a.length)];
+/* категории контента: какие типы записей в какую группу попадают */
+const QZ_CATS=[["film","🎬 Фильмы",["Фильм"]],["cartoon","🧸 Мультфильмы",["Мультфильм","Мультсериал"]],["anime","🌸 Аниме",["Аниме"]],["series","📺 Сериалы",["Сериал"]],["dorama","🍜 Дорамы",["Дорама"]],["game","🎮 Игры",["Игра"]],["other","📦 Прочее",[]]];
+const qzCatOf=ty=>{const c=QZ_CATS.find(c=>c[2].includes(ty));return c?c[0]:"other"};
+const qzAllWatched=()=>DB.items.filter(i=>i.status==="watched"&&i.title);
+const qzCatsOn=()=>new Set(Array.isArray(UI.qzCats)?UI.qzCats:QZ_CATS.map(c=>c[0]).filter(k=>k!=="game"));
+const qzPool=()=>{const on=qzCatsOn();return qzAllWatched().filter(i=>on.has(qzCatOf(i.type)))};
+const qzHasImg=i=>typeof i.poster==="string"&&i.poster.length>8;
+function qzPlayer(){
+  const R=DB.raters;
+  if(UI.qzWho&&UI.qzWho!=="turn"&&R.includes(UI.qzWho))return UI.qzWho;
+  return R[QZ.res.length%R.length];
+}
+function qzKinds(){
+  const on=Array.isArray(UI.qzTypes)?UI.qzTypes:QZ_KINDS.map(k=>k[0]);
+  return QZ_KINDS.map(k=>k[0]).filter(k=>on.includes(k)&&(k!=="frame"||apiKey("tmdb"))&&(k!=="duel"||DB.raters.length>=2));
+}
+/* варианты ответа: похожие по типу записи в приоритете */
+function qzOthers(it,pool,n){
+  const used=new Set([normT(it.title)]),out=[];
+  const cand=qzShuf(pool.filter(x=>x.id!==it.id&&x.type===it.type)).concat(qzShuf(pool.filter(x=>x.id!==it.id&&x.type!==it.type)));
+  for(const x of cand){const k=normT(x.title);if(used.has(k))continue;used.add(k);out.push(x);if(out.length>=n)break}
+  return out;
+}
+const qzTitleOpts=(it,pool)=>{const o=qzOthers(it,pool,3);if(o.length<3)return null;return qzShuf([it,...o]).map(x=>({label:x.title,ok:x.id===it.id}))};
+function qzMask(it){
+  let s=String(it.synopsis||"").replace(/\s+/g," ").trim();
+  const names=[it.title,it.ext&&it.ext.en].filter(Boolean);
+  for(const n of names){s=s.replace(new RegExp(n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"),"▮▮▮")}
+  if(s.length>340){s=s.slice(0,340);const i=Math.max(s.lastIndexOf(". "),s.lastIndexOf(" "));s=s.slice(0,i>200?i:340)+"…"}
+  return s;
+}
+async function qzBackdrop(it){
+  if(QZ.bd[it.id]!==undefined)return QZ.bd[it.id];
+  let url=null;
+  try{
+    const r=await tmdbGet(`/${it.tmdb.type}/${it.tmdb.id}/images`,{include_image_language:"null"});
+    const b=(r.backdrops||[]).filter(x=>!x.iso_639_1);
+    if(b.length)url=tmdbImg(qzPick(b.slice(0,12)).file_path,"w780");
+  }catch(e){}
+  QZ.bd[it.id]=url;return url;
+}
+async function qzMakeOne(kind,pool){
+  const R=DB.raters;
+  const fresh=a=>{const f=a.filter(i=>!QZ.used.has(i.id));return f.length?f:a};
+  const base={kind,reveal:null};
+  if(kind==="poster"){
+    const c=fresh(pool.filter(qzHasImg));if(!c.length)return null;const it=qzPick(c),opts=qzTitleOpts(it,pool);if(!opts)return null;
+    return{...base,it,prompt:"Что это за проект?",img:it.poster,opts};
+  }
+  if(kind==="frame"){
+    const c=fresh(pool.filter(i=>i.tmdb&&i.tmdb.id));
+    for(const it of qzShuf(c).slice(0,4)){const url=await qzBackdrop(it);if(!url)continue;const opts=qzTitleOpts(it,pool);if(!opts)continue;
+      return{...base,it,prompt:"Угадайте проект по кадру",img:url,wide:true,opts}}
+    return null;
+  }
+  if(kind==="plot"){
+    const c=fresh(pool.filter(i=>String(i.synopsis||"").length>=80));if(!c.length)return null;const it=qzPick(c),opts=qzTitleOpts(it,pool);if(!opts)return null;
+    return{...base,it,prompt:"Что за проект по описанию?",text:qzMask(it),opts};
+  }
+  if(kind==="year"){
+    const c=fresh(pool.filter(i=>isNum(i.year)));if(!c.length)return null;const it=qzPick(c),cy=new Date().getFullYear()+1;
+    const ys=new Set([it.year]);for(const d of qzShuf([-9,-7,-5,-4,-3,-2,-1,1,2,3,4,5,7,9])){const y=it.year+d;if(y>=1900&&y<=cy)ys.add(y);if(ys.size>=4)break}
+    if(ys.size<4)return null;
+    return{...base,it,prompt:`В каком году вышел «${it.title}»?`,img:qzHasImg(it)?it.poster:null,small:true,opts:[...ys].sort((a,b)=>a-b).map(y=>({label:String(y),ok:y===it.year}))};
+  }
+  if(kind==="genre"){
+    const all=[...new Set(pool.flatMap(i=>i.genres||[]))];
+    const c=fresh(pool.filter(i=>(i.genres||[]).length));if(!c.length)return null;const it=qzPick(c);
+    const right=qzPick(it.genres),wrong=qzShuf(all.filter(g=>!it.genres.includes(g))).slice(0,3);
+    if(wrong.length<3)return null;
+    return{...base,it,prompt:`Какой жанр есть у «${it.title}»?`,img:qzHasImg(it)?it.poster:null,small:true,opts:qzShuf([right,...wrong]).map(g=>({label:g,ok:g===right}))};
+  }
+  if(kind==="duel"){
+    const [a,b]=R;
+    const c=fresh(pool.filter(i=>{const x=itemScore(i,a),y=itemScore(i,b);return isNum(x)&&isNum(y)&&Math.abs(x-y)>=.3}));if(!c.length)return null;
+    const it=qzPick(c),hi=itemScore(it,a)>itemScore(it,b)?a:b;
+    return{...base,it,prompt:`Кто из вас поставил «${it.title}» выше?`,img:qzHasImg(it)?it.poster:null,small:true,opts:[a,b].map(n=>({label:n,ok:n===hi})),duel:true};
+  }
+  return null;
+}
+async function qzNextQ(){
+  const pool=qzPool(),kinds=qzKinds();
+  QZ.state="loading";qzPaint();
+  let q=null;
+  for(let t=0;t<12&&!q;t++)q=await qzMakeOne(qzPick(kinds),pool);
+  if(!q)for(const k of kinds){q=await qzMakeOne(k,pool);if(q)break}
+  if(!q){QZ.state="idle";QZ.err="Не получилось составить вопрос — отметьте больше типов вопросов или оцените больше проектов.";qzPaint();return}
+  QZ.used.add(q.it.id);QZ.q=q;QZ.state="q";QZ.ans=null;qzPaint();
+}
+function qzStart(){
+  const kinds=qzKinds();
+  if(!kinds.length){toast("Отметьте хотя бы один тип вопросов");return}
+  if(qzPool().length<6){toast("В выбранных категориях нужно хотя бы 6 просмотренных проектов");return}
+  Object.assign(QZ,{state:"loading",q:null,ans:null,res:[],used:new Set(),n:+UI.qzLen||10,err:""});
+  qzNextQ();
+}
+function qzAnswer(i){
+  if(QZ.state!=="q"||QZ.ans)return;
+  const q=QZ.q,o=q.opts[i];if(!o)return;
+  const who=qzPlayer(),ok=!!o.ok;
+  QZ.ans={i,ok,who};QZ.res.push({who,ok,kind:q.kind,id:q.it.id,n:q.it.title});
+  DB.quizLog=Array.isArray(DB.quizLog)?DB.quizLog:[];
+  DB.quizLog.push({id:"q"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:Date.now(),w:who,k:q.kind,i:q.it.id,n:q.it.title,ok:ok?1:0,g:(q.it.genres||[]).slice(0,3),ty:q.it.type});
+  if(DB.quizLog.length>1200)DB.quizLog=DB.quizLog.slice(-1200);
+  save();qzPaint();
+}
+function qzNext(){
+  if(QZ.res.length>=QZ.n){QZ.state="done";qzPaint();return}
+  qzNextQ();
+}
+const qzScore=()=>DB.raters.map(n=>{const r=QZ.res.filter(x=>x.who===n);return{n,ok:r.filter(x=>x.ok).length,all:r.length}});
+function qzHTML(){
+  if(QZ.state==="loading")return `<div class="qz"><div class="qz-load"><i class="spin"></i> Готовлю вопрос…</div></div>`;
+  if(QZ.state==="q")return qzQuestionHTML();
+  if(QZ.state==="done")return qzDoneHTML();
+  return qzIdleHTML();
+}
+function qzCatChips(){
+  const all=qzAllWatched(),on=qzCatsOn(),cnt={};
+  for(const i of all){const k=qzCatOf(i.type);cnt[k]=(cnt[k]||0)+1}
+  return QZ_CATS.filter(c=>cnt[c[0]]||on.has(c[0])&&c[0]!=="other"&&c[0]!=="game").map(([k,n])=>{const c=cnt[k]||0;return `<button class="chip ${on.has(k)&&c?"on":""}" data-qzc="${k}" ${c?"":"disabled"}>${n} <small>${c}</small></button>`}).join("")
+    +`<button class="chip" data-qzc="*" title="Выбрать всё">Все</button>`;
+}
+function qzIdleHTML(){
+  const pool=qzPool(),R=DB.raters,on=new Set(qzKinds()),hasKey=!!apiKey("tmdb"),log=DB.quizLog||[];
+  const need=pool.length<6,allN=qzAllWatched().length;
+  return `<div class="panel qz-set">
+    ${QZ.err?`<p class="rnote">⚠ ${esc(QZ.err)}</p>`:""}
+    <p class="muted" style="margin:0 0 14px">Вопросы строятся по вашим просмотренным проектам (${pool.length}${pool.length!==allN?` из ${allN}`:""}). Играйте вдвоём по очереди или каждый за себя — результаты копятся в статистике.</p>
+    <div class="flt"><label>Кто играет</label><div class="chips" data-ui="qzWho">${chipHTML("turn","🔁 По очереди",(UI.qzWho||"turn")==="turn")}${R.map(n=>chipHTML(n,esc(n),UI.qzWho===n)).join("")}</div></div>
+    <div class="flt" style="margin-top:14px"><label>Что спрашивать</label><div class="chips">${qzCatChips()}</div></div>
+    <div class="flt" style="margin-top:14px"><label>Типы вопросов</label><div class="chips">${QZ_KINDS.map(([k,n])=>{const dis=(k==="frame"&&!hasKey)||(k==="duel"&&R.length<2);return `<button class="chip ${on.has(k)?"on":""}" data-qzt="${k}" ${dis?`disabled title="${k==="frame"?"нужен ключ TMDB":"нужны два оценщика"}"`:""}>${n}</button>`}).join("")}</div></div>
+    <div class="flt" style="margin-top:14px"><label>Вопросов в раунде</label>${segHTML("qzLen",[["5","5"],["10","10"],["20","20"]],String(UI.qzLen||"10"))}</div>
+    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center"><button class="btn pri" data-qzstart ${need?"disabled":""} style="padding:10px 26px;font-size:16px">▶ Начать</button>${need?`<span class="dim">Нужно хотя бы 6 просмотренных проектов</span>`:log.length?`<span class="dim">Всего ответов в статистике: ${log.length}</span>`:""}</div>
+  </div>`;
+}
+function qzScoreStrip(){
+  return `<div class="qz-sc">${qzScore().map(s=>`<span class="${QZ.ans&&QZ.ans.who===s.n?"hot":""}"><b>${esc(s.n)}</b> ${s.ok}/${s.all}</span>`).join("")}</div>`;
+}
+function qzQuestionHTML(){
+  const q=QZ.q,a=QZ.ans,i=QZ.res.length-(a?1:0),who=a?a.who:qzPlayer();
+  const kindName=(QZ_KINDS.find(k=>k[0]===q.kind)||[])[1]||"";
+  const imgBox=q.img?`<div class="qz-img${q.wide?" wide":""}${q.small?" small":""}"><img src="${esc(q.img)}" alt="" onerror="this.parentNode.classList.add('bad')"></div>`:"";
+  const it=q.it;
+  const reveal=a?`<div class="qz-rev ${a.ok?"ok":"bad"}"><div class="qz-rp">${it.poster?`<img src="${esc(it.poster)}" alt="">`:""}</div><div><b>${a.ok?"✓ Верно!":"✗ Не угадали"}</b><div>«${esc(it.title)}» · ${it.year||"—"} · ${esc(it.type)}</div>${q.duel?`<div class="dim">${DB.raters.map(n=>esc(n)+" — "+f1(itemScore(it,n))).join(" · ")}</div>`:`<div class="dim">${esc((it.genres||[]).join(", "))}</div>`}</div></div>
+      <div style="display:flex;gap:10px;margin-top:14px"><button class="btn pri" data-qznext>${QZ.res.length>=QZ.n?"Итоги →":"Дальше →"} <small class="dim">Enter</small></button></div>`:"";
+  return `<div class="qz">
+    <div class="qz-top"><span class="qz-kind">${kindName}</span><span>Вопрос <b>${i+1}</b> из ${QZ.n}</span><span class="qz-who">Отвечает: <b>${esc(who)}</b></span>${qzScoreStrip()}<div class="sp"></div><button class="btn sm ghost" data-qzend>Закончить раунд</button></div>
+    <div class="qz-prog"><i style="width:${(QZ.res.length/QZ.n*100).toFixed(1)}%"></i></div>
+    <div class="qz-body${q.wide?" wide":""}">${imgBox}
+      <div class="qz-main"><h2>${esc(q.prompt)}</h2>${q.text?`<blockquote class="qz-text">${esc(q.text)}</blockquote>`:""}
+        <div class="qz-opts">${q.opts.map((o,k)=>{const cls=!a?"":o.ok?" right":k===a.i?" wrong":" dim";return `<button class="qzo${cls}" data-qzopt="${k}" ${a?"disabled":""}><kbd>${k+1}</kbd><span>${esc(o.label)}</span></button>`}).join("")}</div>
+        ${reveal}</div></div></div>`;
+}
+function qzDoneHTML(){
+  const sc=qzScore().filter(s=>s.all),top=Math.max(0,...sc.map(s=>s.ok)),win=sc.filter(s=>s.ok===top);
+  const miss=QZ.res.filter(x=>!x.ok),total=QZ.res.length;
+  return `<div class="panel qz-done"><h2>Раунд окончен</h2>
+    <div class="qz-res">${sc.map(s=>`<div class="qz-rc ${sc.length>1&&win.length===1&&win[0].n===s.n?"win":""}"><b>${esc(s.n)}</b><span class="big">${s.ok}<small>/${s.all}</small></span><div class="qbar"><i style="width:${s.all?s.ok/s.all*100:0}%"></i></div></div>`).join("")}</div>
+    <p class="muted" style="text-align:center;margin:10px 0 0">${sc.length>1?(win.length===1?`🏆 Победил ${esc(win[0].n)}!`:"🤝 Ничья!"):""} Всего верных ответов: ${QZ.res.filter(x=>x.ok).length} из ${total}.</p>
+    ${miss.length?`<p class="muted" style="margin:16px 0 6px">Где ошиблись:</p><div class="chips">${miss.map(m=>`<span class="tag">${esc(m.n)} · ${esc(m.who)}</span>`).join("")}</div>`:""}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;justify-content:center"><button class="btn pri" data-qzstart>↻ Сыграть ещё</button><button class="btn" data-qzend>Настройки</button><button class="btn ghost" data-ui-go="stats">📊 Статистика</button></div></div>`;
+}
+function qzPaint(){const el=document.getElementById("qzBox");if(el)el.innerHTML=qzHTML()}
+
+/* ---- статистика ---- */
+function qzStatsData(){
+  const L=DB.quizLog||[],R=DB.raters,S={};
+  for(const n of R)S[n]={n,all:0,ok:0,kind:{},genre:{},proj:{},type:{},best:0,cur:0,seq:[]};
+  for(const e of L.slice().sort((a,b)=>a.t-b.t)){
+    const s=S[e.w];if(!s)continue;
+    s.all++;s.ok+=e.ok;s.seq.push(e.ok);
+    s.cur=e.ok?s.cur+1:0;if(s.cur>s.best)s.best=s.cur;
+    const bump=(m,k,extra)=>{const o=m[k]||(m[k]=Object.assign({all:0,ok:0},extra));o.all++;o.ok+=e.ok};
+    bump(s.kind,e.k);bump(s.type,e.ty||"—");
+    for(const g of e.g||[])bump(s.genre,g);
+    bump(s.proj,e.i,{n:e.n});
+  }
+  return S;
+}
+const pc=(a,b)=>b?Math.round(a/b*100):null;
+function qzCell(o,i){
+  if(!o||!o.all)return `<td class="c dim">—</td>`;
+  const p=pc(o.ok,o.all);
+  return `<td><div class="qcell"><span class="qbar c${i}"><i style="width:${p}%"></i></span><b>${p}%</b><small class="dim">${o.ok}/${o.all}</small></div></td>`;
+}
+function qzDyn(S){
+  const R=DB.raters,W=600,H=150,P=24;
+  const lines=R.map((n,i)=>{
+    const seq=S[n].seq;if(seq.length<5)return null;
+    const win=Math.min(15,seq.length),pts=[];
+    for(let k=win-1;k<seq.length;k++){let s=0;for(let j=k-win+1;j<=k;j++)s+=seq[j];pts.push(s/win)}
+    return{n,i,pts};
+  }).filter(Boolean);
+  if(!lines.length)return "";
+  const mx=Math.max(...lines.map(l=>l.pts.length));
+  const X=k=>P+(mx<=1?0:k/(mx-1))*(W-2*P),Y=v=>H-P-v*(H-2*P);
+  return `<svg viewBox="0 0 ${W} ${H}" class="qz-dyn" role="img" aria-label="Динамика точности ответов">
+    ${[0,.5,1].map(v=>`<line x1="${P}" x2="${W-P}" y1="${Y(v)}" y2="${Y(v)}" class="gl"/><text x="2" y="${Y(v)+4}" class="gt">${v*100}%</text>`).join("")}
+    ${lines.map(l=>`<polyline class="ln c${l.i}" fill="none" points="${l.pts.map((v,k)=>X(k).toFixed(1)+","+Y(v).toFixed(1)).join(" ")}"/>`).join("")}
+  </svg><div class="qz-leg">${lines.map(l=>`<span><i class="c${l.i}"></i>${esc(l.n)}</span>`).join("")}<span class="dim">скользящее среднее по 15 ответам</span></div>`;
+}
+function qzStatsHTML(){
+  const L=DB.quizLog||[],R=DB.raters;
+  if(!L.length)return `<div class="empty">Статистика появится после первого раунда. Сыграйте — и здесь будет видно, кто лучше знает фильмы, жанры и проекты.</div>`;
+  const S=qzStatsData();
+  const kpi=`<div class="qz-kpis">${R.map((n,i)=>{const s=S[n];return `<div class="panel qk"><h3 class="c${i}">${esc(n)}</h3><div class="big">${s.all?pc(s.ok,s.all)+"%":"—"}</div><div class="dim">${s.ok} верно из ${s.all}</div><div class="qbar c${i}"><i style="width:${s.all?pc(s.ok,s.all):0}%"></i></div><div class="dim" style="margin-top:8px">Лучшая серия: <b>${s.best}</b> подряд</div></div>`}).join("")}</div>`;
+  const kinds=QZ_KINDS.filter(k=>R.some(n=>S[n].kind[k[0]]));
+  const kindT=`<div class="panel"><h3>По типам вопросов</h3><div class="tbl-wrap"><table class="t qz-t"><thead><tr><th>Тип</th>${R.map(n=>`<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>${kinds.map(k=>`<tr><td>${k[1]}</td>${R.map((n,i)=>qzCell(S[n].kind[k[0]],i)).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+  const catAgg=(n,k)=>Object.entries(S[n].type).reduce((a,[ty,o])=>{if(qzCatOf(ty)===k){a.all+=o.all;a.ok+=o.ok}return a},{all:0,ok:0});
+  const cats=QZ_CATS.filter(c=>R.some(n=>catAgg(n,c[0]).all));
+  const catT=cats.length?`<div class="panel"><h3>По типам контента</h3><div class="tbl-wrap"><table class="t qz-t"><thead><tr><th>Контент</th>${R.map(n=>`<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>${cats.map(c=>`<tr><td>${c[1]}</td>${R.map((n,i)=>qzCell(catAgg(n,c[0]),i)).join("")}</tr>`).join("")}</tbody></table></div></div>`:"";
+  const gset=new Set();R.forEach(n=>Object.keys(S[n].genre).forEach(g=>gset.add(g)));
+  const gs=[...gset].map(g=>({g,all:R.reduce((s,n)=>s+(S[n].genre[g]?S[n].genre[g].all:0),0)})).sort((a,b)=>b.all-a.all||cmpRu(a.g,b.g)).slice(0,14);
+  const best=R.map(n=>{const a=Object.entries(S[n].genre).filter(([g,o])=>o.all>=3).map(([g,o])=>({g,p:o.ok/o.all})).sort((x,y)=>y.p-x.p);return{n,b:a[0],w:a.length>1?a[a.length-1]:null}});
+  const genreT=`<div class="panel"><h3>По жанрам</h3>${best.some(x=>x.b)?`<div class="qz-hl">${best.map((x,i)=>x.b?`<span><b class="c${i}">${esc(x.n)}</b>: сильнее всего — ${esc(x.b.g)} (${Math.round(x.b.p*100)}%)${x.w?`, слабее — ${esc(x.w.g)} (${Math.round(x.w.p*100)}%)`:""}</span>`:"").join("")}</div>`:`<p class="dim" style="margin:0 0 8px">Лучшие и худшие жанры появятся после 3+ ответов на жанр.</p>`}
+    <div class="tbl-wrap"><table class="t qz-t"><thead><tr><th>Жанр</th>${R.map(n=>`<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>${gs.map(x=>`<tr><td>${esc(x.g)}</td>${R.map((n,i)=>qzCell(S[n].genre[x.g],i)).join("")}</tr>`).join("")}</tbody></table></div></div>`;
+  const pset=new Map();R.forEach(n=>Object.entries(S[n].proj).forEach(([id,o])=>{if(!pset.has(id))pset.set(id,{id,n:o.n,all:0,ok:0});const p=pset.get(id);p.all+=o.all;p.ok+=o.ok}));
+  const mode=UI.qzProj||"asked";
+  const pl=[...pset.values()].filter(p=>mode==="asked"||p.all>=2).sort((a,b)=>mode==="asked"?b.all-a.all||cmpRu(a.n,b.n):mode==="hard"?(a.ok/a.all)-(b.ok/b.all)||b.all-a.all:(b.ok/b.all)-(a.ok/a.all)||b.all-a.all).slice(0,15);
+  const projT=`<div class="panel"><div class="row" style="justify-content:space-between;margin-bottom:8px"><h3 style="margin:0">По проектам</h3>${segHTML("qzProj",[["asked","Чаще спрашивали"],["hard","Самые каверзные"],["easy","Самые лёгкие"]],mode)}</div>
+    <div class="tbl-wrap"><table class="t qz-t"><thead><tr><th>Проект</th>${R.map(n=>`<th>${esc(n)}</th>`).join("")}<th>Итого</th></tr></thead><tbody>${pl.map(p=>`<tr><td>${esc(p.n)}</td>${R.map((n,i)=>qzCell(S[n].proj[p.id],i)).join("")}<td class="c"><b>${pc(p.ok,p.all)}%</b> <small class="dim">${p.ok}/${p.all}</small></td></tr>`).join("")}</tbody></table></div></div>`;
+  const dyn=qzDyn(S);
+  const recent=L.slice(-12).reverse();
+  const recT=`<div class="panel"><h3>Последние ответы</h3><div class="qz-recent">${recent.map(e=>`<span class="qr ${e.ok?"ok":"bad"}" title="${esc((QZ_KINDS.find(k=>k[0]===e.k)||[])[1]||"")}">${e.ok?"✓":"✗"} ${esc(e.w)} · ${esc(e.n)}</span>`).join("")}</div></div>`;
+  return `${kpi}${dyn?`<div class="panel"><h3>Динамика точности</h3>${dyn}</div>`:""}<div class="qz-grid2">${kindT}${catT}</div>${genreT}${projT}${recT}
+    <p style="margin-top:16px"><button class="btn sm ghost danger" data-qzreset>Сбросить статистику викторины</button></p>`;
+}
+function vQuiz(){
+  const sub=UI.qzSub==="stats"?"stats":"play";
+  return `<div class="ptitle"><div><h1>Викторина</h1><p>Проверьте, как хорошо вы помните просмотренное</p></div>${segHTML("qzSub",[["play","🎲 Играть"],["stats","📊 Статистика"]],sub)}</div>
+  ${sub==="stats"?qzStatsHTML():`<div id="qzBox">${qzHTML()}</div>`}`;
+}
+/* клавиатура: 1–4 — ответ, Enter — дальше */
+document.addEventListener("keydown",e=>{
+  if(UI.tab!=="quiz"||UI.qzSub==="stats"||e.ctrlKey||e.metaKey||e.altKey)return;
+  if(/INPUT|TEXTAREA|SELECT/.test((e.target.tagName||"")))return;
+  if(document.querySelector("dialog[open]"))return;
+  if(QZ.state==="q"&&!QZ.ans&&/^[1-6]$/.test(e.key)){qzAnswer(+e.key-1);e.preventDefault()}
+  else if(QZ.state==="q"&&QZ.ans&&(e.key==="Enter"||e.key==="ArrowRight")){qzNext();e.preventDefault()}
+});
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-qzstart],[data-qzopt],[data-qznext],[data-qzt],[data-qzc],[data-qzend],[data-qzreset],[data-ui-go]");
+  if(!t)return;
+  e.stopPropagation();e.preventDefault();
+  const d=t.dataset;
+  if(d.qzstart!==undefined){qzStart();return}
+  if(d.qzopt!==undefined){qzAnswer(+d.qzopt);return}
+  if(d.qznext!==undefined){qzNext();return}
+  if(d.qzc){const cur=qzCatsOn();if(d.qzc==="*"){QZ_CATS.forEach(c=>{if(qzAllWatched().some(i=>qzCatOf(i.type)===c[0]))cur.add(c[0])})}else if(cur.has(d.qzc)){if(cur.size>1)cur.delete(d.qzc)}else cur.add(d.qzc);UI.qzCats=[...cur];saveUI();render();return}
+  if(d.qzt){const cur=new Set(Array.isArray(UI.qzTypes)?UI.qzTypes:QZ_KINDS.map(k=>k[0]));if(cur.has(d.qzt))cur.delete(d.qzt);else cur.add(d.qzt);UI.qzTypes=[...cur];saveUI();render();return}
+  if(d.qzend!==undefined){if(QZ.state==="q"&&QZ.res.length)QZ.state="done";else QZ.state="idle";qzPaint();return}
+  if(d.qzreset!==undefined){if(confirm("Удалить всю статистику викторины (у обоих)?")){DB.quizLog=[];save();render()}return}
+  if(d.uiGo){UI.qzSub="stats";saveUI();render()}
+},true);
 
 /* ============ VIEW: comics ============ */
 function catStatus(c){
