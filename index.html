@@ -1307,6 +1307,10 @@ html[data-fx="on"] .fx-in .geo-svg .gt{animation:fxPop .5s cubic-bezier(.2,.8,.2
 .seenrow.cpt .sb{min-width:24px;height:22px;padding:0 6px;line-height:20px;text-align:center}
 .plan .card .body{gap:4px}
 .plan .card .gen{font-size:12px;line-height:1.3}
+/* кнопки внизу карточки плана: на узкой карточке остаётся только галочка */
+.plan .card{container-type:inline-size}
+.plan .card .act .btn.pri{overflow:hidden;text-overflow:clip}
+@container (max-width:210px){.plan .card .act .btn.pri .lbl{display:none}}
 </style>
 </head>
 <body>
@@ -2741,7 +2745,7 @@ function planCard(it,U){
        ${it.genres.length?`<div class="gen">${it.genres.map(esc).join(", ")}</div>`:""}
        ${!upc&&durLine(it)?`<div class="gen">⏱ ${esc(durLine(it))}</div>`:""}
        ${seenRow(it,true)}
-       <div class="act">${upc?`<button class="btn sm" data-relnow="${it.id}" title="Уже вышло — перенести в основной список">Уже вышло</button>`:`${it.kind==="series"?`<button class="btn sm" data-start="${it.id}" title="Начать смотреть" aria-label="Начать смотреть" style="flex:0 0 30px;height:30px;padding:0;justify-content:center"><i class="ico ico-play"></i></button>`:""}<button class="btn sm pri" data-finish="${it.id}">✓ Просмотрено</button>`}<button class="btn sm icon" data-edit="${it.id}" title="Изменить" aria-label="Изменить" style="flex:0 0 30px;height:30px"><i class="ico ico-edit"></i></button></div>
+       <div class="act">${upc?`<button class="btn sm" data-relnow="${it.id}" title="Уже вышло — перенести в основной список">Уже вышло</button>`:`${it.kind==="series"?`<button class="btn sm" data-start="${it.id}" title="Начать смотреть" aria-label="Начать смотреть" style="flex:0 0 30px;height:30px;padding:0;justify-content:center"><i class="ico ico-play"></i></button>`:""}<button class="btn sm pri" data-finish="${it.id}" title="Отметить просмотренным">✓<span class="lbl"> Просмотрено</span></button>`}<button class="btn sm icon" data-edit="${it.id}" title="Изменить" aria-label="Изменить" style="flex:0 0 30px;height:30px"><i class="ico ico-edit"></i></button></div>
      </div></div>`;
 }
 function ucPoster(i){return i.poster?`<img src="${esc(i.poster)}" alt="" loading="lazy" onerror="this.remove()">`:posterHTML(i,false)}
