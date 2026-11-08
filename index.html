@@ -616,9 +616,9 @@ dialog.gs[open]{animation:gsIn .15s ease-out both}
   .sidebar nav.tabs{flex-direction:row;gap:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));justify-content:space-between;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;background:transparent;backdrop-filter:none}
   .sidebar nav.tabs{min-width:0;width:100%}
   .sidebar nav.tabs::-webkit-scrollbar{display:none}
-  .tabsw.cr nav.tabs{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
-  .tabsw.cl nav.tabs{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px)}
-  .tabsw.cl.cr nav.tabs{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent)}
+  .tabsw.tcr nav.tabs{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+  .tabsw.tcl nav.tabs{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px)}
+  .tabsw.tcl.tcr nav.tabs{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent)}
   .rhead h3{flex:1}
   .rhead .sp{display:none}
   .rhead .seg{order:5;flex-basis:100%;display:flex}
@@ -636,8 +636,8 @@ dialog.gs[open]{animation:gsIn .15s ease-out both}
   main{margin-left:0;padding:50px 14px 110px}
   .fab{right:16px;bottom:80px;width:50px;height:50px;font-size:24px}
   .wrap{padding:0 14px}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
-  .grid.posters-only{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(calc(var(--gridMin) * .78),1fr));gap:10px}
+  .grid.posters-only{grid-template-columns:repeat(auto-fill,minmax(calc(var(--gridMin) * .62),1fr));gap:6px}
   .ser{grid-template-columns:70px 1fr;gap:12px;padding:12px}
   .det{grid-template-columns:1fr}
   .det .poster{max-width:200px}
@@ -897,7 +897,7 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .cc.sk .cbody i+i{width:60%}
 .lnk2{background:none;border:0;padding:0;color:var(--acc);font:inherit;cursor:pointer;text-decoration:underline}
 @media (hover:none){.ccact{opacity:1;transform:none;padding-top:22px}.cx{opacity:1}.cc:hover .cs{opacity:1}}
-@media (max-width:700px){.ccgrid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px}.ccact button{font-size:11.5px;padding:5px 6px}}
+@media (max-width:700px){.ccgrid{grid-template-columns:repeat(auto-fill,minmax(calc(var(--gridMin) * .63),1fr));gap:9px}.ccact button{font-size:11.5px;padding:5px 6px}}
 /* карточки планов: кнопки не вылезают, «Видели» всегда над кнопкой «Просмотрено» */
 .plan .card .act{min-width:0}
 .plan .card .act .btn{min-width:0;white-space:nowrap}
@@ -1311,6 +1311,55 @@ html[data-fx="on"] .fx-in .geo-svg .gt{animation:fxPop .5s cubic-bezier(.2,.8,.2
 .plan .card{container-type:inline-size}
 .plan .card .act .btn.pri{overflow:hidden;text-overflow:clip}
 @container (max-width:210px){.plan .card .act .btn.pri .lbl{display:none}}
+/* ===== гайд: подсказка на экране оценок ===== */
+.rtbl th .q{cursor:pointer;width:20px;height:20px;font-size:11px;font-weight:800;padding:0;vertical-align:middle;transition:all .15s}
+.rtbl th .q:hover{color:var(--tx);border-color:var(--acc)}
+.ghint{padding:12px 14px}
+.gh-top{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline}
+.gh-top b{color:var(--tx);font-size:14px}
+.gh-lead{flex:1 1 220px;color:var(--tx2)}
+.gh-act{display:flex;gap:6px;margin-left:auto}
+.gh-btn{border:1px solid var(--line2);background:transparent;color:var(--tx2);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;cursor:pointer}
+.gh-btn:hover,.gh-btn.on{color:var(--tx);border-color:var(--gc,var(--acc))}
+.gh-btn.on{background:color-mix(in srgb,var(--gc,var(--acc)) 18%,transparent)}
+.gh-chips{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0 6px}
+.gh-chip{border:1px solid var(--line);background:var(--card);color:var(--tx2);border-radius:999px;padding:3px 10px;font-size:12.5px;cursor:pointer;font-weight:600}
+.gh-chip:hover{border-color:var(--gc)}
+.gh-chip.on{background:color-mix(in srgb,var(--gc) 22%,transparent);border-color:var(--gc);color:var(--tx)}
+.gh-sub{font-size:13px;line-height:1.45;margin-bottom:8px;min-height:20px}
+.gh-scale{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gh-scale>div{font-size:12px;line-height:1.35;color:var(--tx2);border-top:2px solid color-mix(in srgb,var(--gc) 45%,var(--line));padding-top:5px}
+.gh-n{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:50%;background:var(--gc);color:#111;font-weight:800;font-size:11px;margin-right:6px}
+.gh-ref{margin-top:9px;font-size:12.5px;display:flex;flex-direction:column;gap:3px;border-top:1px dashed var(--line);padding-top:8px}
+.gh-k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);font-weight:700}
+.gh-it{border:0;background:color-mix(in srgb,var(--tx) 7%,transparent);color:var(--tx);border-radius:6px;padding:1px 7px;font-size:12px;cursor:pointer;margin:1px 2px}
+.gh-it:hover{background:color-mix(in srgb,var(--acc) 22%,transparent)}
+@media (max-width:640px){.gh-scale{grid-template-columns:1fr}.gh-act{margin-left:0}}
+/* ===== гайд: страница ===== */
+.gtool{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
+.gsearch{position:relative;flex:1 1 240px;max-width:420px}
+.gsearch .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--tx3);pointer-events:none}
+.gsearch input{width:100%;padding:9px 12px 9px 34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:inherit;outline:none}
+.gsearch input:focus{border-color:var(--acc)}
+.gex{display:flex;flex-direction:column;gap:5px;margin:4px 0 14px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--gc) 8%,transparent);border:1px solid color-mix(in srgb,var(--gc) 25%,var(--line));font-size:13px}
+.gex .gh-it b{color:var(--gc)}
+.gd{border-top:1px solid var(--line);padding:2px 0;scroll-margin-top:90px;border-radius:8px;transition:background .6s}
+.gd.flash{background:color-mix(in srgb,var(--gc) 22%,transparent)}
+.gd summary{display:flex;gap:10px;align-items:baseline;cursor:pointer;list-style:none;padding:9px 4px}
+.gd summary::-webkit-details-marker{display:none}
+.gd summary::after{content:"";margin-left:auto;align-self:center;width:8px;height:8px;border-right:2px solid var(--tx3);border-bottom:2px solid var(--tx3);transform:rotate(45deg);transition:transform .2s;flex:none}
+.gd[open] summary::after{transform:rotate(225deg)}
+.gd .gn{color:var(--gc);font-size:12.5px;font-weight:700;flex:none}
+.gd .gt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.gd .gt b{font-size:14.5px;color:var(--tx)}
+.gd .gt em{font-style:normal;font-size:13px;color:var(--tx3)}
+.gd[open] .gt em{color:var(--tx2)}
+.gbody{padding:0 4px 12px 28px}
+.gbody h5{margin:12px 0 2px;font-size:13px;color:var(--tx)}
+.ganch{display:flex;flex-direction:column;gap:3px;margin-top:10px;font-size:12.5px;color:var(--tx2)}
+.ganch i{font-style:normal;display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:50%;background:var(--gc);color:#111;font-weight:800;font-size:11px;margin-right:7px}
+.gsub{display:block}
+@media (min-width:1100px){.gsub{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;align-items:start}}
 </style>
 </head>
 <body>
@@ -2244,7 +2293,7 @@ function renderTabs(){
 }
 /* прокрутка вкладок мышью: стрелки, колесо, перетаскивание */
 function tabsArrows(){const n=$("#tabs"),w=$("#tabsW");if(!n||!w)return;const max=n.scrollWidth-n.clientWidth;
-  w.classList.toggle("cl",n.scrollLeft>2);w.classList.toggle("cr",n.scrollLeft<max-2)}
+  w.classList.toggle("tcl",n.scrollLeft>2);w.classList.toggle("tcr",n.scrollLeft<max-2)}
 (function(){
   const n=$("#tabs");
   n.addEventListener("scroll",tabsArrows,{passive:true});window.addEventListener("resize",tabsArrows);
@@ -3528,17 +3577,6 @@ function trendSVG(tr){
 }
 
 /* ============ VIEW: guide ============ */
-function guideHTML(g,cat){
-  const L=g.lines;let lead=[],i=0;
-  while(i<L.length&&!/^\d+\.\d+/.test(L[i])){lead.push(L[i]);i++}
-  const blocks=t=>{let h="",ul=[];const flush=()=>{if(ul.length){h+=`<ul>${ul.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;ul=[]}};
-    for(const ln of t){if(ln.startsWith("•")){ul.push(ln.replace(/^•\s*/,""));continue}flush();if(/:$/.test(ln))h+=`<div class="lab">${esc(ln)}</div>`;else h+=`<p>${esc(ln)}</p>`}flush();return h};
-  let h=lead.length?`<p class="lead">${esc(lead[0])}</p>${blocks(lead.slice(1))}`:"";
-  const subs=[];let cur=null;
-  for(;i<L.length;i++){const m=L[i].match(/^(\d+\.\d+)\s*(.*)$/);if(m){cur={n:m[1],t:m[2],l:[]};subs.push(cur)}else if(cur)cur.l.push(L[i])}
-  h+=`<div class="gsub">${subs.map(s=>`<div><h4><span>${s.n}</span>${esc(s.t)}</h4>${blocks(s.l)}</div>`).join("")}</div>`;
-  return h;
-}
 function vGuide(){
   return `<div class="ptitle"><div><h1>Как оценивать</h1><p>Пояснения к пяти категориям оценки</p></div></div>
   <div class="gintro">
@@ -3547,11 +3585,134 @@ function vGuide(){
     <div class="panel"><h3 style="font-size:15px;margin-bottom:6px">Прочерк «—»</h3><p class="muted" style="margin:0">Если категория неприменима (например, «Актёры» в мультфильме), ставьте «-». Она не участвует в среднем.</p></div>
     <div class="panel"><h3 style="font-size:15px;margin-bottom:6px">Сериалы</h3><p class="muted" style="margin:0">Можно оценивать каждый сезон отдельно и/или сериал целиком. Если оценки «целиком» нет, итог считается как среднее по сезонам.</p></div>
   </div>
+  ${guideToolbar()}
   <div class="gnav">${CATS.map(c=>`<a class="chip" href="#guide" data-jump="g-${c.k}">${c.ic} ${c.n}</a>`).join("")}</div>
   ${GUIDE.map(g=>{const c=CATS.find(c=>c.k===g.key)||CATS[0];return `<section class="gcat" id="g-${c.k}" style="--gc:${c.c}"><h2><i>${c.ic}</i>${esc(g.title)}</h2>${guideHTML(g,c)}</section>`}).join("")}`;
 }
-function guideHint(k){const g=GUIDE.find(x=>x.key===k);if(!g)return"";const subs=g.lines.filter(l=>/^\d+\.\d+/.test(l)).map(l=>l.replace(/^\d+\.\d+\s*/,""));return `<b>${esc(g.title)}:</b> ${esc(g.lines[0]||"")}${subs.length?`<br><span class="dim">Смотрим на: ${subs.map(esc).join(" · ")}</span>`:""}`}
 
+/* ============ Гайд: модель, подсказки на экране оценок, страница гайда ============
+   GUIDE (guide.json) → GM: {dir:{title,lead:[…],subs:[{id:"1.1",t,desc,ex:[…],lines,kids:[{id,t,lines}]}]}}
+   Используется в экране оценок (чипы подпунктов, якоря шкалы, «ваши оценки», закрепление «?»)
+   и на странице «Как оценивать» (сворачиваемые подпункты, поиск, примеры из вашей базы). */
+const GM={};
+(function(){
+  GUIDE.forEach((g,gi)=>{
+    const m={title:g.title,lead:[],subs:[]};let cur=null,kid=null;
+    for(const ln of g.lines){
+      const h=ln.match(/^(\d+(?:\.\d+)+)\s+(.+)$/);
+      if(h&&+h[1].split(".")[0]===gi+1){
+        const depth=h[1].split(".").length;
+        if(depth===2){cur={id:h[1],t:h[2],lines:[],kids:[]};m.subs.push(cur);kid=null;continue}
+        if(cur){kid={id:h[1],t:h[2],lines:[]};cur.kids.push(kid);continue}
+      }
+      if(kid)kid.lines.push(ln);else if(cur)cur.lines.push(ln);else m.lead.push(ln);
+    }
+    m.subs.forEach(s=>{
+      const plain=s.lines.filter(l=>!l.startsWith("•")&&!/:$/.test(l));
+      s.desc=plain[0]||s.kids.map(k=>k.t).join(" · ");
+      const grp=[];let lab="";s.lines.forEach(l=>{if(l.startsWith("•"))grp.push([lab,l.replace(/^•\s*/,"")]);else lab=l});
+      const pick=grp.filter(x=>/^(Например|Сюда входит|Хорош|Сильн)/i.test(x[0]));
+      const first=grp.length?grp.filter(x=>x[0]===grp[0][0]):[];
+      s.ex=(pick.length?pick:first).map(x=>x[1]).slice(0,5);
+      if(!s.ex.length)s.ex=s.kids.map(k=>k.t);
+    });
+    GM[g.key]=m;
+  });
+})();
+/* ориентиры шкалы: что значит 1, 3 и 5 именно в этой категории */
+const GANCH={
+  dir:["сцены и темп разваливаются, настроение не держится","крепко и ровно, но без запоминающихся решений","хочется пересмотреть ради самой постановки"],
+  script:["дыры в логике, пустые диалоги, непонятно зачем всё","история понятна и работает, но предсказуема","удивила, осталась в голове, всё на своём месте"],
+  actors:["не верится ни одному герою","играют нормально, но без отдачи","забываешь, что это актёры; герои как живые"],
+  visual:["выглядит дёшево или нечитаемо","аккуратно, но без своего почерка","хочется делать скриншоты; стиль узнаётся с кадра"],
+  sound:["мешает или вовсе не замечается","работает фоном, но не запоминается","звук и музыка усиливают каждую сцену; хочется в плейлист"]
+};
+/* оценки категории по всей базе: [{it,v,who}] (целиком + сезоны), кроме проекта exceptId */
+function guideVals(cat,rater,exceptId){
+  const out=[];
+  DB.items.forEach(it=>{
+    if(it.id===exceptId)return;
+    const srcs=[it.ratings,...(it.seasons||[]).map(s=>s.ratings)];
+    let vs=[];srcs.forEach(r=>{DB.raters.forEach(n=>{if(rater&&n!==rater)return;const v=r&&r[n]&&r[n][cat];if(isNum(v))vs.push(v)})});
+    if(vs.length)out.push({it,v:avg(vs)});
+  });
+  return out;
+}
+function guideRefHTML(cat,rater,exceptId){
+  const rows=(rater?[rater]:DB.raters).map(n=>{
+    const a=guideVals(cat,n,exceptId);if(a.length<2)return"";
+    const s=a.slice().sort((x,y)=>y.v-x.v||cmpRu(x.it.title,y.it.title));
+    const mean=avg(a.map(x=>x.v)),best=s[0],low=s[s.length-1];
+    return `<div><b>${esc(n)}</b> · в среднем ${f1(mean)} <span class="dim">(${a.length})</span>${best.v!==low.v?` · выше всего <button type="button" class="gh-it" data-open="${best.it.id}">${esc(best.it.title)} ${f1(best.v)}</button> · ниже всего <button type="button" class="gh-it" data-open="${low.it.id}">${esc(low.it.title)} ${f1(low.v)}</button>`:""}</div>`;
+  }).filter(Boolean);
+  return rows.length?`<div class="gh-ref"><span class="gh-k">Ваши оценки</span>${rows.join("")}</div>`:"";
+}
+/* подсказка на экране оценок */
+function guideHint(k,o={}){
+  const m=GM[k];if(!m)return"";const c=CATS.find(x=>x.k===k)||CATS[0];
+  const sub=o.sub&&m.subs.find(s=>s.id===o.sub);
+  const an=GANCH[k]||[];
+  return `<div class="gh" style="--gc:${c.c}">
+    <div class="gh-top"><b>${c.ic} ${esc(m.title)}</b><span class="gh-lead">${esc(m.lead[0]||"")}</span>
+      <span class="gh-act"><button type="button" class="gh-btn${o.pinned?" on":""}" data-gh="pin" title="${o.pinned?"Открепить подсказку":"Закрепить подсказку"}">${o.pinned?"Закреплено":"Закрепить"}</button><button type="button" class="gh-btn" data-gh="guide" data-gk="${k}" data-gs="${sub?sub.id:""}">В гайде →</button></span></div>
+    <div class="gh-chips">${m.subs.map(s=>`<button type="button" class="gh-chip${sub&&sub.id===s.id?" on":""}" data-gsub="${s.id}">${esc(s.t)}</button>`).join("")}</div>
+    ${sub?`<div class="gh-sub"><b>${esc(sub.t)}.</b> ${esc(sub.desc)}${sub.ex.length?` <span class="dim">Признаки: ${sub.ex.map(esc).join(" · ")}.</span>`:""}</div>`:`<div class="gh-sub dim">Нажмите на подпункт, чтобы увидеть, что он значит.</div>`}
+    <div class="gh-scale">${[["1",0],["3",1],["5",2]].map(([n,i])=>`<div><span class="gh-n">${n}</span>${esc(an[i]||"")}</div>`).join("")}</div>
+    ${guideRefHTML(k,o.rater,o.exceptId)}
+  </div>`;
+}
+/* ---------- страница гайда ---------- */
+function guideBlocks(t){
+  let h="",ul=[];const flush=()=>{if(ul.length){h+=`<ul>${ul.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`;ul=[]}};
+  for(const ln of t){if(ln.startsWith("•")){ul.push(ln.replace(/^•\s*/,""));continue}flush();if(/:$/.test(ln))h+=`<div class="lab">${esc(ln)}</div>`;else h+=`<p>${esc(ln)}</p>`}
+  flush();return h;
+}
+function guideExamples(cat){
+  const a=guideVals(cat,null,null);if(a.length<3)return"";
+  const s=a.slice().sort((x,y)=>y.v-x.v||cmpRu(x.it.title,y.it.title));
+  const chip=x=>`<button type="button" class="gh-it" data-open="${x.it.id}">${esc(x.it.title)} <b>${f1(x.v)}</b></button>`;
+  const top=s.slice(0,3),low=s.slice(-3).reverse().filter(x=>!top.includes(x));
+  return `<div class="gex"><span class="gh-k">Примеры у вас</span><div><span class="dim">выше всего:</span> ${top.map(chip).join("")}</div>${low.length?`<div><span class="dim">ниже всего:</span> ${low.map(chip).join("")}</div>`:""}</div>`;
+}
+function guideHTML(g,c){
+  const m=GM[g.key];
+  let h=`<p class="lead">${esc(m.lead[0]||"")}</p>${guideBlocks(m.lead.slice(1))}`;
+  h+=guideExamples(g.key);
+  h+=`<div class="gsub">${m.subs.map(s=>`<details class="gd" id="g-${g.key}-${s.id.replace(/\./g,"_")}" data-k="${g.key}"${UI.gOpenAll?" open":""}>
+    <summary><span class="gn">${s.id}</span><span class="gt"><b>${esc(s.t)}</b><em>${esc(s.desc)}</em></span></summary>
+    <div class="gbody">${guideBlocks(s.lines.filter(l=>l!==s.desc))}${s.kids.map(k=>`<h5>${esc(k.t)}</h5>${guideBlocks(k.lines)}`).join("")}
+      <div class="ganch">${[["1",0],["3",1],["5",2]].map(([n,i])=>`<span><i>${n}</i>${esc(GANCH[g.key][i])}</span>`).join("")}</div></div></details>`).join("")}</div>`;
+  return h;
+}
+function guideRateTarget(){
+  const rated=it=>hasRatings(it.ratings)||(it.seasons||[]).some(s=>hasRatings(s.ratings));
+  const w=DB.items.filter(i=>i.status==="watching"&&!rated(i)),d=DB.items.filter(i=>i.status==="watched"&&!rated(i));
+  return w[0]||d[d.length-1]||null;
+}
+function guideToolbar(){
+  const t=guideRateTarget();
+  return `<div class="gtool"><div class="gsearch"><i class="ico ico-search"></i><input id="gSearch" type="search" placeholder="Найти: темп, озвучка, химия…" autocomplete="off" spellcheck="false"></div>
+    <button type="button" class="btn sm" id="gAll" data-open-all="1">Развернуть всё</button><button type="button" class="btn sm" id="gNone">Свернуть всё</button>
+    ${t?`<button type="button" class="btn sm pri" id="gRate" data-gr="${t.id}" title="Открыть оценку и подсказки рядом">Оценить: ${esc(t.title.length>26?t.title.slice(0,25)+"…":t.title)}</button>`:""}</div><div class="gnone empty" id="gEmpty" hidden>Ничего не нашлось. Попробуйте другое слово.</div>`;
+}
+function guideBind(v){
+  const all=()=>$$(".gd",v),sec=()=>$$(".gcat",v);
+  const setOpen=o=>all().forEach(d=>{if(!d.hidden)d.open=o});
+  $("#gAll",v)?.addEventListener("click",()=>setOpen(true));
+  $("#gNone",v)?.addEventListener("click",()=>setOpen(false));
+  $("#gRate",v)?.addEventListener("click",e=>openRate(e.currentTarget.dataset.gr));
+  const q=$("#gSearch",v);
+  q?.addEventListener("input",()=>{
+    const s=q.value.trim().toLowerCase();
+    all().forEach(d=>{const hit=!s||d.textContent.toLowerCase().includes(s);d.hidden=!hit;if(s)d.open=hit});
+    let any=0;sec().forEach(c=>{const n=$$(".gd:not([hidden])",c).length;c.hidden=!!s&&!n;if(n||!s)any++});
+    $("#gEmpty",v).hidden=!s||any>0;
+  });
+  const f=UI.guideFocus;
+  if(f){UI.guideFocus=null;const [k,sid]=f.split(":");
+    const el=sid?document.getElementById(`g-${k}-${sid.replace(/\./g,"_")}`):document.getElementById("g-"+k);
+    if(el){if(el.tagName==="DETAILS")el.open=true;setTimeout(()=>{el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),1800)},120)}}
+}
 /* ============ VIEW: data ============ */
 function vData(){
   const n=DB.items.length,ph=DB.items.filter(i=>i.poster).length;
@@ -3644,6 +3805,7 @@ function bindView(){
   $("#newSeries",v)?.addEventListener("click",()=>openEdit(null,{type:"Сериал",status:"watched"}));
   $("#addPlan",v)?.addEventListener("click",()=>openEdit(null,{status:"planned"}));
   $$("[data-jump]",v).forEach(a=>a.addEventListener("click",e=>{e.preventDefault();document.getElementById(a.dataset.jump)?.scrollIntoView({behavior:"smooth"})}));
+  if(UI.tab==="guide")guideBind(v);
   // data tab
   bindCloud(v);
   $("#pwaInstall",v)?.addEventListener("click",pwaInstall);
@@ -3888,11 +4050,11 @@ function openRate(id,opt={}){
     ${ser?`<div class="row" style="margin-bottom:12px"><div class="seg" id="rTgt"><button data-v="s" class="${season!=null?"on":""}">${isArc(it)?"Арка":"Сезон"}</button><button data-v="w" class="${season==null?"on":""}">${isArc(it)?"Аниме целиком":"Сериал целиком"}</button></div>
       ${isArc(it)?`<select class="inp" id="rSn" style="max-width:min(340px,100%)" ${season==null?"disabled":""}>${it.arcs.map(a=>`<option value="${a.n}" ${a.n===(season??1)?"selected":""}>${a.n}. ${esc(a.name)}${a.filler?" (филлер)":""} · эп. ${a.from}–${a.to||"…"}${(it.seasons||[]).some(s=>s.n===a.n&&hasRatings(s.ratings))?" ✓":""}</option>`).join("")}</select>`:`<input class="inp" id="rSn" type="number" min="1" style="width:80px" value="${season??1}" ${season==null?"disabled":""}>`}<span class="dim" id="rSnH" style="font-size:13px"></span></div>`:""}
     ${finish?`<div class="row" style="margin-bottom:12px"><label class="dim" style="font-size:13px">Дата просмотра</label><input class="inp" type="date" id="rDate" value="${new Date().toISOString().slice(0,10)}"><label class="dim" style="font-size:13px">№ просмотра</label><input class="inp" type="number" id="rOrd" style="width:90px" value="${it.order||nextOrder()}"></div>`:""}
-    <table class="rtbl"><thead><tr><th></th>${CATS.map(c=>`<th data-ch="${c.k}">${c.ic} ${c.n}<span class="q" data-ch="${c.k}">?</span></th>`).join("")}<th>Среднее</th></tr></thead>
+    <table class="rtbl"><thead><tr><th></th>${CATS.map(c=>`<th data-ch="${c.k}">${c.ic} ${c.n}<button type="button" class="q" data-q-ch="${c.k}" aria-label="Что значит: ${c.n}" title="Что значит «${c.n}»">?</button></th>`).join("")}<th>Среднее</th></tr></thead>
       <tbody id="rBody"></tbody></table>
     <div class="rres"><span class="dim" id="rAt" style="font-weight:400;font-size:12.5px;margin-right:auto"></span>Итог ${"<span id='rTot'></span>"}</div>
     <div class="qp" id="rQp" title="Быстрый ввод в активную клетку">${["-",1,1.5,2,2.5,3,3.5,4,4.5,5].map(v=>`<button data-q="${v}">${v==="-"?"—":v}</button>`).join("")}</div>
-    <div class="ghint" id="rHint"><span class="dim">Шкала 0–5, можно дробные. «-» — категория неприменима и не учитывается в среднем. Пустая строка — оценщик ещё не оценил. Наведите на категорию, чтобы увидеть подсказку.</span></div>
+    <div class="ghint" id="rHint"><span class="dim">Шкала 0–5, можно дробные. «-» — категория неприменима и не учитывается в среднем. Пустая строка — оценщик ещё не оценил. Нажмите «?» у категории или выберите поле — здесь появятся пояснения и ориентиры.</span></div>
   </div>
   <div class="df">${!finish&&(season!=null?(it.seasons||[]).some(s=>s.n===season):hasRatings(it.ratings))?`<button class="btn danger ghost" id="rDel">Очистить оценку</button>`:""}<div class="sp"></div>${finish?`<button class="btn" id="rSkip">Без оценки</button>`:""}<button class="btn" data-close>Отмена</button><button class="btn pri" id="rSave">Сохранить</button></div>`;
   const d=showDlg(html,"dlg");
@@ -3907,10 +4069,21 @@ function openRate(id,opt={}){
   const parse=s=>{s=String(s).trim().replace(",",".");if(s===""||s==="-"||s==="—")return null;const n=parseFloat(s);return isFinite(n)?Math.max(0,Math.min(5,n)):null};
   const calc=()=>{const per=[];DB.raters.forEach(n=>{const vs=$$(`input[data-r="${CSS.escape(n)}"]`,d).map(i=>parse(i.value));const a=avg(vs);per.push(a);$(`[data-av="${CSS.escape(n)}"]`,d).innerHTML=scBadge(a)});$("#rTot",d).innerHTML=scBadge(avg(per),"big")};
   let active=null;
-  d.addEventListener("focusin",e=>{if(e.target.matches("input[data-k]")){active=e.target;$("#rHint",d).innerHTML=guideHint(e.target.dataset.k)}});
+  const H={k:null,sub:null,pin:false,who:null};
+  const hintShow=()=>{if(H.k)$("#rHint",d).innerHTML=guideHint(H.k,{sub:H.sub,pinned:H.pin,rater:H.who,exceptId:it.id})};
+  const hintSet=(k,who)=>{if(H.pin&&H.k!==k)return;if(H.k!==k)H.sub=null;H.k=k;if(who)H.who=who;hintShow()};
+  d.addEventListener("focusin",e=>{if(e.target.matches("input[data-k]")){active=e.target;hintSet(e.target.dataset.k,e.target.dataset.r)}});
+  $("#rHint",d).addEventListener("click",e=>{
+    const ch=e.target.closest("[data-gsub]");if(ch){H.sub=H.sub===ch.dataset.gsub?null:ch.dataset.gsub;hintShow();return}
+    const b=e.target.closest("[data-gh]");if(!b)return;
+    if(b.dataset.gh==="pin"){H.pin=!H.pin;hintShow()}
+    else if(b.dataset.gh==="guide"){UI.guideFocus=b.dataset.gk+(b.dataset.gs?":"+b.dataset.gs:"");closeDlg();location.hash==="#guide"?render(true):(location.hash="guide")}
+  });
+  d.addEventListener("click",e=>{const q=e.target.closest("[data-q-ch]");if(!q)return;e.preventDefault();const k=q.dataset.qCh;
+    if(H.pin&&H.k===k){H.pin=false}else{H.pin=false;H.k=null;hintSet(k);H.pin=true}hintShow()});
   $("#rBody",d)?.addEventListener("input",e=>{const i=e.target;if(/[^\d.,\-—]/.test(i.value))i.value=i.value.replace(/[^\d.,\-—]/g,"");calc()});
   d.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches("input[data-k]")){e.preventDefault();const all=$$("input[data-k]",d);const ix=all.indexOf(e.target);if(all[ix+1])all[ix+1].focus();else $("#rSave",d).focus()}});
-  $$("[data-ch]",d).forEach(h=>h.addEventListener("mouseenter",()=>$("#rHint",d).innerHTML=guideHint(h.dataset.ch)));
+  $$("th[data-ch]",d).forEach(h=>h.addEventListener("mouseenter",()=>hintSet(h.dataset.ch)));
   $("#rQp",d).addEventListener("mousedown",e=>e.preventDefault());
   $("#rQp",d).addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(!b)return;if(!active)active=$("input[data-k]",d);active.value=b.dataset.q;calc();const all=$$("input[data-k]",d);const ix=all.indexOf(active);if(all[ix+1])all[ix+1].focus()});
   if(ser){
