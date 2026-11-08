@@ -36,7 +36,7 @@
   --tx:#16181d;--tx2:#5c6070;--tx3:#8a8e9a;
   --acc:#4a6fa5;--acc2:#3d8e6f;--accTx:#fff;
   --sh:0 6px 20px rgba(20,22,30,.07);
-  --fox1:#4a6fa5;--fox2:#3a5585;--foxEar:#7a8da8;--foxBelly:#16181d;--foxEye:#f0f1f3;
+  --fox1:#4a6fa5;--fox2:#3a5585;--foxEar:#7a8da8;--foxBelly:#ffffff;--foxEye:#16181d;
   --card-g:rgba(255,255,255,0.75);--bg2-g:rgba(228,230,234,0.8);--bg2-gd:rgba(228,230,234,0.88);--bg2-gdh:rgba(228,230,234,0.72);
   --card-g2:rgba(255,255,255,0.5);--card-gk:rgba(255,255,255,0.45);--card-gs:rgba(255,255,255,0.4);--card-ge:rgba(255,255,255,0.25);--card2-g:rgba(245,246,248,0.5);
   color-scheme:light;
@@ -4494,7 +4494,7 @@ function themeVars(t){
   const v={"--bg":bg,"--bg2":bg2,"--card":card,"--card2":card2,"--line":line,"--line2":line2,
     "--tx":tx,"--tx2":thMix(tx,bg,.42),"--tx3":thMix(tx,bg,.66),"--acc":acc,"--acc2":acc2,
     "--accTx":thLum(acc)>.38?"#15120e":"#ffffff",
-    "--fox1":acc,"--fox2":thMix(acc,"#000000",.28),"--foxEar":thMix(acc,bg,.62),"--foxBelly":tx,"--foxEye":bg,
+    "--fox1":acc,"--fox2":thMix(acc,"#000000",.28),"--foxEar":thMix(acc,bg,.62),"--foxBelly":L?"#ffffff":tx,"--foxEye":L?"#16181d":bg,
     "--sh":L?"0 6px 20px rgba(20,22,30,.08)":"0 8px 28px rgba(0,0,0,.5)",
     "--card-g":thRgba(card,L?.75:.55),"--bg2-g":thRgba(bg2,L?.8:.65),"--bg2-gd":thRgba(bg2,L?.88:.78),"--bg2-gdh":thRgba(bg2,L?.72:.72),
     "--card-g2":thRgba(card,L?.5:.5),"--card-gk":thRgba(card,L?.45:.45),"--card-gs":thRgba(card,L?.4:.4),"--card-ge":thRgba(card,.25),"--card2-g":thRgba(card2,.5),
