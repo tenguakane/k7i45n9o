@@ -4974,23 +4974,25 @@ document.addEventListener("click",e=>{
   else if(act==="go"){closeDlg();openDetail(a.dataset.id)}
 },true);
 /* ============ Лисий год: итоги года (вкладка «Аналитика» → «🦊 Лисий год») ============
-   Считается по просмотренным проектам с известной датой просмотра (поле «Дата просмотра»
+   Считается по просмотренным и начатым проектам с известной датой просмотра (поле «Дата просмотра»
    или первая оценка в журнале). Истории — полноэкранные слайды с автопереходом. */
 const WR={y:null,i:0,slides:[],data:null};
+const wrIn=i=>i.status==="watched"||i.status==="watching";
 function wrDate(it){
+  if(it.status==="watching"){if(it.progressAt)return new Date(it.progressAt);return itemDate(it)}
   const m=typeof it.watchedAt==="string"&&it.watchedAt.match(/^(\d{4})-(\d\d)-(\d\d)/);
   if(m)return new Date(+m[1],+m[2]-1,+m[3]);
   return itemDate(it);
 }
 function wrYears(){
-  const ys=new Set();DB.items.forEach(i=>{if(i.status==="watched"){const d=wrDate(i);if(d)ys.add(d.getFullYear())}});
+  const ys=new Set();DB.items.forEach(i=>{if(wrIn(i)){const d=wrDate(i);if(d)ys.add(d.getFullYear())}});
   return [...ys].sort((a,b)=>b-a);
 }
 function wrData(y){
-  const R=DB.raters,all=DB.items.filter(i=>i.status==="watched");
+  const R=DB.raters,all=DB.items.filter(wrIn);
   const dated=all.map(it=>({it,d:wrDate(it)})),undated=dated.filter(x=>!x.d).length;
   const Y=dated.filter(x=>x.d&&x.d.getFullYear()===y);
-  let minutes=0,noDur=0;Y.forEach(x=>{const m=totalMinutes(x.it);if(isNum(m)&&m>0)minutes+=m;else noDur++});
+  let minutes=0,noDur=0;Y.forEach(x=>{const m=x.it.status==="watching"?watchedMinutes(x.it):totalMinutes(x.it);if(isNum(m)&&m>0)minutes+=m;else noDur++});
   const months=Array(12).fill(0);Y.forEach(x=>months[x.d.getMonth()]++);
   const byCat={};Y.forEach(x=>{const k=qzCatOf(x.it.type);byCat[k]=(byCat[k]||0)+1});
   const gm=new Map();Y.forEach(x=>{const sc=itemScore(x.it);(x.it.genres||[]).forEach(g=>{const o=gm.get(g)||{n:0,s:[]};o.n++;if(isNum(sc))o.s.push(sc);gm.set(g,o)})});
@@ -5024,7 +5026,8 @@ function wrData(y){
     if(minutes/60>=100)badges.push(["🏆","Сотня часов","больше 100 часов кино"]);
     const night=months.filter(Boolean).length;if(night>=9)badges.push(["📅","Без пропусков","кино почти каждый месяц"]);
   }
-  return{y,R,n:Y.length,undated,minutes,noDur,months,mi,byCat,genres,top,scored,per,diffs,meanDiff,compat,hot,busiest,badges,Y};
+  const started=Y.filter(x=>x.it.status==="watching").length;
+  return{y,R,n:Y.length,started,undated,minutes,noDur,months,mi,byCat,genres,top,scored,per,diffs,meanDiff,compat,hot,busiest,badges,Y};
 }
 const MONTHS_IN=["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"];
 const wrFmtDay=d=>d.toLocaleDateString("ru-RU",{day:"numeric",month:"long"});
@@ -5051,7 +5054,7 @@ function vWrapped(){
   const gRows=D.genres.slice(0,8).map(g=>`<tr><td>${esc(g.g)}</td><td class="c"><b>${g.n}</b></td><td class="c">${isNum(g.avg)?scBadge(g.avg,"sm"):"—"}</td></tr>`).join("");
   const tRows=D.top.slice(0,7).map((x,i)=>`<tr data-open="${esc(x.it.id)}" style="cursor:pointer"><td class="c dim">${i+1}</td><td>${esc(x.it.title)}</td><td class="c">${scBadge(x.sc,"sm")}</td><td class="dim">${esc(wrFmtDay(x.d))}</td></tr>`).join("");
   const pRows=D.per.map(p=>`<tr><td><b>${esc(p.n)}</b></td><td class="c">${isNum(p.avg)?scBadge(p.avg,"sm"):"—"}</td><td>${p.fav?esc(p.fav.it.title)+" "+scBadge(p.fav.s,"sm"):"—"}</td><td>${p.fg?esc(p.fg.g)+" <small class='dim'>"+f1(p.fg.m)+"</small>":"<span class='dim'>мало данных</span>"}</td></tr>`).join("");
-  return `<div class="ptitle"><div><h1>Лисий год ${WR.y}</h1><p>${D.n} ${plural(D.n,"проект","проекта","проектов")} за год${D.undated?` · ещё ${D.undated} без даты просмотра`:""}</p></div>
+  return `<div class="ptitle"><div><h1>Лисий год ${WR.y}</h1><p>${D.n} ${plural(D.n,"проект","проекта","проектов")} за год${D.started?` (из них ${D.started} ещё в процессе)`:""}${D.undated?` · ещё ${D.undated} без даты просмотра`:""}</p></div>
     <div class="row" style="gap:8px;flex-wrap:wrap"><div class="chips">${ys.map(y=>`<button class="chip ${y===WR.y?"on":""}" data-wr="year" data-y="${y}">${y}</button>`).join("")}</div><button class="btn pri" data-wr="story">▶ Смотреть итоги</button></div></div>
   ${kpis}
   <div class="wr-grid">
@@ -5070,7 +5073,7 @@ function wrSlides(D){
   const bigNum=(v,suf="")=>`<div class="wr-big"><span data-count>${v}</span>${suf}</div>`;
   S.push({g:"g1",html:`<div class="wr-fox">${fox}</div><div class="wr-k">Наш</div><h1 class="wr-h">Лисий год</h1><div class="wr-year">${D.y}</div><div class="wr-sub">${R.map(esc).join(" и ")}<br>итоги кино-года</div>`});
   const days=hrs/24;
-  S.push({g:"g2",html:`<div class="wr-k">За год вы посмотрели</div>${bigNum(D.n)}<div class="wr-lab">${plural(D.n,"проект","проекта","проектов")}</div>
+  S.push({g:"g2",html:`<div class="wr-k">За год вы посмотрели или начали</div>${bigNum(D.n)}<div class="wr-lab">${plural(D.n,"проект","проекта","проектов")}${D.started?` · ${D.started} ещё смотрим`:""}</div>
     ${D.minutes?`<div class="wr-line">Это ≈ <b>${hrs>=10?Math.round(hrs):f1(hrs)} ч</b> перед экраном${days>=1?` — целых <b>${days>=10?Math.round(days):f1(days)} сут.</b> подряд без сна и еды`:""}</div>`:""}
     <div class="wr-pills">${QZ_CATS.filter(c=>D.byCat[c[0]]).map(c=>`<span>${c[1]} · ${D.byCat[c[0]]}</span>`).join("")}</div>`});
   S.push({g:"g3",html:`<div class="wr-k">Кино-календарь</div>${wrMonthsSVG(D,true)}<div class="wr-line">Больше всего — в <b>${MONTHS_IN[D.mi]}</b>: ${D.months[D.mi]} ${plural(D.months[D.mi],"проект","проекта","проектов")}${D.busiest&&D.busiest.n>1?`<br>Рекордный день — ${wrFmtDay(D.busiest.d)}: ${D.busiest.n} за день`:""}</div>`});
