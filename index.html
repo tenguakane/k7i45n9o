@@ -913,6 +913,8 @@ table.t td.c .sc,.ctbl td .sc,.rtbl td.av .sc{margin:0 auto}
 .fpanel .seg button{padding:4px 11px}
 .fpanel .chip{padding:3px 10px;font-size:12.5px}
 .reco{margin-bottom:16px}
+.simbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px;padding:10px 14px;border:1px solid color-mix(in srgb,var(--acc) 50%,var(--line));border-radius:var(--r);background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.simbar span{flex:1;min-width:180px}
 .ppgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
 .ppgrid.sm{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
 .ppi{position:relative;display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);background:var(--card2);border-radius:var(--r);padding:0;overflow:hidden;cursor:pointer;color:var(--tx);font:inherit;text-align:left}
@@ -2424,10 +2426,13 @@ function tabsPanel(){
 
 /* ============ быстрые действия (перехватываем клик раньше общих обработчиков) ============ */
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-seen],[data-planuni],[data-unifind],[data-unifadd],[data-relnow],[data-cadd],[data-cwatch],[data-chide],[data-cprev],[data-cretry],[data-ckey],[data-cunhide],[data-ppick]");
+  const t=e.target.closest("[data-seen],[data-planuni],[data-unifind],[data-unifadd],[data-relnow],[data-cadd],[data-cwatch],[data-chide],[data-cprev],[data-cretry],[data-ckey],[data-cunhide],[data-csimi],[data-csimk],[data-csimx],[data-ppick]");
   if(!t)return;
   e.stopPropagation();e.preventDefault();
   const d=t.dataset;
+  if(d.csimi){const it=itemById(d.csimi);if(it)catSimilarFor(it);return}
+  if(d.csimk){const x=CAT.items.find(r=>r.k===d.csimk);if(x)catSimilar(x.t,x.id,x.title);return}
+  if(d.csimx!==undefined){UI.catSim=null;saveUI();render(true);return}
   if(d.ppick){const it=itemById(d.ppick);if(it)openPosterPicker(it.tmdb,it.title,it.year,u=>{it.poster=u;commit();openDetail(it.id)});return}
   if(d.seen){toggleSeen(d.seen,d.who,!!t.closest("dialog"));return}
   if(d.planuni!==undefined){UI.planUni=d.planuni;UI.planView="uni";saveUI();if(t.closest("dialog"))closeDlg();if(UI.tab!=="plan")location.hash="plan";else render(true);return}
@@ -2483,6 +2488,7 @@ const catCur=()=>CAT_CATS.find(c=>c.k===UI.catCat)||CAT_CATS[0];
 const catGenres=()=>catCur().kind==="tv"?CG_TV:CG_MOVIE;
 function catReq(page){
   const c=catCur(),q=(UI.catQ||"").trim();
+  if(UI.catSim&&UI.catSim.id)return{path:`/${UI.catSim.t}/${UI.catSim.id}/${CAT.simPath||"recommendations"}`,params:{language:"ru-RU",page}};
   if(q)return{path:"/search/multi",params:{query:q,language:"ru-RU",include_adult:"false",page}};
   const tv=c.kind==="tv",dk=tv?"first_air_date":"primary_release_date";
   const p=Object.assign({language:"ru-RU",include_adult:"false",page},c.p);
@@ -2500,8 +2506,8 @@ const catNorm=(x,t)=>({k:t+":"+x.id,t,id:x.id,title:x.title||x.name||x.original_
   g:x.genre_ids||[],lang:x.original_language,oc:x.origin_country||[],ov:x.overview||""});
 const catType=x=>tmdbType(x.t,{genre_ids:x.g,origin_country:x.oc,original_language:x.lang});
 function catSync(){
-  const key=JSON.stringify([!!apiKey("tmdb"),UI.catCat,UI.catSort,UI.catGenre,UI.catYear,(UI.catQ||"").trim()]);
-  if(CAT.key!==key){Object.assign(CAT,{key,tok:CAT.tok+1,loading:false,items:[],seen:new Set(),page:0,total:1,totalRes:0,err:""})}
+  const key=JSON.stringify([!!apiKey("tmdb"),UI.catCat,UI.catSort,UI.catGenre,UI.catYear,(UI.catQ||"").trim(),UI.catSim&&UI.catSim.t+UI.catSim.id]);
+  if(CAT.key!==key){Object.assign(CAT,{simPath:"",key,tok:CAT.tok+1,loading:false,items:[],seen:new Set(),page:0,total:1,totalRes:0,err:""})}
 }
 async function catMore(){
   if(CAT.loading||CAT.page>=CAT.total)return;
@@ -2509,10 +2515,12 @@ async function catMore(){
   const tok=CAT.tok;CAT.loading=true;CAT.err="";catPaint();
   try{
     const {path,params}=catReq(CAT.page+1);
-    const r=await tmdbGet(path,params);
+    let r=await tmdbGet(path,params);
     if(CAT.tok!==tok)return;
+    if(UI.catSim&&!(r.results||[]).length&&!CAT.page&&!CAT.simPath){CAT.simPath="similar";const q2=catReq(1);r=await tmdbGet(q2.path,q2.params);if(CAT.tok!==tok)return}
     const c=catCur();let res=r.results||[];
-    if(path==="/search/multi")res=res.filter(x=>x.media_type==="movie"||x.media_type==="tv").map(x=>catNorm(x,x.media_type));
+    if(UI.catSim)res=res.map(x=>catNorm(x,UI.catSim.t));
+    else if(path==="/search/multi")res=res.filter(x=>x.media_type==="movie"||x.media_type==="tv").map(x=>catNorm(x,x.media_type));
     else{res=res.map(x=>catNorm(x,c.kind));if(c.not)res=res.filter(x=>x.lang!==c.not)}
     for(const x of res)if(!CAT.seen.has(x.k)){CAT.seen.add(x.k);CAT.items.push(x)}
     CAT.page=r.page||CAT.page+1;CAT.total=Math.min(r.total_pages||1,500);CAT.totalRes=r.total_results||0;
@@ -2544,7 +2552,7 @@ function catState(x,ix){
 function catCard(x,st){
   const upc=x.rd&&x.rd>todayStr();
   const badge=st?`<span class="ccb ${st.status==="watched"?"w":st.status==="watching"?"c":"p"}">${st.status==="watched"?"✓ Просмотрено":st.status==="watching"?"▶ Смотрим":"В планах"}</span>`:`<button class="cx" data-chide="${x.k}" title="Не интересно — скрыть" aria-label="Скрыть">✕</button>`;
-  const acts=!st?`<button data-cadd="${x.k}">＋ В планы</button><button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:st.status==="planned"?`<button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:"";
+  const acts=(!st?`<button data-cadd="${x.k}">＋ В планы</button><button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:st.status==="planned"?`<button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:"")+`<button class="alt" data-csimk="${x.k}">≈ Похожие</button>`;
   return `<div class="cc${st?" in":""}">
     <div class="cp" data-cprev="${x.k}" title="${esc(x.ov||x.title)}">${x.p?`<img loading="lazy" src="${tmdbImg(x.p,"w342")}" alt="">`:`<span class="ph0">${esc(initials(x.title))}</span>`}
       ${isNum(x.v)&&x.v>0&&x.vc>=5?`<span class="cr">★ ${x.v.toFixed(1)}</span>`:""}${badge}${upc?`<span class="cs">📅 ${new Date(x.rd+"T00:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"short",year:"numeric"}).replace(/\s*г\.$/,"")}</span>`:""}
@@ -2557,7 +2565,7 @@ function catBodyHTML(){
     <div class="row"><input class="inp" id="catKeyIn" placeholder="Ключ TMDB (API Key или токен)" style="flex:1;min-width:200px" autocomplete="off"><button class="btn pri" data-ckey>Подключить</button></div></div>`;
   const ix=catIndex(),hid=new Set(DB.recoHide||[]),q=(UI.catQ||"").trim();
   let hiddenN=0;const vis=[];
-  for(const x of CAT.items){const st=catState(x,ix);if(!q&&(hid.has(x.k)||(UI.catHide&&st))){hiddenN++;continue}vis.push([x,st])}
+  for(const x of CAT.items){const st=catState(x,ix);if(!q&&!UI.catSim&&(hid.has(x.k)||(UI.catHide&&st))){hiddenN++;continue}vis.push([x,st])}
   const sk=CAT.loading?Array.from({length:CAT.page?6:18},()=>`<div class="cc sk"><div class="cp"></div><div class="cbody"><i></i><i></i></div></div>`).join(""):"";
   let note="";
   if(CAT.err)note=`<p class="rnote">⚠ ${esc(CAT.err)} <button class="btn sm" data-cretry>Повторить</button></p>`;
@@ -2571,16 +2579,17 @@ function catPaint(){const el=$("#catBody");if(el)el.innerHTML=catBodyHTML()}
 function vCatalog(){
   catSync();
   const gl=catGenres();if(UI.catGenre&&!gl.some(g=>String(g[0])===String(UI.catGenre)))UI.catGenre="";
-  const y0=new Date().getFullYear();
+  const sim=UI.catSim&&UI.catSim.id,y0=new Date().getFullYear();
   const years=Array.from({length:y0-1989},(_,i)=>y0+1-i);
   return `<div class="ptitle"><div><h1>Каталог</h1><p>Что сейчас смотрят: популярное из TMDB — фильмы, сериалы, аниме, дорамы. Наведите на постер — добавить в планы или сразу оценить.</p></div></div>
+  ${sim?`<div class="simbar"><span>≈ Похожие на <b>${esc(UI.catSim.title)}</b></span><button class="btn sm" data-csimx>✕ Вернуться к каталогу</button></div>`:""}
   ${recoHTML()}
   <div class="chips catcats" data-ui="catCat">${CAT_CATS.map(c=>`<button class="chip ${UI.catCat===c.k?"on":""}" data-v="${c.k}">${c.n}</button>`).join("")}</div>
   <div class="toolbar catbar">
-    <input class="inp" id="catQ" type="search" placeholder="🔎 Найти по названию (по всему TMDB)…" value="${esc(UI.catQ||"")}" style="min-width:220px;flex:1 1 220px;max-width:360px" autocomplete="off">
-    <select class="inp" data-uis="catSort" ${(UI.catQ||"").trim()?"disabled":""}>${CAT_SORTS.map(([k,n])=>`<option value="${k}" ${UI.catSort===k?"selected":""}>${n}</option>`).join("")}</select>
-    <select class="inp" data-uis="catGenre" ${(UI.catQ||"").trim()?"disabled":""}><option value="">Все жанры</option>${gl.map(([id,n])=>`<option value="${id}" ${String(UI.catGenre)===String(id)?"selected":""}>${n}</option>`).join("")}</select>
-    <select class="inp" data-uis="catYear" ${(UI.catQ||"").trim()?"disabled":""}><option value="">Любой год</option>${years.map(y=>`<option value="${y}" ${String(UI.catYear)===String(y)?"selected":""}>${y}</option>`).join("")}</select>
+    <input class="inp" id="catQ" type="search" placeholder="🔎 Найти любой фильм или сериал (по всему TMDB)…" value="${esc(UI.catQ||"")}" style="min-width:220px;flex:1 1 220px;max-width:360px" autocomplete="off">
+    <select class="inp" data-uis="catSort" ${(UI.catQ||"").trim()||sim?"disabled":""}>${CAT_SORTS.map(([k,n])=>`<option value="${k}" ${UI.catSort===k?"selected":""}>${n}</option>`).join("")}</select>
+    <select class="inp" data-uis="catGenre" ${(UI.catQ||"").trim()||sim?"disabled":""}><option value="">Все жанры</option>${gl.map(([id,n])=>`<option value="${id}" ${String(UI.catGenre)===String(id)?"selected":""}>${n}</option>`).join("")}</select>
+    <select class="inp" data-uis="catYear" ${(UI.catQ||"").trim()||sim?"disabled":""}><option value="">Любой год</option>${years.map(y=>`<option value="${y}" ${String(UI.catYear)===String(y)?"selected":""}>${y}</option>`).join("")}</select>
     <label class="chk" style="font-size:13.5px"><input type="checkbox" id="catHide" ${UI.catHide?"checked":""}> Скрывать то, что уже в списке</label>
   </div>
   <div id="catBody">${catBodyHTML()}</div>`;
@@ -2614,7 +2623,7 @@ function catPreview(k){
       ${g.length?`<div class="chips" style="margin-bottom:12px">${g.map(t=>`<span class="tag am">${esc(t)}</span>`).join("")}</div>`:""}
       ${x.rd&&x.rd>todayStr()?`<p class="muted" style="margin:0 0 10px">📅 Выходит ${esc(new Date(x.rd+"T00:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"}).replace(/\s*г\.$/,""))}</p>`:""}
       <p class="syn${x.ov?"":" dim"}">${x.ov?esc(x.ov):"Описания на русском пока нет."}</p></div></div></div>
-  <div class="df"><a class="btn" href="https://www.themoviedb.org/${x.t}/${x.id}?language=ru-RU" target="_blank" rel="noopener">TMDB ↗</a>${st?"":`<button class="btn ghost" data-chide="${x.k}">Не интересно</button>`}<div class="sp"></div>${st?"":`<button class="btn" data-cadd="${x.k}">＋ В планы</button>`}${!st||st.status==="planned"?`<button class="btn pri" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:""}</div>`;
+  <div class="df"><a class="btn" href="https://www.themoviedb.org/${x.t}/${x.id}?language=ru-RU" target="_blank" rel="noopener">TMDB ↗</a>${st?"":`<button class="btn ghost" data-chide="${x.k}">Не интересно</button>`}<button class="btn" data-csimk="${x.k}">≈ Похожие</button><div class="sp"></div>${st?"":`<button class="btn" data-cadd="${x.k}">＋ В планы</button>`}${!st||st.status==="planned"?`<button class="btn pri" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:""}</div>`;
   showDlg(html,"dlg2");
 }
 
@@ -2649,6 +2658,24 @@ function openPosterPicker(ref,title,year,onPick){
   };
   d.querySelector("#ppQ").addEventListener("keydown",e=>{if(e.key==="Enter")search(e.target.value)});
   if(ref&&ref.id)loadImages(ref.type,ref.id,title);else search(title);
+}
+
+function catSimilar(t,id,title){
+  UI.catSim={t,id:+id,title:title||""};UI.catQ="";saveUI();
+  closeDlg("dlg2");closeDlg("dlg");
+  if(UI.tab!=="catalog")location.hash="catalog";else render(true);
+  window.scrollTo(0,0);
+}
+async function catSimilarFor(it){
+  if(it.tmdb&&it.tmdb.id){catSimilar(it.tmdb.type,it.tmdb.id,it.title);return}
+  if(!apiKey("tmdb")){toast("Нужен ключ TMDB (вкладка «Каталог» или «Данные»)");return}
+  try{
+    const r=await tmdbGet("/search/multi",{query:it.title,language:"ru-RU",include_adult:"false"});
+    const m=(r.results||[]).filter(x=>x.media_type==="movie"||x.media_type==="tv");
+    const best=m.find(x=>it.year&&String(x.release_date||x.first_air_date||"").slice(0,4)==String(it.year))||m[0];
+    if(!best){toast("В TMDB не нашлось «"+it.title+"»");return}
+    catSimilar(best.media_type,best.id,it.title);
+  }catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}
 }
 
 /* ============ VIEW: comics ============ */
@@ -2984,7 +3011,7 @@ function bindView(){
     try{await tmdbGet("/configuration");toast("✓ Ключ TMDB работает");fillPosters()}catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}});
   $("#malGo",v)?.addEventListener("click",()=>refreshMal());
   $$("[data-tabvis]",v).forEach(cb=>cb.addEventListener("change",()=>{const id=cb.dataset.tabvis,h=new Set(UI.hiddenTabs||[]);if(cb.checked)h.delete(id);else h.add(id);UI.hiddenTabs=[...h];saveUI();render()}));
-  const cq=$("#catQ",v);if(cq){cq.addEventListener("input",()=>{UI.catQ=cq.value;saveUI();clearTimeout(cq.t);cq.t=setTimeout(()=>{render();const n=$("#catQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},500)})}
+  const cq=$("#catQ",v);if(cq){cq.addEventListener("input",()=>{UI.catQ=cq.value;UI.catSim=null;saveUI();clearTimeout(cq.t);cq.t=setTimeout(()=>{render();const n=$("#catQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},500)})}
   $("#catHide",v)?.addEventListener("change",e=>setUI("catHide",e.target.checked));
 }
 function renameRater(o,n){const fix=r=>{if(r&&r[o]!==undefined){r[n]=r[o];delete r[o]}};DB.items.forEach(i=>{fix(i.ratings);(i.seasons||[]).forEach(s=>fix(s.ratings))})}
@@ -3043,7 +3070,7 @@ function openDetail(id,season){
   const arc=isArc(it);
   const html=`<div class="dh"><h2>${esc(it.title)}${sObj?` · ${esc(segName(it,season))}`:""}</h2><button class="btn icon ghost" data-close>✕</button></div>
   <div class="db"><div class="det" id="detShot">
-    <div><div class="poster">${posterHTML(it)}</div><button class="btn sm" data-ppick="${it.id}" style="width:100%;margin-top:8px;justify-content:center">🖼 Сменить постер</button></div>
+    <div><div class="poster">${posterHTML(it)}</div><button class="btn sm" data-ppick="${it.id}" style="width:100%;margin-top:8px;justify-content:center">🖼 Сменить постер</button><button class="btn sm" data-csimi="${it.id}" style="width:100%;margin-top:6px;justify-content:center">≈ Похожие в каталоге</button></div>
     <div>
       <div class="meta"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}${it.status==="planned"?`<span class="stt p">В планах</span>`:it.status==="watching"?`<span class="stt c">Смотрим · ${esc(progLabel(it,true))}</span>`:`<span class="stt w">Просмотрено${it.order?` · №${it.order}`:""}</span>`}${it.watchedAt?`<span class="dim">${new Date(it.watchedAt).toLocaleDateString("ru-RU")}</span>`:""}${cm.map(c=>`<span class="tag acc">${FR[c.franchise]}${c.franchise==="MCU"?" №"+c.num:""}${c.link.season!=null?" (S"+c.link.season+")":""}</span>`).join("")}</div>
       ${it.status==="planned"?detPlanBlock(it):""}
