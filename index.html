@@ -1302,6 +1302,11 @@ html[data-fx="on"] .fx-in .geo-svg .gt{animation:fxPop .5s cubic-bezier(.2,.8,.2
 .ico-x-wave{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M2 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0%27/%3E%3C/svg%3E")}
 .ico-x-x{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M5 5l14 14M19 5L5 19%27/%3E%3C/svg%3E")}
 .ico-x-star,.ico-x-heart,.ico-x-sparkle,.ico-x-newmoon,.ico-x-galaxy{}
+/* компактные карточки планов */
+.seenrow.cpt{gap:4px}
+.seenrow.cpt .sb{min-width:24px;height:22px;padding:0 6px;line-height:20px;text-align:center}
+.plan .card .body{gap:4px}
+.plan .card .gen{font-size:12px;line-height:1.3}
 </style>
 </head>
 <body>
@@ -2590,9 +2595,9 @@ function seenBadge(it){
   const all=s.length===DB.raters.length&&s.length>1;
   return `<span class="${all?"rw":"sv1"}">${all?"↻ Пересмотр":"👁 "+esc(s.join(", "))+" видел(а)"}</span>`;
 }
-function seenRow(it){
-  return `<div class="seenrow"><span>Видели:</span>${DB.raters.map(n=>{const on=!!(it.seenBy&&it.seenBy[n]);
-    return `<button type="button" class="sb${on?" on":""}" data-seen="${it.id}" data-who="${esc(n)}" title="${esc(n)}: ${on?"уже видел(а) — для этого человека это пересмотр. Нажмите, чтобы снять":"отметить, что уже видел(а) — будет пересмотр"}">${on?"✓ ":""}${esc(n)}</button>`}).join("")}</div>`;
+function seenRow(it,compact){
+  return `<div class="seenrow${compact?" cpt":""}">${compact?"":"<span>Видели:</span>"}${DB.raters.map(n=>{const on=!!(it.seenBy&&it.seenBy[n]);
+    return `<button type="button" class="sb${on?" on":""}" data-seen="${it.id}" data-who="${esc(n)}" title="${compact?"Видел(а) — ":""}${esc(n)}: ${on?"уже видел(а) — для этого человека это пересмотр. Нажмите, чтобы снять":"отметить, что уже видел(а) — будет пересмотр"}">${on?"✓ ":""}${compact?esc(n.trim().charAt(0).toUpperCase()):esc(n)}</button>`}).join("")}</div>`;
 }
 function toggleSeen(id,who,inDlg){
   const it=itemById(id);if(!it)return;
@@ -2731,12 +2736,11 @@ function planCard(it,U){
   return `<div class="card${upc?" upc":""}" data-open="${it.id}">
      <div class="poster">${posterHTML(it)}<div class="pb">${upc?`<span class="up">🚧 Скоро</span>`:""}</div></div>
      <div class="body"><div class="t">${esc(it.title)}</div>
-       <div class="m"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}${extChip(it)}</div>
+       <div class="m"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}</div>
        ${upc?`<div class="rel">${esc(relLabel(it))}</div>`:""}
-       ${u?`<button type="button" class="uchip" data-planuni="${esc(u)}" title="Показать всю вселенную / серию: ${esc(u)}">🌐 ${esc(u)}</button>`:""}
        ${it.genres.length?`<div class="gen">${it.genres.map(esc).join(", ")}</div>`:""}
        ${!upc&&durLine(it)?`<div class="gen">⏱ ${esc(durLine(it))}</div>`:""}
-       ${seenRow(it)}
+       ${seenRow(it,true)}
        <div class="act">${upc?`<button class="btn sm" data-relnow="${it.id}" title="Уже вышло — перенести в основной список">Уже вышло</button>`:`${it.kind==="series"?`<button class="btn sm" data-start="${it.id}" title="Начать смотреть" aria-label="Начать смотреть" style="flex:0 0 30px;height:30px;padding:0;justify-content:center"><i class="ico ico-play"></i></button>`:""}<button class="btn sm pri" data-finish="${it.id}">✓ Просмотрено</button>`}<button class="btn sm icon" data-edit="${it.id}" title="Изменить" aria-label="Изменить" style="flex:0 0 30px;height:30px"><i class="ico ico-edit"></i></button></div>
      </div></div>`;
 }
