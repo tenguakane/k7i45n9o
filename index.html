@@ -2334,6 +2334,7 @@ function wMatch(e,sc,skipBucket){
   if(!comicsMatch(e,UI.comics))return false;
   if(UI.genre&&!e.it.genres.includes(UI.genre))return false;
   if(UI.tag&&!(e.it.tags||[]).includes(UI.tag))return false;
+  if(UI.rater!=="all"){const has=isNum(e.per[UI.rater]);if(UI.unr==="only"?has:!has)return false}
   if(UI.q&&!e.title.toLowerCase().includes(UI.q.toLowerCase()))return false;
   if(!skipBucket&&UI.bucket){const b=BUCKETS.find(b=>b.k===UI.bucket);const v=sc(e);if(!isNum(v)||!b.f(v))return false}
   return true;
@@ -2361,8 +2362,8 @@ function watchedState(){
   const list=wSort(all.filter(e=>wMatch(e,sc)),sc);
   return {all,list,sc,rater,rk:wRanks(list,sc)};
 }
-function wActiveFilters(){return [UI.type!=="all",UI.bucket,UI.comics!=="all",UI.genre,UI.rater!=="all"].filter(Boolean).length}
-function wHasFilters(){return UI.type!=="all"||UI.bucket||UI.comics!=="all"||UI.genre||UI.tag||UI.q||UI.rater!=="all"}
+function wActiveFilters(){return [UI.type!=="all",UI.bucket,UI.comics!=="all",UI.genre,UI.rater!=="all",UI.rater!=="all"&&UI.unr==="only"].filter(Boolean).length}
+function wHasFilters(){return (UI.rater!=="all"&&UI.unr==="only")||UI.type!=="all"||UI.bucket||UI.comics!=="all"||UI.genre||UI.tag||UI.q||UI.rater!=="all"}
 
 /* --- components --- */
 function segHTML(key,opts,cur){return `<div class="seg" data-ui="${key}">${opts.map(([v,n,t])=>`<button data-v="${esc(v)}" class="${cur===v?"on":""}"${t?` title="${t}"`:""}>${n}</button>`).join("")}</div>`}
@@ -2390,6 +2391,7 @@ function wFiltersHTML(st){
     ${fltHTML("Тип контента",`<div class="chips" data-ui="type">${chipHTML("all","Все",UI.type==="all",st.all.length)}${DB.types.filter(t=>typesPresent[t]).map(t=>chipHTML(t,esc(t),UI.type===t,typesPresent[t])).join("")}</div>`)}
     ${fltHTML("Кинокомиксы",selectHTML("comics",[["all","Все"],["any","Только кинокомиксы"],["marvel","Marvel (все)"],["MCU","Marvel · MCU"],["CLASSIC","Marvel · Классика"],["XMEN","Marvel · Люди Икс"],["DC","DC"],["none","Без кинокомиксов"]],UI.comics))}
     ${fltHTML("Чей топ",segHTML("rater",[["all","Общий"],...DB.raters.map(r=>[r,esc(r)])],UI.rater))}
+    ${UI.rater!=="all"?fltHTML("Без оценки",segHTML("unr",[["hide","Скрыть"],["only","Только без оценки "+esc(UI.rater)]],UI.unr==="only"?"only":"hide")):""}
     ${fltHTML("Жанр",selectHTML("genre",[["","Любой"],...genres.map(g=>[g,esc(g)])],UI.genre))}
     ${tags.length?fltHTML("Тег",selectHTML("tag",[["","Любой"],...tags.map(([t,c])=>[t,`#${esc(t)} (${c})`])],UI.tag)):""}
   </div>`;
@@ -3801,7 +3803,7 @@ function bindView(){
   $("#reorderBtn",v)?.addEventListener("click",()=>reo(!UI.reorder));
   $("#reorderDone",v)?.addEventListener("click",()=>reo(false));
   $$("[data-gtoggle]",v).forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.gtoggle;UI.gColl=Object.assign({},UI.gColl);if(UI.gColl[k])delete UI.gColl[k];else UI.gColl[k]=1;saveUI();render()}));
-  $("#resetF",v)?.addEventListener("click",()=>{Object.assign(UI,{type:"all",bucket:null,comics:"all",genre:"",tag:"",q:"",rater:"all"});saveUI();render()});
+  $("#resetF",v)?.addEventListener("click",()=>{Object.assign(UI,{type:"all",bucket:null,comics:"all",genre:"",tag:"",q:"",rater:"all",unr:"hide"});saveUI();render()});
   $("#newSeries",v)?.addEventListener("click",()=>openEdit(null,{type:"Сериал",status:"watched"}));
   $("#addPlan",v)?.addEventListener("click",()=>openEdit(null,{status:"planned"}));
   $$("[data-jump]",v).forEach(a=>a.addEventListener("click",e=>{e.preventDefault();document.getElementById(a.dataset.jump)?.scrollIntoView({behavior:"smooth"})}));
