@@ -3270,12 +3270,14 @@ async function tmdbNewItem(t,id,status="planned"){
 }
 
 /* ============ VIEW: каталог (что сейчас популярно на TMDB) ============ */
+/* какой тип должен быть у карточки в каждой вкладке каталога */
+const CAT_TYPE={movie:"Фильм",tv:"Сериал",anime:"Аниме",animem:"Аниме",dorama:"Дорама",cartoon:"Мультфильм",cartoontv:"Мультсериал"};
 const CAT_CATS=[
   {k:"movie",n:"🎬 Фильмы",kind:"movie",p:{without_genres:"16"}},
   {k:"tv",n:"📺 Сериалы",kind:"tv",p:{without_genres:"16"}},
   {k:"anime",n:"🌸 Аниме",kind:"tv",p:{with_genres:"16",with_original_language:"ja"}},
   {k:"animem",n:"🌸 Аниме-фильмы",kind:"movie",p:{with_genres:"16",with_original_language:"ja"}},
-  {k:"dorama",n:"🍜 Дорамы",kind:"tv",p:{with_origin_country:"KR|JP|CN|TW|TH",without_genres:"16"}},
+  {k:"dorama",n:"🍜 Дорамы",kind:"tv",p:{with_origin_country:"KR|JP|CN|TW|TH|HK",without_genres:"16"}},
   {k:"cartoon",n:"🧸 Мультфильмы",kind:"movie",p:{with_genres:"16"},not:"ja"},
   {k:"cartoontv",n:"🧸 Мультсериалы",kind:"tv",p:{with_genres:"16"},not:"ja"}];
 const CAT_SORTS=[["popular","Популярное сейчас"],["top","Лучшие по рейтингу"],["new","Свежие новинки"],["soon","Скоро выйдут"]];
@@ -3320,7 +3322,7 @@ async function catMore(){
     const c=catCur();let res=r.results||[];
     if(UI.catSim)res=res.map(x=>catNorm(x,UI.catSim.t));
     else if(path==="/search/multi")res=res.filter(x=>x.media_type==="movie"||x.media_type==="tv").map(x=>catNorm(x,x.media_type));
-    else{res=res.map(x=>catNorm(x,c.kind));if(c.not)res=res.filter(x=>x.lang!==c.not)}
+    else{res=res.map(x=>catNorm(x,c.kind));if(c.not)res=res.filter(x=>x.lang!==c.not);res=res.filter(x=>tmdbRawType(x.t,{genre_ids:x.g,origin_country:x.oc,original_language:x.lang})===CAT_TYPE[c.k])}
     for(const x of res)if(!CAT.seen.has(x.k)){CAT.seen.add(x.k);CAT.items.push(x)}
     CAT.page=r.page||CAT.page+1;CAT.total=Math.min(r.total_pages||1,500);CAT.totalRes=r.total_results||0;
   }catch(e){if(CAT.tok===tok)CAT.err=e.message==="Failed to fetch"?"нет связи с TMDB":(e.message||"ошибка")}
@@ -4541,11 +4543,15 @@ async function tmdbGet(path,params={}){
 const TG={28:["Боевик"],12:["Приключения"],16:["Мультфильм"],35:["Комедия"],80:["Криминал"],99:["Документальный"],18:["Драма"],10751:["Семейный"],14:["Фэнтези"],36:["История"],27:["Ужасы"],10402:["Музыка"],9648:["Детектив"],10749:["Мелодрама"],878:["Фантастика"],53:["Триллер"],10752:["Военный"],37:["Вестерн"],
   10759:["Боевик","Приключения"],10762:["Детский"],10764:["Реалити-шоу"],10765:["Фантастика","Фэнтези"],10766:["Мыльная опера"],10767:["Ток-шоу"],10768:["Военный","Политика"]};
 const tmdbImg=(p,w="w500")=>p?`https://image.tmdb.org/t/p/${w}${p}`:"";
-function tmdbType(kind,d){
+/* чистый тип по данным TMDB: сериалы из Азии (в т.ч. Японии) без анимации — это дорамы */
+function tmdbRawType(kind,d){
   const ids=(d.genres||[]).map(g=>g.id).concat(d.genre_ids||[]);const anim=ids.includes(16);
   const orig=[...(d.origin_country||[]),...(d.production_countries||[]).map(c=>c.iso_3166_1)];const jp=orig.includes("JP")||d.original_language==="ja";
   const asia=["KR","CN","TW","TH","HK"].some(c=>orig.includes(c))||["ko","zh","th"].includes(d.original_language);
-  let t=kind==="tv"?(anim?(jp?"Аниме":"Мультсериал"):asia?"Дорама":"Сериал"):(anim?(jp?"Аниме":"Мультфильм"):"Фильм");
+  return kind==="tv"?(anim?(jp?"Аниме":"Мультсериал"):(asia||jp)?"Дорама":"Сериал"):(anim?(jp?"Аниме":"Мультфильм"):"Фильм");
+}
+function tmdbType(kind,d){
+  let t=tmdbRawType(kind,d);
   if(!DB.types.includes(t))t=kind==="tv"?(DB.types.includes("Сериал")?"Сериал":DB.types[0]):(DB.types.includes("Фильм")?"Фильм":DB.types[0]);
   return t;
 }
