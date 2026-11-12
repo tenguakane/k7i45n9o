@@ -1620,6 +1620,27 @@ dialog::backdrop{background:rgba(5,8,10,.66);backdrop-filter:blur(6px) saturate(
   .grid.compact .card .poster::after{display:none}
   .grid.compact .card .body{padding:2px 4px 2px}
 }
+
+/* ---------- «На согласовании» ---------- */
+.plsw{margin:0 0 20px}
+.plsw .seg button small{margin-left:6px;opacity:.7;font-weight:700}
+.card.prop .pask{margin-top:8px;padding:9px 10px 10px 12px;border-radius:12px;background:color-mix(in srgb,var(--acc2) 9%,transparent);box-shadow:inset 3px 0 0 var(--acc2)}
+.pask .pq{font-size:12.5px;color:var(--tx2);margin-bottom:7px;font-weight:600}
+.pask .pq b{color:var(--tx)}
+.pask.seen{background:color-mix(in srgb,var(--acc2) 16%,transparent)}
+.pask.new{background:color-mix(in srgb,var(--tx) 5%,transparent)}
+.pask .pbt{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pask .pbt button{font:inherit;font-size:12.5px;font-weight:700;padding:6px 4px;white-space:nowrap;border-radius:9px;border:1px solid color-mix(in srgb,var(--tx) 14%,transparent);background:transparent;color:var(--tx2);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.pask .pbt button:hover{border-color:var(--acc2);color:var(--tx)}
+.pask .pbt button.on{background:var(--acc2);border-color:var(--acc2);color:#06201b}
+.dplan .pask{margin:0 0 10px}
+.pbq{display:inline-flex;gap:4px;align-items:center;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:8px;background:var(--acc2);color:#06201b;box-shadow:0 6px 14px -6px rgba(0,0,0,.6)}
+.ccb.q{background:rgba(14,18,20,.9);color:var(--acc2);box-shadow:inset 0 0 0 1.5px var(--acc2)}
+.ccb.sub{top:33px;background:rgba(14,18,20,.9);color:#fff;font-weight:600}
+.stt.q{color:var(--acc2);border-color:color-mix(in srgb,var(--acc2) 45%,transparent);background:color-mix(in srgb,var(--acc2) 11%,transparent)}
+.stt.s{color:var(--tx2);font-weight:600}
+.card.prop .act{gap:6px}
+.card.prop .act .btn.pri{flex:1;justify-content:center}
 </style>
 </head>
 <body>
@@ -2110,6 +2131,7 @@ function commit(){save();render()}
 const UIK="kinoteka.ui.v1";
 let UI={qzSub:"play",qzWho:"turn",qzLen:"10",qzProj:"asked",sub:"stats",hiddenTabs:["comics"],catCat:"movie",catSort:"popular",catGenre:"",catYear:"",catHide:true,catQ:"",planView:"list",planSeen:"all",planUni:"",tab:"watched",type:"all",comics:"all",bucket:null,rater:"all",sort:"order",dir:-1,mode:"whole",view:"cards",q:"",genre:"",uni:"marvel",cOrder:"num",planType:"all",planSort:"added",serType:"all",serQ:"",theme:"dark",tag:"",tA:"",tB:"",wSrc:"all",wWho:"all",wSort:"rel",omdbKey:"",gridSize:178,hideScores:false,group:"none",gColl:{},compact:false,stPer:"month"};
 try{Object.assign(UI,JSON.parse(localStorage.getItem(UIK)||"{}"))}catch(e){}
+if(!UI.catStatusShown){UI.catHide=false;UI.catStatusShown=1}  /* в каталоге по умолчанию видны статусы (смотрели / в планах / на согласовании) */
 UI.reorder=false;
 function tabHidden(id){return id!=="data"&&Array.isArray(UI.hiddenTabs)&&UI.hiddenTabs.includes(id)}
 if(TABALIAS[UI.tab]){UI.sub=TABALIAS[UI.tab];UI.tab="analytics"}
@@ -2523,7 +2545,7 @@ function durLine(it){
 function buildEntries(mode){
   const out=[];const cm=comicsMap();
   for(const it of DB.items){
-    if(it.status==="planned")continue;
+    if(it.status==="planned"||it.status===PROP)continue;
     if(it.status==="watching"&&!hasRatings(it.ratings)&&!seasonsRated(it).length)continue;
     const cs=cm[it.id]||[];
     if(mode==="seasons"&&it.kind==="series"&&seasonsRated(it).length){
@@ -2846,7 +2868,7 @@ document.addEventListener("input",e=>{const t=e.target;if(!t.classList||!t.class
   document.querySelectorAll(".gridSlider").forEach(x=>{if(x!==t)x.value=t.value})});
 /* ============ VIEW: series ============ */
 function vSeries(){
-  let list=DB.items.filter(i=>i.kind==="series"&&i.status!=="planned");
+  let list=DB.items.filter(i=>i.kind==="series"&&(i.status!=="planned"&&i.status!=="proposed"));
   const tp={};list.forEach(i=>tp[i.type]=(tp[i.type]||0)+1);
   if(UI.serType!=="all")list=list.filter(i=>i.type===UI.serType);
   if(UI.serQ)list=list.filter(i=>i.title.toLowerCase().includes(UI.serQ.toLowerCase()));
@@ -2855,7 +2877,7 @@ function vSeries(){
   return `<div class="ptitle"><div><h1>Сериалы</h1><p>Оценки по сезонам · нажмите на клетку, чтобы изменить оценку сезона</p></div>
      <button class="btn" id="newSeries">＋ Новый сериал</button></div>
    <div class="kpis">
-     <div class="kpi"><span>Сериалов</span><b>${DB.items.filter(i=>i.kind==="series"&&i.status!=="planned").length}</b><em>${DB.items.filter(i=>i.status==="watching").length?`смотрим сейчас: ${DB.items.filter(i=>i.status==="watching").length}`:""}</em></div>
+     <div class="kpi"><span>Сериалов</span><b>${DB.items.filter(i=>i.kind==="series"&&(i.status!=="planned"&&i.status!=="proposed")).length}</b><em>${DB.items.filter(i=>i.status==="watching").length?`смотрим сейчас: ${DB.items.filter(i=>i.status==="watching").length}`:""}</em></div>
      <div class="kpi"><span>Оценено сезонов</span><b>${allSeasons.length}</b></div>
      <div class="kpi"><span>Средняя за сезон</span><b>${f2(avg(allSeasons.map(s=>overallOf(s.ratings))))}</b></div>
      <div class="kpi"><span>Лучший сезон</span><b style="font-size:16px">${(()=>{let best=null;DB.items.forEach(i=>seasonsRated(i).forEach(s=>{const v=overallOf(s.ratings);if(!best||v>best.v)best={v,t:i.title+" · "+(isArc(i)?segName(i,s.n):"S"+s.n)}}));return best?esc(best.t)+" "+scBadge(best.v,"sm"):"—"})()}</b></div>
@@ -2925,8 +2947,63 @@ function toggleSeen(id,who,inDlg){
   const it=itemById(id);if(!it)return;
   const s=Object.assign({},it.seenBy);if(s[who])delete s[who];else s[who]=1;
   if(Object.keys(s).length)it.seenBy=s;else delete it.seenBy;
+  if(s[who]&&it.noSeen){const nb=Object.assign({},it.noSeen);delete nb[who];if(Object.keys(nb).length)it.noSeen=nb;else delete it.noSeen}
   commit();
   if(inDlg&&document.getElementById("dlg").open&&document.getElementById("dlg").querySelector(`[data-seen="${id}"]`))openDetail(id);
+}
+/* ---- «На согласовании»: фильмы, про которые сначала спрашиваем партнёра ---- */
+const PROP="proposed";
+const isProp=it=>!!it&&it.status===PROP;
+const askWho=()=>DB.raters[1]||DB.raters[0];
+/* ответ того, кого спрашиваем: "seen" — смотрел(а), "new" — не смотрел(а), "" — ответа ещё нет */
+function replyOf(it){const w=askWho();if(it.seenBy&&it.seenBy[w])return"seen";if(it.noSeen&&it.noSeen[w])return"new";return""}
+function setReply(id,val){
+  const it=itemById(id);if(!it)return;const w=askWho();
+  const sb=Object.assign({},it.seenBy),nb=Object.assign({},it.noSeen);delete sb[w];delete nb[w];
+  if(val==="seen")sb[w]=1;else if(val==="new")nb[w]=1;
+  if(Object.keys(sb).length)it.seenBy=sb;else delete it.seenBy;
+  if(Object.keys(nb).length)it.noSeen=nb;else delete it.noSeen;
+  commit();
+  const dg=document.getElementById("dlg");if(dg&&dg.open&&dg.querySelector(`[data-reply="${id}"]`))openDetail(id);
+}
+const REPLY_TXT={"":"ждём ответа",seen:"смотрела",new:"не смотрела"};
+function askRow(it){
+  const w=askWho(),r=replyOf(it);
+  return `<div class="pask ${r||"wait"}"><div class="pq"><b>${esc(w)}</b> · ${REPLY_TXT[r]}</div><div class="pbt">
+    <button type="button" data-reply="${it.id}" data-v="seen" class="${r==="seen"?"on":""}" title="${esc(w)} уже видела этот фильм">Смотрела</button>
+    <button type="button" data-reply="${it.id}" data-v="new" class="${r==="new"?"on":""}" title="${esc(w)} ещё не видела — можно смотреть вместе">Не смотрела</button></div></div>`;
+}
+function propCard(it){
+  const r=replyOf(it);
+  return `<div class="card prop" data-open="${it.id}">
+     <div class="poster">${posterHTML(it)}<div class="pb">${r==="seen"?`<span class="pbq">👁 ${esc(askWho())} смотрела</span>`:""}</div></div>
+     <div class="body"><div class="t">${esc(it.title)}</div>
+       <div class="m"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}</div>
+       ${it.genres.length?`<div class="gen">${it.genres.map(esc).join(", ")}</div>`:""}
+       ${durLine(it)?`<div class="gen">⏱ ${esc(durLine(it))}</div>`:""}
+       ${askRow(it)}
+       <div class="act"><button class="btn sm pri" data-toplan="${it.id}" title="Решили смотреть — перенести в планы (отметка о Жене сохранится)">В планы</button><button class="btn sm icon" data-finish="${it.id}" title="Уже смотрели вместе — оценить" aria-label="Смотрели вместе — оценить">✓</button><button class="btn sm icon" data-edit="${it.id}" title="Изменить" aria-label="Изменить"><i class="ico ico-edit"></i></button><button class="btn sm icon" data-propdel="${it.id}" title="Убрать из списка" aria-label="Убрать из списка">✕</button></div>
+     </div></div>`;
+}
+function planSwitch(){
+  const nP=DB.items.filter(i=>i.status==="planned").length,nQ=DB.items.filter(isProp).length,on=UI.planList==="prop";
+  return `<div class="plsw"><div class="seg lg" data-ui="planList"><button data-v="plan" class="${on?"":"on"}">В планах <small>${nP}</small></button><button data-v="prop" class="${on?"on":""}">🤝 На согласовании <small>${nQ}</small></button></div></div>`;
+}
+function vProp(){
+  const all=DB.items.filter(isProp),w=askWho();
+  const cnt={wait:all.filter(i=>!replyOf(i)).length,seen:all.filter(i=>replyOf(i)==="seen").length,new:all.filter(i=>replyOf(i)==="new").length};
+  const f=["all","wait","seen","new"].includes(UI.propF)?UI.propF:"all";
+  const list=all.filter(i=>f==="all"||(f==="wait"?!replyOf(i):replyOf(i)===f)).sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
+  const body=list.length?gridSizerHTML()+`<div class="grid plan">${list.map(propCard).join("")}</div>`:
+    `<div class="empty">${all.length?"По этому фильтру ничего нет.":`Здесь фильмы, про которые вы сначала хотите узнать, смотрела ли их ${esc(w)}. В планы они не попадают, пока вы не решите. Нажмите «＋ На согласование».`}</div>`;
+  return `<div class="ptitle"><div><h1>Планы</h1><p>${all.length?`${cnt.wait} ждут ответа · ${cnt.seen} ${esc(w)} смотрела · ${cnt.new} не смотрела`:"Спросите, смотрела ли "+esc(w)+", прежде чем добавлять в планы"}</p></div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn pri" id="addProp">＋ На согласование</button></div></div>
+  ${planSwitch()}
+  <div class="toolbar">
+    <div class="chips" data-ui="propF"><button class="chip ${f==="all"?"on":""}" data-v="all">Все <small>${all.length}</small></button><button class="chip ${f==="wait"?"on":""}" data-v="wait">Ждём ответа <small>${cnt.wait}</small></button><button class="chip ${f==="seen"?"on":""}" data-v="seen">👁 Смотрела <small>${cnt.seen}</small></button><button class="chip ${f==="new"?"on":""}" data-v="new">Не смотрела <small>${cnt.new}</small></button></div>
+    <div class="sp"></div>
+    <button class="btn sm" data-shot="#plist" data-shot-title="На согласовании" title="Скопировать список картинкой — например, чтобы отправить ${esc(w)}"><i class="ico ico-cam"></i></button>
+  </div>
+  <div id="plist">${body}</div>`;
 }
 /* ---- вселенные и серии ---- */
 const MCU_NAME="Киновселенная Marvel (MCU)";
@@ -3090,6 +3167,7 @@ function planUniHTML(U,list){
     </section>`}).join("");
 }
 function vPlan(){
+  if(UI.planList==="prop")return vProp();
   const U=buildUni();
   const all=DB.items.filter(i=>i.status==="planned");
   const tp={};all.forEach(i=>tp[i.type]=(tp[i.type]||0)+1);
@@ -3111,6 +3189,7 @@ function vPlan(){
     (rel.length||up.length?gridSizerHTML():"")+(rel.length?`<div class="grid plan">${rel.map(it=>planCard(it,U)).join("")}</div>`:(up.length?"":`<div class="empty">${all.length?"По этим фильтрам ничего нет.":"План пуст. Добавьте что-нибудь посмотреть — или загляните в «Каталог»!"}</div>`))+
     (up.length?`<div class="sechead"><h2>🚧 Ещё не вышли</h2><span>${up.length} · просмотр впереди, сверху — те, что выйдут раньше</span></div><div class="grid plan">${up.map(it=>planCard(it,U)).join("")}</div>`:"");
   return `<div class="ptitle"><div><h1>Планы</h1><p>${rel.length} можно смотреть${up.length?` · ${up.length} ещё не вышли`:""}${tot?` · суммарно ≈ ${hoursStr(tot)}`:""}</p></div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" data-rl="open" title="Выбрать, что смотреть сегодня">🎰 Рулетка</button><button class="btn pri" id="addPlan">＋ В планы</button></div></div>
+  ${planSwitch()}
   ${contHTML()}
   <div class="toolbar">
     <div class="chips" data-ui="planType"><button class="chip ${UI.planType==="all"?"on":""}" data-v="all">Все</button>${Object.keys(tp).map(t=>`<button class="chip ${UI.planType===t?"on":""}" data-v="${esc(t)}">${esc(t)} <small>${tp[t]}</small></button>`).join("")}</div>
@@ -3140,7 +3219,7 @@ function tabsPanel(){
 
 /* ============ быстрые действия (перехватываем клик раньше общих обработчиков) ============ */
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-seen],[data-planuni],[data-unifind],[data-unifadd],[data-relnow],[data-cadd],[data-cwatch],[data-chide],[data-cprev],[data-cretry],[data-ckey],[data-cunhide],[data-csimi],[data-csimk],[data-csimx],[data-ppick]");
+  const t=e.target.closest("[data-seen],[data-planuni],[data-unifind],[data-unifadd],[data-relnow],[data-cadd],[data-cwatch],[data-chide],[data-cprev],[data-cretry],[data-ckey],[data-cunhide],[data-csimi],[data-csimk],[data-csimx],[data-ppick],[data-reply],[data-toplan],[data-propdel],[data-cprop],[data-ccprop]");
   if(!t)return;
   e.stopPropagation();e.preventDefault();
   const d=t.dataset;
@@ -3149,6 +3228,11 @@ document.addEventListener("click",e=>{
   if(d.csimx!==undefined){UI.catSim=null;saveUI();render(true);return}
   if(d.ppick){const it=itemById(d.ppick);if(it)openPosterPicker(it.tmdb,it.title,it.year,u=>{it.poster=u;commit();openDetail(it.id)});return}
   if(d.seen){toggleSeen(d.seen,d.who,!!t.closest("dialog"));return}
+  if(d.reply){const it=itemById(d.reply);if(it)setReply(d.reply,replyOf(it)===d.v?"":d.v);return}
+  if(d.toplan){const it=itemById(d.toplan);if(it){it.status="planned";it.addedAt=Date.now();if(t.closest("#dlg2"))closeDlg("dlg2");if(t.closest("#dlg"))closeDlg();commit();toast("✓ «"+it.title+"» — в планах"+(replyOf(it)==="seen"?" · "+askWho()+" смотрела":""))}return}
+  if(d.propdel){const it=itemById(d.propdel);if(it&&confirm("Убрать «"+it.title+"» из списка «На согласовании»?")){DB.items=DB.items.filter(x=>x!==it);DB.catalog.forEach(c=>{if(c.link?.itemId===it.id)c.link=null});commit();toast("Убрано из списка")}return}
+  if(d.cprop){if(t.closest("#dlg2"))closeDlg("dlg2");catAdd(d.cprop,"prop");return}
+  if(d.ccprop){const c=DB.catalog.find(x=>x.id===d.ccprop);if(c){const it={id:uid("i"),title:c.title,type:"Фильм",kind:"movie",status:PROP,year:c.year||null,genres:["Кинокомикс"],synopsis:"",poster:"",duration:null,ratings:{},order:null,watchedAt:null,addedAt:Date.now()};DB.items.push(it);c.link={itemId:it.id,season:null};commit();toast("🤝 На согласовании: "+c.title)}return}
   if(d.planuni!==undefined){UI.planUni=d.planuni;UI.planView="uni";saveUI();if(t.closest("dialog"))closeDlg();if(UI.tab!=="plan")location.hash="plan";else render(true);return}
   if(d.unifind){uniFind(d.unifind);return}
   if(d.unifadd){const s=t.closest("[data-uni]");t.disabled=true;uniAdd(d.unifadd,s?s.dataset.uni:"");return}
@@ -3264,10 +3348,17 @@ function catState(x,ix){
   if(b&&(!b.year||!x.y||Math.abs(b.year-(+x.y))<=1))return b;
   return null;
 }
+/* метка статуса в каталоге: смотрели / смотрим / на согласовании / в планах + кто уже видел */
+function catBadge(st){
+  const sn=st.status==="watched"?[]:seenList(st);
+  const main=st.status==="watched"?`<span class="ccb w">✓ Просмотрено</span>`:st.status==="watching"?`<span class="ccb c">▶ Смотрим</span>`:st.status===PROP?`<span class="ccb q" title="На согласовании">🤝 Согласуем</span>`:`<span class="ccb p">В планах</span>`;
+  const eye=sn.length?`<span class="ccb sub">${sn.length===DB.raters.length&&sn.length>1?"↻ Оба видели":"👁 "+esc(sn.join(", "))+" видел(а)"}</span>`:"";
+  return main+eye;
+}
 function catCard(x,st){
   const upc=x.rd&&x.rd>todayStr();
-  const badge=st?`<span class="ccb ${st.status==="watched"?"w":st.status==="watching"?"c":"p"}">${st.status==="watched"?"✓ Просмотрено":st.status==="watching"?"▶ Смотрим":"В планах"}</span>`:`<button class="cx" data-chide="${x.k}" title="Не интересно — скрыть" aria-label="Скрыть">✕</button>`;
-  const acts=(!st?`<button data-cadd="${x.k}">＋ В планы</button><button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:st.status==="planned"?`<button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:"")+`<button class="alt" data-csimk="${x.k}">≈ Похожие</button>`;
+  const badge=st?catBadge(st):`<button class="cx" data-chide="${x.k}" title="Не интересно — скрыть" aria-label="Скрыть">✕</button>`;
+  const acts=(!st?`<button data-cadd="${x.k}">＋ В планы</button><button class="alt" data-cprop="${x.k}">🤝 На согласование</button><button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:st.status==="planned"?`<button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:st.status==="proposed"?`<button class="alt" data-toplan="${st.id}">＋ В планы</button><button class="alt" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:"")+`<button class="alt" data-csimk="${x.k}">≈ Похожие</button>`;
   return `<div class="cc${st?" in":""}">
     <div class="cp" data-cprev="${x.k}" title="${esc(x.ov||x.title)}">${x.p?`<img loading="lazy" src="${tmdbImg(x.p,"w342")}" alt="">`:`<span class="ph0">${esc(initials(x.title))}</span>`}
       ${isNum(x.v)&&x.v>0&&x.vc>=5?`<span class="cr">★ ${x.v.toFixed(1)}</span>`:""}${badge}${upc?`<span class="cs">📅 ${new Date(x.rd+"T00:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"short",year:"numeric"}).replace(/\s*г\.$/,"")}</span>`:""}
@@ -3316,8 +3407,8 @@ async function catAdd(k,mode){
   try{
     const ex=DB.items.find(i=>i.tmdb&&i.tmdb.type===t&&String(i.tmdb.id)===id);
     let it=ex;
-    if(!it){toast("Добавляю…");it=await tmdbNewItem(t,id,"planned");DB.items.push(it)}
-    if(mode==="plan"){save();catPaint();toast("✓ «"+it.title+"» — в планах")}
+    if(!it){toast("Добавляю…");it=await tmdbNewItem(t,id,mode==="prop"?PROP:"planned");DB.items.push(it)}
+    if(mode==="plan"||mode==="prop"){save();catPaint();toast(mode==="prop"?"🤝 «"+it.title+"» — на согласовании":"✓ «"+it.title+"» — в планах")}
     else{
       if(document.getElementById("dlg2").open)closeDlg("dlg2");
       const created=!ex;
@@ -3339,7 +3430,7 @@ function catPreview(k){
       ${g.length?`<div class="chips" style="margin-bottom:12px">${g.map(t=>`<span class="tag am">${esc(t)}</span>`).join("")}</div>`:""}
       ${x.rd&&x.rd>todayStr()?`<p class="muted" style="margin:0 0 10px">📅 Выходит ${esc(new Date(x.rd+"T00:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"}).replace(/\s*г\.$/,""))}</p>`:""}
       <p class="syn${x.ov?"":" dim"}">${x.ov?esc(x.ov):"Описания на русском пока нет."}</p></div></div></div>
-  <div class="df"><a class="btn" href="https://www.themoviedb.org/${x.t}/${x.id}?language=ru-RU" target="_blank" rel="noopener">TMDB ↗</a>${st?"":`<button class="btn ghost" data-chide="${x.k}">Не интересно</button>`}<button class="btn" data-csimk="${x.k}">≈ Похожие</button><div class="sp"></div>${st?"":`<button class="btn" data-cadd="${x.k}">＋ В планы</button>`}${!st||st.status==="planned"?`<button class="btn pri" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:""}</div>`;
+  <div class="df"><a class="btn" href="https://www.themoviedb.org/${x.t}/${x.id}?language=ru-RU" target="_blank" rel="noopener">TMDB ↗</a>${st?"":`<button class="btn ghost" data-chide="${x.k}">Не интересно</button>`}<button class="btn" data-csimk="${x.k}">≈ Похожие</button><div class="sp"></div>${st?(st.status===PROP?`<button class="btn" data-toplan="${st.id}">＋ В планы</button>`:""):`<button class="btn" data-cadd="${x.k}">＋ В планы</button><button class="btn" data-cprop="${x.k}">🤝 На согласование</button>`}${!st||st.status==="planned"||st.status===PROP?`<button class="btn pri" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:""}</div>`;
   showDlg(html,"dlg2");
 }
 
@@ -3660,6 +3751,7 @@ function catStatus(c){
   const it=c.link?.itemId&&itemById(c.link.itemId);
   if(!it)return{st:"n"};
   if(it.status==="planned")return{st:"p",it};
+  if(it.status===PROP)return{st:"q",it};
   if(it.status==="watching"){const s=c.link.season!=null?(it.seasons||[]).find(s=>s.n===c.link.season):null;
     if(!s||!hasRatings(s.ratings)){if(c.link.season==null&&(hasRatings(it.ratings)||seasonsRated(it).length)){}else return{st:"c",it}}}
   if(c.link.season!=null){const s=(it.seasons||[]).find(s=>s.n===c.link.season);if(!s||!hasRatings(s.ratings))return{st:"p",it};
@@ -3695,9 +3787,9 @@ function vComics(){
         <span class="n">${c.franchise==="MCU"?c.num:c.num}</span>
         <span class="ttl" ${x.it?`data-open="${x.it.id}${c.link.season!=null&&x.st==="w"?":"+c.link.season:""}"`:`data-cedit="${c.id}"`}>${esc(c.title)}${c.link?.season!=null?` <span class="dim">· ${c.link.season} сезон</span>`:""}</span>
         <span class="yr">${c.year||""}</span>
-        <span>${x.st==="w"?`<span class="stt w">✓ Просмотрено</span>`:x.st==="p"?`<span class="stt p">В планах</span>`:x.st==="c"?`<span class="stt c">Смотрим</span>`:`<span class="stt n">Не отмечено</span>`}</span>
+        <span>${x.st==="w"?`<span class="stt w">✓ Просмотрено</span>`:x.st==="p"?`<span class="stt p">В планах</span>`:x.st==="q"?`<span class="stt q">🤝 На согласовании</span>`:x.st==="c"?`<span class="stt c">Смотрим</span>`:`<span class="stt n">Не отмечено</span>`}${x.it&&x.st!=="w"&&seenList(x.it).length?` <span class="stt s" title="Уже видел(а)">👁 ${esc(seenList(x.it).join(", "))}</span>`:""}</span>
         <span class="rs">${x.st==="w"?scBadge(x.score,"sm")+DB.raters.map(n=>`<span title="${esc(n)}">${scBadge(x.per[n],"sm")}</span>`).join(""):""}</span>
-        <span class="acts">${x.st==="n"?`<button class="btn sm" data-cplan="${c.id}">В планы</button>`:""}${x.st==="p"?`<button class="btn sm pri" data-finish="${x.it.id}" ${c.link.season!=null?`data-fseason="${c.link.season}"`:""}>✓</button>`:""}<button class="btn sm ghost" data-cedit="${c.id}" title="Изменить / связать" aria-label="Изменить / связать"><i class="ico ico-edit"></i></button></span>
+        <span class="acts">${x.st==="n"?`<button class="btn sm" data-cplan="${c.id}">В планы</button><button class="btn sm" data-ccprop="${c.id}" title="Сначала согласовать: смотрела ли Женя" aria-label="На согласование">🤝</button>`:""}${x.st==="q"?`<button class="btn sm" data-toplan="${x.it.id}" title="В планы">В планы</button>`:""}${x.st==="p"||x.st==="q"?`<button class="btn sm pri" data-finish="${x.it.id}" ${c.link.season!=null?`data-fseason="${c.link.season}"`:""}>✓</button>`:""}<button class="btn sm ghost" data-cedit="${c.id}" title="Изменить / связать" aria-label="Изменить / связать"><i class="ico ico-edit"></i></button></span>
       </div>`}).join("")||`<div class="crow"><span></span><span class="dim">Пусто</span></div>`}</div>`}).join("")}`;
 }
 
@@ -4073,6 +4165,7 @@ function bindView(){
   $("#resetF",v)?.addEventListener("click",()=>{Object.assign(UI,{type:"all",bucket:null,comics:"all",genre:"",tag:"",q:"",rater:"all",unr:"hide"});saveUI();render()});
   $("#newSeries",v)?.addEventListener("click",()=>openEdit(null,{type:"Сериал",status:"watched"}));
   $("#addPlan",v)?.addEventListener("click",()=>openEdit(null,{status:"planned"}));
+  $("#addProp",v)?.addEventListener("click",()=>openEdit(null,{status:PROP}));
   $$("[data-jump]",v).forEach(a=>a.addEventListener("click",e=>{e.preventDefault();document.getElementById(a.dataset.jump)?.scrollIntoView({behavior:"smooth"})}));
   if(UI.tab==="guide")guideBind(v);
   // data tab
@@ -4163,8 +4256,8 @@ function openDetail(id,season){
   <div class="db"><div class="det" id="detShot">
     <div><div class="poster">${posterHTML(it)}</div><button class="btn sm" data-ppick="${it.id}" style="width:100%;margin-top:8px;justify-content:center">🖼 Сменить постер</button><button class="btn sm" data-csimi="${it.id}" style="width:100%;margin-top:6px;justify-content:center">≈ Похожие в каталоге</button></div>
     <div>
-      <div class="meta"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}${it.status==="planned"?`<span class="stt p">В планах</span>`:it.status==="watching"?`<span class="stt c">Смотрим · ${esc(progLabel(it,true))}</span>`:`<span class="stt w">Просмотрено${it.order?` · №${it.order}`:""}</span>`}${it.watchedAt?`<span class="dim">${new Date(it.watchedAt).toLocaleDateString("ru-RU")}</span>`:""}${cm.map(c=>`<span class="tag acc">${FR[c.franchise]}${c.franchise==="MCU"?" №"+c.num:""}${c.link.season!=null?" (S"+c.link.season+")":""}</span>`).join("")}</div>
-      ${it.status==="planned"?detPlanBlock(it):""}
+      <div class="meta"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}${it.status==="planned"?`<span class="stt p">В планах</span>`:it.status===PROP?`<span class="stt q">🤝 На согласовании</span>`:it.status==="watching"?`<span class="stt c">Смотрим · ${esc(progLabel(it,true))}</span>`:`<span class="stt w">Просмотрено${it.order?` · №${it.order}`:""}</span>`}${it.watchedAt?`<span class="dim">${new Date(it.watchedAt).toLocaleDateString("ru-RU")}</span>`:""}${cm.map(c=>`<span class="tag acc">${FR[c.franchise]}${c.franchise==="MCU"?" №"+c.num:""}${c.link.season!=null?" (S"+c.link.season+")":""}</span>`).join("")}</div>
+      ${it.status==="planned"?detPlanBlock(it):isProp(it)?`<div class="dplan">${askRow(it)}</div>`:""}
       ${it.genres.length?`<div class="chips" style="margin-bottom:12px">${it.genres.map(g=>`<span class="tag am">${esc(g)}</span>`).join("")}</div>`:""}
       ${(it.tags||[]).length?`<div class="chips" style="margin-bottom:12px">${it.tags.map(t=>`<button class="chip" data-gotag="${esc(t)}" style="padding:3px 10px;font-size:12px">#${esc(t)}</button>`).join("")}</div>`:""}
       ${durLine(it)?`<p class="muted" style="margin:0 0 12px">⏱ ${esc(durLine(it))}${it.tmdb?`<span data-noshot> · <a href="${tmdbUrl(it)}" target="_blank" rel="noopener">TMDB ↗</a></span>`:""}</p>`:it.tmdb?`<p class="muted" style="margin:0 0 12px" data-noshot><a href="${tmdbUrl(it)}" target="_blank" rel="noopener">TMDB ↗</a></p>`:""}
@@ -4183,7 +4276,7 @@ function openDetail(id,season){
     ${canFreeze(it)?(it.frozen?`<button class="btn" data-unfreeze="${it.id}">Разморозить</button>`:`<button class="btn" data-freeze="${it.id}" title="Пока не продолжаем — убрать из «Продолжить просмотр»"><i class="ico ico-snow"></i> Заморозить</button>`):""}
     <button class="btn" data-edit="${it.id}">✎ Изменить</button>
     ${it.status==="planned"&&ser?`<button class="btn" data-start="${it.id}">▶ Начать смотреть</button>`:""}${it.status==="watched"&&ser&&it.seasonsTotal&&Math.max(0,...(it.seasons||[]).map(s=>s.n))<it.seasonsTotal?`<button class="btn" data-start="${it.id}" data-sn="${Math.max(0,...(it.seasons||[]).map(s=>s.n))+1}">▶ Продолжить</button>`:""}${it.status==="watching"?`<button class="btn" data-finish="${it.id}">✓ Досмотрели</button>`:""}
-    ${it.status==="planned"?`<button class="btn pri" data-finish="${it.id}">✓ Просмотрено</button>`:`<button class="btn pri" data-rate="${it.id}" data-season="${sObj?season:"whole"}">★ ${sObj?(arc?"Оценить арку":"Оценить сезон"):ser?"Оценить целиком":"Изменить оценку"}</button>`}</div>`;
+    ${isProp(it)?`<button class="btn" data-toplan="${it.id}">＋ В планы</button>`:""}${it.status==="planned"||isProp(it)?`<button class="btn pri" data-finish="${it.id}">✓ Просмотрено</button>`:`<button class="btn pri" data-rate="${it.id}" data-season="${sObj?season:"whole"}">★ ${sObj?(arc?"Оценить арку":"Оценить сезон"):ser?"Оценить целиком":"Изменить оценку"}</button>`}</div>`;
   const d=showDlg(html);
   posterBgApply(d,it);
   $("#dDel",d).onclick=()=>{
@@ -4209,7 +4302,7 @@ function openEdit(id,preset){
     <div class="form">
       <div class="f s6 tfind"><label>Название * <button type="button" class="lnk" id="eFindBtn" title="Найти фильм или сериал в TMDB и заполнить поля">🔎 найти данные</button></label><input class="inp" id="eTitle" value="${esc(it.title)}" required autocomplete="off"><div class="tres" id="eFind" hidden></div><span class="hint" id="eFindSt">${isNew?(apiKey("tmdb")?"Начните вводить название — предложу варианты, остальное заполнится само":"Подключите TMDB во вкладке «Данные» — тогда данные будут подтягиваться сами"):""}</span></div>
       <div class="f s2"><label>Тип</label><select class="inp" id="eType">${DB.types.map(t=>`<option ${t===it.type?"selected":""}>${esc(t)}</option>`).join("")}</select></div>
-      <div class="f s2"><label>Статус</label><select class="inp" id="eStatus"><option value="watched" ${it.status==="watched"?"selected":""}>Просмотрено</option><option value="watching" ${it.status==="watching"?"selected":""}>Смотрим сейчас</option><option value="planned" ${it.status==="planned"?"selected":""}>В планах</option></select></div>
+      <div class="f s2"><label>Статус</label><select class="inp" id="eStatus"><option value="watched" ${it.status==="watched"?"selected":""}>Просмотрено</option><option value="watching" ${it.status==="watching"?"selected":""}>Смотрим сейчас</option><option value="planned" ${it.status==="planned"?"selected":""}>В планах</option><option value="proposed" ${it.status===PROP?"selected":""}>На согласовании</option></select></div>
       <div class="f s2"><label>Год выхода</label><input class="inp" id="eYear" type="number" min="1890" max="2100" value="${it.year||""}"></div>
       <div class="f s6"><label class="chk"><input type="checkbox" id="eSer" ${it.kind==="series"?"checked":""}> Многосерийное (сезоны и серии)</label></div>
       <div class="f s2 mv"><label>Длительность, мин</label><input class="inp" id="eDur" inputmode="numeric" value="${it.kind!=="series"&&it.duration!=null?esc(it.duration):""}"></div>
@@ -4283,7 +4376,7 @@ function openEdit(id,preset){
     {const rd=$("#eRel",d).value;if(rd)o.relDate=rd;else delete o.relDate;
      if($("#eUnrel",d).checked)o.unreleased=true;else delete o.unreleased;
      const uv=$("#eUni",d).value.trim();if(uv)o.uni=uv;else delete o.uni;
-     const sb={};$$("[data-seenchk]",d).forEach(c=>{if(c.checked)sb[c.dataset.seenchk]=1});if(Object.keys(sb).length)o.seenBy=sb;else delete o.seenBy}
+     const sb={};$$("[data-seenchk]",d).forEach(c=>{if(c.checked)sb[c.dataset.seenchk]=1});if(Object.keys(sb).length)o.seenBy=sb;else delete o.seenBy;if(o.noSeen){for(const n in sb)delete o.noSeen[n];if(!Object.keys(o.noSeen).length)delete o.noSeen}}
     {const x=Object.assign({},o.ext||{});const en=$("#xEn",d).value.trim();if(en)x.en=en;else delete x.en;let ch=false;
      WSRC.forEach(s=>{const raw=$("#x_"+s.k,d).value.trim().replace(",",".").replace("%","");const v=raw===""?null:parseFloat(raw);const nv=isFinite(v)?v:null;if((x[s.k]??null)!==nv)ch=true;if(nv==null)delete x[s.k];else x[s.k]=nv});
      if(ch){x.at=new Date().toISOString();x.src=picked&&picked.ext?"OMDb (авто)":"вручную"}
@@ -4488,7 +4581,7 @@ const recoKey=(t,id)=>t+":"+id;
 function recoWho(){return UI.recoWho&&DB.raters.includes(UI.recoWho)?UI.recoWho:null}
 function recoSeeds(){
   const who=recoWho();
-  return DB.items.filter(i=>i.tmdb&&i.tmdb.id&&i.status!=="planned").map(it=>({it,s:itemScore(it,who)}))
+  return DB.items.filter(i=>i.tmdb&&i.tmdb.id&&(i.status!=="planned"&&i.status!=="proposed")).map(it=>({it,s:itemScore(it,who)}))
     .filter(x=>isNum(x.s)&&x.s>=3.8).sort((a,b)=>b.s-a.s).slice(0,10);
 }
 function recoHave(){const h=new Set(),t=new Set();for(const i of DB.items){if(i.tmdb)h.add(recoKey(i.tmdb.type,i.tmdb.id));t.add(normT(i.title));if(i.ext?.en)t.add(normT(i.ext.en))}
@@ -4692,7 +4785,7 @@ async function refreshMal(){
     await sleep(700)}
   commit();toast(`MyAnimeList: обновлено ${ok} из ${L.length}`);
 }
-function ourEntries(){return DB.items.filter(i=>i.status!=="planned").map(it=>({it,o:itemScore(it),per:Object.fromEntries(DB.raters.map(r=>[r,itemScore(it,r)]))})).filter(x=>isNum(x.o))}
+function ourEntries(){return DB.items.filter(i=>(i.status!=="planned"&&i.status!=="proposed")).map(it=>({it,o:itemScore(it),per:Object.fromEntries(DB.raters.map(r=>[r,itemScore(it,r)]))})).filter(x=>isNum(x.o))}
 function vWorld(){
   const src=UI.wSrc||"all",who=UI.wWho!=="all"&&DB.raters.includes(UI.wWho)?UI.wWho:null;
   const ours=x=>who?x.per[who]:x.o;
@@ -4780,7 +4873,7 @@ function vTaste(){
   const R=DB.raters;
   if(R.length<2)return `<div class="ptitle"><div><h1>Вкусы</h1></div></div><div class="empty">Для сравнения нужны минимум два оценщика.</div>`;
   let A=UI.tA&&R.includes(UI.tA)?UI.tA:R[0],B=UI.tB&&R.includes(UI.tB)&&UI.tB!==A?UI.tB:R.find(r=>r!==A);
-  const W=DB.items.filter(i=>i.status!=="planned");
+  const W=DB.items.filter(i=>(i.status!=="planned"&&i.status!=="proposed"));
   const P=W.map(it=>({it,a:itemScore(it,A),b:itemScore(it,B)})).filter(x=>isNum(x.a)&&isNum(x.b)).map(x=>({...x,d:x.a-x.b}));
   if(P.length<2)return `<div class="ptitle"><div><h1>Вкусы</h1></div></div><div class="empty">Мало общих оценок для сравнения.</div>`;
   const ad=avg(P.map(x=>Math.abs(x.d))),md=avg(P.map(x=>x.d)),r=pearson(P.map(x=>x.a),P.map(x=>x.b));
