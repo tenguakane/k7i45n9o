@@ -3137,8 +3137,8 @@ function propCard(it){
      </div></div>`;
 }
 function planSwitch(){
-  const nP=DB.items.filter(i=>i.status==="planned").length,nQ=DB.items.filter(isProp).length,on=UI.planList==="prop";
-  return `<div class="plsw"><div class="seg lg" data-ui="planList"><button data-v="plan" class="${on?"":"on"}">В планах <small>${nP}</small></button><button data-v="prop" class="${on?"on":""}">🤝 На согласовании <small>${nQ}</small></button></div></div>`;
+  const pl=DB.items.filter(i=>i.status==="planned"),nS=pl.filter(isUpcoming).length,nP=pl.length-nS,nQ=DB.items.filter(isProp).length,cur=UI.planList==="prop"?"prop":UI.planList==="soon"?"soon":"plan",on=cur==="prop";
+  return `<div class="plsw"><div class="seg lg" data-ui="planList"><button data-v="plan" class="${cur==="plan"?"on":""}">В планах <small>${nP}</small></button><button data-v="soon" class="${cur==="soon"?"on":""}">🚧 Скоро <small>${nS}</small></button><button data-v="prop" class="${on?"on":""}">🤝 На согласовании <small>${nQ}</small></button></div></div>`;
 }
 function vProp(){
   const all=DB.items.filter(isProp),w=askWho();
@@ -3320,7 +3320,8 @@ function planUniHTML(U,list){
 function vPlan(){
   if(UI.planList==="prop")return vProp();
   const U=buildUni();
-  const all=DB.items.filter(i=>i.status==="planned");
+  const soonTab=UI.planList==="soon";
+  const all=DB.items.filter(i=>i.status==="planned"&&isUpcoming(i)===soonTab);
   const tp={};all.forEach(i=>tp[i.type]=(tp[i.type]||0)+1);
   const nSeen=all.filter(i=>seenList(i).length).length;
   let list=all.slice();
@@ -3338,9 +3339,9 @@ function vPlan(){
   const rel=list.filter(i=>!isUpcoming(i));
   const tot=rel.reduce((s,i)=>s+(totalMinutes(i)||0),0);
   const body=uni?planUniHTML(U,list):
-    (rel.length||up.length?gridSizerHTML():"")+(rel.length?`<div class="grid plan">${rel.map(it=>planCard(it,U)).join("")}</div>`:(up.length?"":`<div class="empty">${all.length?"По этим фильтрам ничего нет.":"План пуст. Добавьте что-нибудь посмотреть — или загляните в «Каталог»!"}</div>`))+
-    (up.length?`<div class="sechead"><h2>🚧 Ещё не вышли</h2><span>${up.length} · просмотр впереди, сверху — те, что выйдут раньше</span></div><div class="grid plan">${up.map(it=>planCard(it,U)).join("")}</div>`:"");
-  return `<div class="ptitle"><div><h1>Планы</h1><p>${rel.length} можно смотреть${up.length?` · ${up.length} ещё не вышли`:""}${tot?` · суммарно ≈ ${hoursStr(tot)}`:""}</p></div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" data-rl="open" title="Выбрать, что смотреть сегодня">🎰 Рулетка</button><button class="btn pri" id="addPlan">＋ В планы</button></div></div>
+    (rel.length||up.length?gridSizerHTML():"")+(rel.length&&!soonTab?`<div class="grid plan">${rel.map(it=>planCard(it,U)).join("")}</div>`:(up.length?"":`<div class="empty">${all.length?"По этим фильтрам ничего нет.":soonTab?"Невышедших фильмов в планах нет. Они появятся здесь сами, когда вы добавите проект с будущей датой выхода.":"План пуст. Добавьте что-нибудь посмотреть — или загляните в «Каталог»!"}</div>`))+
+    (up.length?`<div class="grid plan">${up.map(it=>planCard(it,U)).join("")}</div>`:"");
+  return `<div class="ptitle"><div><h1>Планы</h1><p>${soonTab?`${up.length} ещё не вышли · сверху те, что выйдут раньше`:`${rel.length} можно смотреть`}${tot&&!soonTab?` · суммарно ≈ ${hoursStr(tot)}`:""}</p></div><div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn" data-rl="open" title="Выбрать, что смотреть сегодня">🎰 Рулетка</button><button class="btn pri" id="addPlan">＋ В планы</button></div></div>
   ${planSwitch()}
   ${contHTML()}
   <div class="toolbar plbar">
