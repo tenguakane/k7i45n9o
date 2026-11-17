@@ -1771,6 +1771,12 @@ dialog:focus,dialog:focus-visible{outline:none}
 .acprog .bar i{display:block;height:100%;background:var(--acc);transition:width .2s}
 @media(max-width:640px){.acr .acper{display:none}}
 .acr .afav{position:static;flex:none;width:30px;height:30px;background:rgba(255,255,255,.07)}
+.actc .akn{display:block;font-style:normal;font-size:11px;color:var(--acc);margin-top:3px;line-height:1.25}
+.pfav{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 6px}
+.pfav:empty{display:none}
+.pfc{font-size:11.5px;padding:2px 8px;border-radius:999px;background:rgba(245,197,24,.14);color:#f5c518;white-space:nowrap}
+.pfc em{font-style:normal;font-weight:800;opacity:.85}
+.favbar .bd{font-size:13px}
 </style>
 </head>
 <body>
@@ -3205,15 +3211,31 @@ function propCard(it){
        <div class="m"><span class="tag">${esc(it.type)}</span>${it.year?`<span>${it.year}</span>`:""}</div>
        ${it.genres.length?`<div class="gen">${it.genres.map(esc).join(", ")}</div>`:""}
        ${durLine(it)?`<div class="gen">⏱ ${esc(durLine(it))}</div>`:""}
+       <div class="pfav" data-pfav="${it.id}"></div>
        ${askRow(it)}
        <div class="act"><button class="btn sm pri" data-toplan="${it.id}" title="Решили смотреть — перенести в планы (отметки «смотрел(а)» сохранятся)">В планы</button><button class="btn sm icon" data-finish="${it.id}" title="Уже смотрели вместе — оценить" aria-label="Смотрели вместе — оценить">✓</button><button class="btn sm icon" data-edit="${it.id}" title="Изменить" aria-label="Изменить"><i class="ico ico-edit"></i></button><button class="btn sm icon" data-propdel="${it.id}" title="Убрать из списка" aria-label="Убрать из списка">✕</button></div>
      </div></div>`;
+}
+/* у проектов на согласовании показываем, кто из любимых актёров в них снимается */
+async function propFavFill(){
+  if(!favList().length||!apiKey("tmdb"))return;
+  const slots=[...document.querySelectorAll(".pfav[data-pfav]")];
+  for(const el of slots){
+    const it=itemById(el.dataset.pfav);if(!it||!castRef(it))continue;
+    let L;try{L=await castGet(it,0)}catch(_){continue}
+    if(!el.isConnected||!L)continue;
+    const hit=favList().map(f=>({f,c:L.find(c=>c.i===f.id&&c.k)})).filter(x=>x.c);
+    if(!hit.length)continue;
+    const multi=DB.raters.length>1;
+    el.innerHTML=hit.slice(0,4).map(({f})=>`<span class="pfc" title="${esc(f.n)}${multi?" — любит: "+(favBoth(f)?"оба":esc(favBy(f).join(", "))):""}">⭐ ${esc(f.n)}${multi?` <em>${esc(favInit(f))}</em>`:""}</span>`).join("")+(hit.length>4?`<span class="pfc">+${hit.length-4}</span>`:"");
+  }
 }
 function planSwitch(){
   const pl=DB.items.filter(i=>i.status==="planned"),nS=pl.filter(isUpcoming).length,nP=pl.length-nS,nQ=DB.items.filter(isProp).length,cur=UI.planList==="prop"?"prop":UI.planList==="soon"?"soon":"plan",on=cur==="prop";
   return `<div class="plsw"><div class="seg lg" data-ui="planList"><button data-v="plan" class="${cur==="plan"?"on":""}">В планах <small>${nP}</small></button><button data-v="soon" class="${cur==="soon"?"on":""}">🚧 Скоро <small>${nS}</small></button><button data-v="prop" class="${on?"on":""}">🤝 На согласовании <small>${nQ}</small></button></div></div>`;
 }
 function vProp(){
+  setTimeout(propFavFill,0);
   const all=DB.items.filter(isProp),me=propMe();
   const cnt={wait:0,seen:0,new:0,me:0};
   for(const i of all){cnt[propState(i)]++;if(me&&!replyOf(i,me))cnt.me++}
@@ -3603,14 +3625,15 @@ function catBodyHTML(){
     <div class="row"><input class="inp" id="catKeyIn" placeholder="Ключ TMDB (API Key или токен)" style="flex:1;min-width:200px" autocomplete="off"><button class="btn pri" data-ckey>Подключить</button></div></div>`;
   const ix=catIndex(),hid=new Set(DB.recoHide||[]),q=(UI.catQ||"").trim();
   let hiddenN=0;const vis=[];
-  const actor=catActorOn(),AF=UI.catActF||"new";
+  const actor=catActorOn(),AF=UI.catActF||"new",hotCut=new Date(Date.now()-365*864e5).toISOString().slice(0,10);
   for(const x of CAT.items){const st=catState(x,ix);
-    if(actor){const hide=AF==="all"?false:AF==="fresh"?!!st:!!st&&st.status==="watched";if(hide){hiddenN++;continue}vis.push([x,st]);continue}
+    if(actor){const hide=AF==="all"?false:AF==="fresh"?!!st:AF==="hot"?(!x.rd||x.rd<hotCut||(!!st&&st.status==="watched")):!!st&&st.status==="watched";if(hide){hiddenN++;continue}vis.push([x,st]);continue}
     if(!q&&!UI.catSim&&(hid.has(x.k)||(UI.catHide&&st))){hiddenN++;continue}vis.push([x,st])}
+  if(actor&&AF==="hot")vis.sort((a,b)=>String(b[0].rd||"").localeCompare(String(a[0].rd||"")));
   const sk=CAT.loading?Array.from({length:CAT.page?6:18},()=>`<div class="cc sk"><div class="cp"></div><div class="cbody"><i></i><i></i></div></div>`).join(""):"";
   let note="";
   if(CAT.err)note=`<p class="rnote">⚠ ${esc(CAT.err)} <button class="btn sm" data-cretry>Повторить</button></p>`;
-  else if(actor&&!CAT.loading&&CAT.page>=CAT.total&&!vis.length)note=`<div class="empty">${AF==="all"?"У этого актёра в TMDB пока нет работ.":"Всё, что снимали эти актёры, вы уже смотрели 🎉 Переключите фильтр на «Все работы», если хотите увидеть список."}</div>`;
+  else if(actor&&!CAT.loading&&CAT.page>=CAT.total&&!vis.length)note=`<div class="empty">${AF==="all"?"У этого актёра в TMDB пока нет работ.":AF==="hot"?"За последний год и в анонсах у этих актёров ничего нового, чего вы ещё не смотрели.":"Всё, что снимали эти актёры, вы уже смотрели 🎉 Переключите фильтр на «Все работы», если хотите увидеть список."}</div>`;
   else if(!CAT.loading&&CAT.page>=CAT.total&&!vis.length)note=`<div class="empty">Ничего не нашлось. Попробуйте другой жанр, год или запрос.</div>`;
   else if(!CAT.loading&&CAT.page&&CAT.page>=CAT.total)note=`<p class="rnote" style="text-align:center">Это всё, что есть в этой подборке</p>`;
   const nh=(DB.recoHide||[]).length;
@@ -3619,7 +3642,7 @@ function catBodyHTML(){
 }
 function catPaint(){const el=$("#catBody");if(el)el.innerHTML=catBodyHTML()}
 function vCatalog(){
-  catSync();
+  catSync();setTimeout(()=>{favBdayPaint();if(favList().length&&!FAVBD.size)favBdayCheck().catch(()=>{})},0);
   const gl=catGenres();if(UI.catGenre&&!gl.some(g=>String(g[0])===String(UI.catGenre)))UI.catGenre="";
   const sim=UI.catSim&&UI.catSim.id,actor=catActorOn(),y0=new Date().getFullYear();
   const years=Array.from({length:y0-1989},(_,i)=>y0+1-i);
@@ -3840,7 +3863,7 @@ function favRefresh(id){
     const w=b.closest(".actw");if(w)w.classList.toggle("fav",on);
   }
   for(const w of document.querySelectorAll(`.favp[data-favp="${id}"]`)){const b=w.querySelector("[data-fav]");if(b)w.outerHTML=favPersonsHTML(id,b.dataset.fn,b.dataset.fp)}
-  const fb=document.getElementById("favBar");if(fb)fb.outerHTML=favBarHTML();
+  const fb=document.getElementById("favBar");if(fb){fb.outerHTML=favBarHTML();favBdayPaint()}
   const pk=document.getElementById("favPick");if(pk)pk.remove();
   if(UI.tab==="analytics"&&UI.sub==="actors"&&document.getElementById("acList"))acPaint();
 }
@@ -3869,6 +3892,27 @@ function favPick(id,n,p,btn){
 }
 document.addEventListener("click",e=>{if(!e.target.closest("#favPick,button[data-fav]:not(.chip)"))document.getElementById("favPick")?.remove()},true);
 document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("favPick")?.remove()});
+/* дни рождения любимых актёров: берём из статьи (кэш 20 дней), раз в день напоминаем */
+const FAVBD=new Set();
+async function favBdayCheck(){
+  if(!apiKey("tmdb")||!DB||!favList().length)return;
+  const d=new Date(),md=String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"),names=[];
+  FAVBD.clear();
+  for(const f of favList()){
+    let P;try{P=await personGet(f.id)}catch(_){continue}
+    if(P&&P.bd&&!P.dd&&P.bd.slice(5)===md){FAVBD.add(f.id);names.push(P.n||f.n)}
+  }
+  favBdayPaint();
+  const today=d.toISOString().slice(0,10);
+  if(names.length&&UI.favBdToast!==today){UI.favBdToast=today;saveUI();toast("🎂 Сегодня день рождения: "+names.join(", ")+" — загляните в «Каталог» → любимые актёры")}
+}
+function favBdayPaint(){
+  for(const b of document.querySelectorAll("#favBar [data-actsel]")){
+    const id=+b.dataset.actsel;if(!id||b.querySelector(".bd")||!FAVBD.has(id))continue;
+    b.insertAdjacentHTML("beforeend",' <span class="bd" title="Сегодня день рождения">🎂</span>');
+  }
+}
+setTimeout(()=>favBdayCheck().catch(()=>{}),6000);
 const catActorOn=()=>!!UI.catActor&&(UI.catActor!=="*"||favShown().length>0);
 function favBarHTML(){
   const F=favShown(),all=favList(),R=DB.raters,multi=R.length>1;
@@ -3884,7 +3928,7 @@ function actBarHTML(){
   const all=UI.catActor==="*",f=favList().find(x=>String(x.id)===String(UI.catActor)),F=UI.catActF||"new",W=favWhoCur();
   const name=all?(W==="all"?"все любимые актёры":W==="&"?"общие любимые актёры":"любимые актёры: "+W):(f?f.n:(UI.catActorName||"актёр"));
   return `<div class="simbar"><span>⭐ Что ещё не смотрели: <b>${esc(name)}</b></span>
-    <div class="chips" data-ui="catActF"><button class="chip ${F==="new"?"on":""}" data-v="new" title="Всё, что вы ещё не оценили (в планах тоже видно)">Не смотрели</button><button class="chip ${F==="fresh"?"on":""}" data-v="fresh" title="Только то, чего ещё нет в вашем списке">Совсем новое</button><button class="chip ${F==="all"?"on":""}" data-v="all">Все работы</button></div>
+    <div class="chips" data-ui="catActF"><button class="chip ${F==="new"?"on":""}" data-v="new" title="Всё, что вы ещё не оценили (в планах тоже видно)">Не смотрели</button><button class="chip ${F==="fresh"?"on":""}" data-v="fresh" title="Только то, чего ещё нет в вашем списке">Совсем новое</button><button class="chip ${F==="hot"?"on":""}" data-v="hot" title="Вышло за последний год или ещё готовится, и вы ещё не смотрели — сверху самое свежее">🆕 Новинки</button><button class="chip ${F==="all"?"on":""}" data-v="all">Все работы</button></div>
     ${all?"":`<button class="btn sm" data-actor="${UI.catActor}">Статья об актёре</button>`}<button class="btn sm" data-actx>✕ Назад к каталогу</button></div>`;
 }
 async function catActorMore(){
@@ -3917,7 +3961,23 @@ function castChipsHTML(it){
   if(n>10)return `<div style="margin:0 0 10px"><select class="inp" data-castsel style="max-width:220px"><option value="0">Весь сериал</option>${Array.from({length:n},(_,i)=>`<option value="${i+1}" ${cur===i+1?"selected":""}>Сезон ${i+1}</option>`).join("")}</select></div>`;
   return `<div class="chips" style="margin:0 0 10px"><button class="chip ${cur?"":"on"}" data-castseason="0">Весь сериал</button>${Array.from({length:n},(_,i)=>`<button class="chip ${cur===i+1?"on":""}" data-castseason="${i+1}">Сезон ${i+1}</button>`).join("")}</div>`;
 }
-const actCard=a=>`<div class="actw${isFav(a.i)?" fav":""}"><button type="button" class="actc" data-actor="${a.i}" data-an="${esc(a.n)}" title="Статья об актёре: ${esc(a.n)}"><span class="ap">${a.p?`<img loading="lazy" src="${tmdbImg(a.p,"w185")}" alt="">`:`<i>${esc(initials(a.n))}</i>`}</span><b>${esc(a.n)}</b><small>${esc(a.c||"")}${a.c&&a.e>1?` · ${a.e} эп.`:""}</small></button>${favBtn(a.i,a.n,a.p)}</div>`;
+const actCard=(a,K)=>{const kn=K&&K.get(a.i);return `<div class="actw${isFav(a.i)?" fav":""}"><button type="button" class="actc" data-actor="${a.i}" data-an="${esc(a.n)}" title="Статья об актёре: ${esc(a.n)}"><span class="ap">${a.p?`<img loading="lazy" src="${tmdbImg(a.p,"w185")}" alt="">`:`<i>${esc(initials(a.n))}</i>`}</span><b>${esc(a.n)}</b><small>${esc(a.c||"")}${a.c&&a.e>1?` · ${a.e} эп.`:""}</small>${kn?`<em class="akn" title="${esc("Мы уже видели: "+kn.map(x=>x.it.title).slice(0,6).join(", "))}">👁 ${kn.length} ${plural(kn.length,"проект","проекта","проектов")} · ${f1(avg(kn.map(x=>x.s)))}</em>`:""}</button>${favBtn(a.i,a.n,a.p)}</div>`};
+/* где ещё мы видели актёров этого проекта — по составам, которые уже посчитаны или лежат в кэше (без запросов в сеть) */
+async function acWarm(){
+  for(const it of acItems()){
+    if(ACS.casts.has(it.id))continue;const ref=castRef(it);if(!ref)continue;
+    const c=await cacheGet(castKey(ref.type,ref.id,0),CAST_TTL);if(c&&c.list)ACS.casts.set(it.id,c.list);
+  }
+}
+function acKnown(self){
+  const m=new Map();
+  for(const it of acItems()){
+    if(self&&it.id===self.id)continue;const L=ACS.casts.get(it.id);if(!L)continue;
+    const sc=itemScore(it);
+    for(const c of L){if(!c.k)continue;let a=m.get(c.i);if(!a){a=[];m.set(c.i,a)}a.push({it,s:sc})}
+  }
+  return m;
+}
 function castBoxHTML(){return `<div class="dsec" id="castBox" data-noshot><h4>Актёры</h4></div>`}
 async function castFind(it,box){
   box.innerHTML=`<h4>Актёры</h4><p class="dim" style="font-size:13px;margin:0">⏳ Ищу «${esc(it.title)}» в TMDB…</p>`;
@@ -3947,10 +4007,12 @@ async function castPaint(it){
   catch(e){if(!box.isConnected)return;box.innerHTML=`<h4>Актёры</h4>${chips}<p class="rnote">⚠ ${esc(e.message==="Failed to fetch"?"нет связи с TMDB":/404/.test(e.message)?"TMDB не знает состав "+(season?"этого сезона":"этого проекта"):e.message)} <button class="btn sm" data-castretry="${it.id}">Повторить</button></p>`;return}
   if(!box.isConnected||CASTUI.id!==it.id||(CASTUI.season||0)!==season)return;
   if(!list||!list.length){box.innerHTML=`<h4>Актёры${season?` · сезон ${season}`:""}</h4>${chips}<p class="dim" style="font-size:13px;margin:0">Состав в TMDB не указан.</p>`;return}
-  const shown=CASTUI.all?list:list.slice(0,14);
+  try{await acWarm()}catch(_){}
+  if(!box.isConnected||CASTUI.id!==it.id||(CASTUI.season||0)!==season)return;
+  const K=acKnown(it),shown=CASTUI.all?list:list.slice(0,14);
   box.innerHTML=`<h4>Актёры${season?` · сезон ${season}`:""} <span class="dim" style="font-weight:600;text-transform:none;letter-spacing:0">· ${list.length}${list.length>=80?"+":""}</span></h4>${chips}
     ${castVoice(it)?`<p class="dim" style="font-size:12.5px;margin:0 0 8px">Для озвучки TMDB указывает актёров, которые говорят голосами героев.</p>`:""}
-    <div class="actgrid">${shown.map(actCard).join("")}</div>
+    <div class="actgrid">${shown.map(a=>actCard(a,K)).join("")}</div>
     ${list.length>shown.length?`<p style="margin:10px 0 0"><button class="btn sm" data-castall="1">Показать всех (${list.length})</button></p>`:CASTUI.all&&list.length>14?`<p style="margin:10px 0 0"><button class="btn sm ghost" data-castall="0">Свернуть</button></p>`:""}
     <p class="dim" style="font-size:12px;margin:8px 0 0">Нажмите на актёра — откроется статья с его фильмографией. ☆ — в любимые.</p>`;
 }
