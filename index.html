@@ -1748,6 +1748,29 @@ dialog:focus,dialog:focus-visible{outline:none}
 .ghint .gh-chip{font-size:14.5px}
 .ghint .gh-it{font-size:14px}
 .ghint .gh-n{font-size:13px}
+
+.chip.sm{padding:3px 9px;font-size:12.5px}
+.favbar .fi{font-size:10px;font-weight:800;opacity:.8;margin-left:3px}
+.favp{display:inline-flex;gap:6px;margin-left:8px;vertical-align:middle}
+.favp .chip{font-size:12.5px}
+#favPick{position:fixed;z-index:9999;background:var(--card,#1b1b22);border:1px solid var(--bd,#333);border-radius:12px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px;min-width:170px}
+#favPick .fpt{font-size:12px;color:var(--tx2);padding:4px 8px 6px}
+#favPick button{all:unset;cursor:pointer;padding:8px 10px;border-radius:8px;font-size:14px}
+#favPick button:hover,#favPick button:focus-visible{background:rgba(255,255,255,.09)}
+.aclist{display:flex;flex-direction:column;gap:6px}
+.acr{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid var(--bd,#2a2a33);border-radius:12px;cursor:pointer;background:var(--card,transparent)}
+.acr:hover{border-color:var(--acc)}
+.acr .acn{width:26px;text-align:center;font-weight:800;color:var(--tx2)}
+.acr .acph{width:44px;height:44px;border-radius:50%;overflow:hidden;flex:none;background:rgba(255,255,255,.06);display:grid;place-items:center}
+.acr .acph img{width:100%;height:100%;object-fit:cover}
+.acr .acm{min-width:0;flex:1;display:flex;flex-direction:column}
+.acr .acm small{color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acr .acper{display:flex;gap:8px;font-size:12px;color:var(--tx2)}
+.acr .acper span{display:inline-flex;gap:4px;align-items:center}
+.acprog .bar{height:8px;border-radius:6px;background:rgba(255,255,255,.1);margin-top:10px;overflow:hidden}
+.acprog .bar i{display:block;height:100%;background:var(--acc);transition:width .2s}
+@media(max-width:640px){.acr .acper{display:none}}
+.acr .afav{position:static;flex:none;width:30px;height:30px;background:rgba(255,255,255,.07)}
 </style>
 </head>
 <body>
@@ -2562,7 +2585,7 @@ function normalize(db){
     if(i.kind==="series")i.seasons=(i.seasons||[]).map(s=>({n:+s.n,ratings:s.ratings||{},order:s.order??null,watchedAt:s.watchedAt||null})).sort((a,b)=>a.n-b.n);
     return i});
   db.catalog=db.catalog||[];
-  db.favActors=Array.isArray(db.favActors)?db.favActors.filter(f=>f&&isNum(+f.id)).map(f=>({id:+f.id,n:String(f.n||""),p:String(f.p||"")})):[];if(!db.favActors.length)delete db.favActors;
+  db.favActors=Array.isArray(db.favActors)?db.favActors.filter(f=>f&&isNum(+f.id)).map(f=>{const o={id:+f.id,n:String(f.n||""),p:String(f.p||"")};if(Array.isArray(f.by)){const by=db.raters.filter(r=>f.by.includes(r));if(by.length)o.by=by}return o}):[];if(!db.favActors.length)delete db.favActors;
   db.collections=db.collections||[];
   db.log=Array.isArray(db.log)?db.log:[];
   if(!db.opAdded){if(!db.items.some(i=>i.id==="op1"||normT(i.title)===normT("Ван Пис")))db.items.push(onePieceItem());db.opAdded=1}
@@ -3412,10 +3435,10 @@ function vPlan(){
 }
 
 /* ============ аналитика: Статистика + Вкусы + Мы и мир ============ */
-const SUBTABS=[["stats","📊 Статистика"],["taste","🤝 Вкусы"],["world","🌍 Мы и мир"],["wrapped","🦊 Лисий год"],["geo","🗺 География"]];
+const SUBTABS=[["stats","📊 Статистика"],["taste","🤝 Вкусы"],["world","🌍 Мы и мир"],["wrapped","🦊 Лисий год"],["geo","🗺 География"],["actors","🎭 Актёры"]];
 function vAnalytics(){
   const sub=SUBTABS.some(s=>s[0]===UI.sub)?UI.sub:"stats";
-  return `<div class="subnav"><div class="seg lg" data-ui="sub" role="tablist">${SUBTABS.map(([k,n])=>`<button role="tab" data-v="${k}" class="${sub===k?"on":""}" aria-selected="${sub===k}">${n}</button>`).join("")}</div></div>`+({stats:vStats,taste:vTaste,world:vWorld,wrapped:vWrapped,geo:vGeo}[sub])();
+  return `<div class="subnav"><div class="seg lg" data-ui="sub" role="tablist">${SUBTABS.map(([k,n])=>`<button role="tab" data-v="${k}" class="${sub===k?"on":""}" aria-selected="${sub===k}">${n}</button>`).join("")}</div></div>`+({stats:vStats,taste:vTaste,world:vWorld,wrapped:vWrapped,geo:vGeo,actors:vActors}[sub])();
 }
 function tabsPanel(){
   return `<div class="panel" id="tabsP"><h3>Вкладки</h3><p>Какие вкладки показывать в меню (на этом устройстве). Скрытое можно вернуть здесь в любой момент.</p>
@@ -3513,7 +3536,7 @@ const catNorm=(x,t)=>({k:t+":"+x.id,t,id:x.id,title:x.title||x.name||x.original_
   g:x.genre_ids||[],lang:x.original_language,oc:x.origin_country||[],ov:x.overview||""});
 const catType=x=>tmdbType(x.t,{genre_ids:x.g,origin_country:x.oc,original_language:x.lang});
 function catSync(){
-  const key=JSON.stringify([!!apiKey("tmdb"),UI.catCat,UI.catSort,UI.catGenre,UI.catYear,(UI.catQ||"").trim(),UI.catSim&&UI.catSim.t+UI.catSim.id,catActorOn()?String(UI.catActor):""]);
+  const key=JSON.stringify([!!apiKey("tmdb"),UI.catCat,UI.catSort,UI.catGenre,UI.catYear,(UI.catQ||"").trim(),UI.catSim&&UI.catSim.t+UI.catSim.id,catActorOn()?String(UI.catActor)+(UI.catActor==="*"?"|"+favShown().map(f=>f.id).join(","):""):""]);
   if(CAT.key!==key){Object.assign(CAT,{simPath:"",key,tok:CAT.tok+1,loading:false,items:[],seen:new Set(),page:0,total:1,totalRes:0,err:""})}
 }
 async function catMore(){
@@ -3780,31 +3803,86 @@ const fmtD=iso=>{const d=new Date(iso+"T00:00:00");return isNaN(d)?"":d.toLocale
 
 /* --- любимые актёры --- */
 const favList=()=>Array.isArray(DB.favActors)?DB.favActors:[];
-const isFav=id=>favList().some(f=>f.id===+id);
-const favBtn=(id,n,p,cls="afav")=>`<button type="button" class="${cls}${isFav(id)?" on":""}" data-fav="${id}" data-fn="${esc(n)}" data-fp="${esc(p||"")}" title="${isFav(id)?"Убрать из любимых актёров":"В любимые актёры"}" aria-label="Любимый актёр" aria-pressed="${isFav(id)}">${isFav(id)?"★":"☆"}</button>`;
-function favToggle(id,n,p){
-  id=+id;const a=favList().slice(),i=a.findIndex(f=>f.id===id);
-  if(i>=0)a.splice(i,1);else a.push({id,n:n||"",p:p||""});
+/* кто отметил актёра: поле by (список оценщиков); у старых записей его нет — тогда считаем, что любим оба */
+const favBy=f=>Array.isArray(f.by)&&f.by.length?DB.raters.filter(r=>f.by.includes(r)):DB.raters.slice();
+const favOf=(f,w)=>favBy(f).includes(w);
+const favFind=id=>favList().find(f=>f.id===+id);
+const favBoth=f=>favBy(f).length===DB.raters.length;
+const favWhoCur=()=>{const w=UI.favWho;return DB.raters.length>1&&(w==="&"||DB.raters.includes(w))?w:"all"};
+const favShown=()=>{const w=favWhoCur(),a=favList();return w==="all"?a:w==="&"?a.filter(favBoth):a.filter(f=>favOf(f,w))};
+const favInit=f=>favBoth(f)&&DB.raters.length>1?"❤":favBy(f).map(r=>r.charAt(0).toUpperCase()).join("");
+/* состояние звёздочки: у «меня» (если известно, кто я), иначе — отмечен кем угодно */
+function isFav(id){const f=favFind(id);if(!f)return false;const me=propMe();return me&&DB.raters.length>1?favOf(f,me):true}
+const favTitle=id=>{const f=favFind(id);if(!f)return"В любимые актёры";const by=favBy(f);return"Любимый актёр: "+(by.length===DB.raters.length&&by.length>1?"оба":by.join(", "))+(isFav(id)?" · нажмите, чтобы убрать":" · нажмите, чтобы изменить")};
+const favBtn=(id,n,p,cls="afav")=>`<button type="button" class="${cls}${isFav(id)?" on":""}" data-fav="${id}" data-fn="${esc(n)}" data-fp="${esc(p||"")}" title="${favTitle(id)}" aria-label="Любимый актёр" aria-pressed="${isFav(id)}">${isFav(id)?"★":"☆"}</button>`;
+/* отметки по людям в статье об актёре: «☆ Дима  ☆ Женя» */
+function favPersonsHTML(id,n,p){
+  if(DB.raters.length<2)return favBtn(id,n,p,"afav big");
+  const f=favFind(id);
+  return `<span class="favp" data-favp="${id}">${DB.raters.map(r=>{const on=!!f&&favOf(f,r);return `<button type="button" class="chip fav sm${on?" on":""}" data-fav="${id}" data-fn="${esc(n)}" data-fp="${esc(p||"")}" data-who="${esc(r)}" aria-pressed="${on}" title="${on?"Убрать из любимых у: ":"В любимые у: "}${esc(r)}">${on?"★":"☆"} ${esc(r)}</button>`}).join("")}</span>`;
+}
+/* w — имя оценщика или "*" (оба); on — включить/выключить */
+function favSet(id,n,p,w,on){
+  id=+id;const R=DB.raters,ws=w==="*"?R.slice():[w],a=favList().map(f=>Object.assign({},f)),i=a.findIndex(f=>f.id===id);
+  if(i<0){if(!on)return;a.push({id,n:n||"",p:p||"",by:ws.filter(x=>R.includes(x))})}
+  else{
+    const by=on?R.filter(x=>favBy(a[i]).includes(x)||ws.includes(x)):favBy(a[i]).filter(x=>!ws.includes(x));
+    if(!by.length)a.splice(i,1);else{a[i].by=by;if(n&&!a[i].n)a[i].n=n;if(p&&!a[i].p)a[i].p=p}
+  }
   if(a.length)DB.favActors=a;else delete DB.favActors;
-  save();
-  for(const b of document.querySelectorAll(`[data-fav="${id}"]`)){
-    const on=i<0;b.classList.toggle("on",on);b.textContent=on?"★":"☆";b.setAttribute("aria-pressed",String(on));b.title=on?"Убрать из любимых актёров":"В любимые актёры";
+  save();favRefresh(id);
+  const f=a.find(x=>x.id===id),who=w==="*"?"у обоих":"у "+w;
+  toast(f&&(on||favOf(f,w))?"⭐ "+(n||"Актёр")+" — в любимых "+who:"Убрано из любимых "+who);
+}
+function favRefresh(id){
+  for(const b of document.querySelectorAll(`button.afav[data-fav="${id}"]`)){
+    const on=isFav(id);b.classList.toggle("on",on);b.textContent=on?"★":"☆";b.setAttribute("aria-pressed",String(on));b.title=favTitle(id);
     const w=b.closest(".actw");if(w)w.classList.toggle("fav",on);
   }
+  for(const w of document.querySelectorAll(`.favp[data-favp="${id}"]`)){const b=w.querySelector("[data-fav]");if(b)w.outerHTML=favPersonsHTML(id,b.dataset.fn,b.dataset.fp)}
   const fb=document.getElementById("favBar");if(fb)fb.outerHTML=favBarHTML();
-  toast(i<0?"⭐ "+(n||"Актёр")+" — в любимых":"Убрано из любимых");
+  const pk=document.getElementById("favPick");if(pk)pk.remove();
+  if(UI.tab==="analytics"&&UI.sub==="actors"&&document.getElementById("acList"))acPaint();
 }
-const catActorOn=()=>!!UI.catActor&&(UI.catActor!=="*"||favList().length>0);
+/* общий клик по звёздочке: если известно, кто я — меняем только мои; иначе спрашиваем */
+function favToggle(id,n,p,who,btn){
+  id=+id;const R=DB.raters,f=favFind(id);
+  if(who){
+    if(who==="*"){favSet(id,n,p,"*",!(f&&favBoth(f)));return}
+    favSet(id,n,p,who,!(f&&favOf(f,who)));return;
+  }
+  const me=propMe();
+  if(R.length<2){favSet(id,n,p,R[0]||"*",!f);return}
+  if(me){favSet(id,n,p,me,!(f&&favOf(f,me)));return}
+  favPick(id,n,p,btn);
+}
+function favPick(id,n,p,btn){
+  const old=document.getElementById("favPick");if(old)old.remove();
+  const f=favFind(id),box=document.createElement("div");box.id="favPick";box.setAttribute("role","menu");
+  const row=(w,lab,on)=>`<button type="button" role="menuitem" data-fav="${id}" data-fn="${esc(n)}" data-fp="${esc(p||"")}" data-who="${esc(w)}">${on?"★":"☆"} ${esc(lab)}</button>`;
+  box.innerHTML=`<div class="fpt">Чей любимый актёр?</div>${DB.raters.map(r=>row(r,r,!!f&&favOf(f,r))).join("")}${row("*","Оба",!!f&&favBoth(f))}`;
+  document.body.appendChild(box);
+  const r=btn?btn.getBoundingClientRect():{left:20,bottom:20,top:20},w=box.offsetWidth,h=box.offsetHeight;
+  let x=Math.min(Math.max(8,r.left),innerWidth-w-8),y=r.bottom+6;if(y+h>innerHeight-8)y=Math.max(8,r.top-h-6);
+  box.style.left=x+"px";box.style.top=y+"px";
+  const first=box.querySelector("button");if(first)first.focus();
+}
+document.addEventListener("click",e=>{if(!e.target.closest("#favPick,button[data-fav]:not(.chip)"))document.getElementById("favPick")?.remove()},true);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("favPick")?.remove()});
+const catActorOn=()=>!!UI.catActor&&(UI.catActor!=="*"||favShown().length>0);
 function favBarHTML(){
-  const F=favList();
-  if(!F.length)return `<div class="favbar" id="favBar"><span class="dim" style="font-size:13px">⭐ Любимые актёры: отмечайте ☆ в карточке проекта или в статье об актёре — здесь появится всё, что они снимали и что вы ещё не смотрели.</span></div>`;
+  const F=favShown(),all=favList(),R=DB.raters,multi=R.length>1;
+  const W=favWhoCur(),cnt=w=>w==="all"?all.length:w==="&"?all.filter(favBoth).length:all.filter(f=>favOf(f,w)).length;
+  if(!all.length)return `<div class="favbar" id="favBar"><span class="dim" style="font-size:13px">⭐ Любимые актёры: отмечайте ☆ в карточке проекта или в статье об актёре — здесь появится всё, что они снимали и что вы ещё не смотрели.</span></div>`;
+  const whoChips=multi?`<span class="chips" data-ui="favWho" style="gap:6px"><button class="chip sm ${W==="all"?"on":""}" data-v="all">Все <small>${cnt("all")}</small></button>${R.map(r=>`<button class="chip sm ${W===r?"on":""}" data-v="${esc(r)}">${esc(r)} <small>${cnt(r)}</small></button>`).join("")}<button class="chip sm ${W==="&"?"on":""}" data-v="&" title="Актёры, которых любите вы оба">Общие <small>${cnt("&")}</small></button></span>`:"";
   const cur=String(UI.catActor||"");
-  return `<div class="favbar" id="favBar"><span class="fl">⭐ Любимые актёры</span>${F.length>1?`<button class="chip ${cur==="*"?"on":""}" data-actsel="*" title="Что ещё не смотрели у любого из любимых">Все сразу</button>`:""}${F.map(f=>`<button class="chip fav ${cur===String(f.id)?"on":""}" data-actsel="${f.id}" data-an="${esc(f.n)}" title="Что ещё не смотрели у ${esc(f.n)}">${f.p?`<img src="${tmdbImg(f.p,"w92")}" alt="">`:""}${esc(f.n)}</button>`).join("")}</div>`;
+  const empty=!F.length?`<span class="dim" style="font-size:13px">${W==="&"?"Общих любимых актёров пока нет.":"У "+esc(W)+" пока нет любимых актёров."}</span>`:"";
+  return `<div class="favbar" id="favBar"><span class="fl">⭐ Любимые актёры</span>${whoChips}${F.length>1?`<button class="chip ${cur==="*"?"on":""}" data-actsel="*" title="Что ещё не смотрели у любого из показанных">Все сразу</button>`:""}${F.map(f=>`<button class="chip fav ${cur===String(f.id)?"on":""}" data-actsel="${f.id}" data-an="${esc(f.n)}" title="Что ещё не смотрели у ${esc(f.n)}${multi?" · любит: "+(favBoth(f)?"оба":esc(favBy(f).join(", "))):""}">${f.p?`<img src="${tmdbImg(f.p,"w92")}" alt="">`:""}${esc(f.n)}${multi?` <span class="fi">${esc(favInit(f))}</span>`:""}</button>`).join("")}${empty}</div>`;
 }
 function actBarHTML(){
   if(!catActorOn())return"";
-  const all=UI.catActor==="*",f=favList().find(x=>String(x.id)===String(UI.catActor)),F=UI.catActF||"new";
-  const name=all?"все любимые актёры":(f?f.n:(UI.catActorName||"актёр"));
+  const all=UI.catActor==="*",f=favList().find(x=>String(x.id)===String(UI.catActor)),F=UI.catActF||"new",W=favWhoCur();
+  const name=all?(W==="all"?"все любимые актёры":W==="&"?"общие любимые актёры":"любимые актёры: "+W):(f?f.n:(UI.catActorName||"актёр"));
   return `<div class="simbar"><span>⭐ Что ещё не смотрели: <b>${esc(name)}</b></span>
     <div class="chips" data-ui="catActF"><button class="chip ${F==="new"?"on":""}" data-v="new" title="Всё, что вы ещё не оценили (в планах тоже видно)">Не смотрели</button><button class="chip ${F==="fresh"?"on":""}" data-v="fresh" title="Только то, чего ещё нет в вашем списке">Совсем новое</button><button class="chip ${F==="all"?"on":""}" data-v="all">Все работы</button></div>
     ${all?"":`<button class="btn sm" data-actor="${UI.catActor}">Статья об актёре</button>`}<button class="btn sm" data-actx>✕ Назад к каталогу</button></div>`;
@@ -3812,7 +3890,7 @@ function actBarHTML(){
 async function catActorMore(){
   const tok=CAT.tok;CAT.loading=true;CAT.err="";catPaint();
   try{
-    const ids=UI.catActor==="*"?favList().map(f=>f.id):[+UI.catActor];
+    const ids=UI.catActor==="*"?favShown().map(f=>f.id):[+UI.catActor];
     const R=await Promise.allSettled(ids.map(personGet));
     if(CAT.tok!==tok)return;
     const Ps=R.filter(r=>r.status==="fulfilled").map(r=>r.value);
@@ -3897,6 +3975,12 @@ async function openActor(id,hint){
     const d=document.getElementById("actView");if(d)d.innerHTML=`<p class="rnote">⚠ ${esc(e.message==="Failed to fetch"?"нет связи с TMDB":e.message)}</p>`;
   }
 }
+function actScoreLine(rows){
+  const W=rows.map(r=>r[1]).filter(st=>st&&st.status==="watched"&&isNum(itemScore(st)));
+  if(!W.length)return"";
+  const per=DB.raters.length>1?DB.raters.map(n=>{const v=avg(W.map(it=>itemScore(it,n)));return isNum(v)?` · ${esc(n)} ${scBadge(v,"sm")}`:""}).join(""):"";
+  return `<p class="muted" style="margin:6px 0 0">Наша средняя оценка его работ: ${scBadge(avg(W.map(it=>itemScore(it))),"sm")}${per} <span class="dim">(по ${W.length} ${plural(W.length,"проекту","проектам","проектам")})</span></p>`;
+}
 function actPaint(full){
   const A=ACT.cur;if(!A)return;const P=A.P,d=document.getElementById("dlg2");
   const ix=catIndex(),isW=st=>!!st&&st.status==="watched";
@@ -3908,9 +3992,10 @@ function actPaint(full){
   const facts=[P.bd?`🎂 ${esc(fmtD(P.bd))}${age!=null?` · ${age} ${plural(age,"год","года","лет")}`:""}`:"",P.dd?`✝ ${esc(fmtD(P.dd))}`:"",P.pob?`📍 ${esc(P.pob)}`:""].filter(Boolean);
   const bio=P.bio?`<p class="abio${A.bio?" open":""}">${esc(P.bio)}</p>${P.bio.length>420?`<button class="lnk2" data-actbio style="margin-top:4px">${A.bio?"Свернуть":"Читать полностью"}</button>`:""}${P.bioLang==="en"?`<p class="dim" style="font-size:12px;margin:6px 0 0">Биография только на английском — на русском в TMDB её нет.</p>`:""}`:`<p class="dim" style="margin:8px 0 0">Биографии в TMDB пока нет.</p>`;
   const html=`<div class="actbio"><div class="actph">${P.p?`<img src="${tmdbImg(P.p,"w342")}" alt="">`:`<i class="ph0">${esc(initials(P.n))}</i>`}</div>
-    <div style="min-width:0;flex:1"><h1 class="dtitle" style="margin:0 0 8px">${esc(P.n)} ${favBtn(P.id,P.n,P.p,"afav big")}</h1>
+    <div style="min-width:0;flex:1"><h1 class="dtitle" style="margin:0 0 8px">${esc(P.n)} ${favPersonsHTML(P.id,P.n,P.p)}</h1>
       ${facts.length?`<div class="chips" style="margin-bottom:6px">${facts.map(f=>`<span class="tag">${f}</span>`).join("")}</div>`:""}
       <p class="muted" style="margin:8px 0 0">В нашем списке: смотрели <b>${nW}</b>${nIn?` · ещё в планах/на согласовании <b>${nIn}</b>`:""} · не смотрели <b>${rows.length-nW}</b> из ${rows.length} работ</p>
+      ${actScoreLine(rows)}
       ${bio}</div></div>
     <div class="toolbar" style="margin-top:6px"><div class="chips"><button class="chip ${A.f==="new"?"on":""}" data-actf="new">Ещё не смотрели <small>${rows.length-nW}</small></button><button class="chip ${A.f==="seen"?"on":""}" data-actf="seen">Смотрели <small>${nW}</small></button><button class="chip ${A.f==="all"?"on":""}" data-actf="all">Все <small>${rows.length}</small></button></div><div class="sp"></div>
       <div class="seg"><button data-actsort="pop" class="${A.sort==="pop"?"on":""}">Известные</button><button data-actsort="year" class="${A.sort==="year"?"on":""}">Новые</button></div></div>
@@ -4126,13 +4211,100 @@ function openAlPick(it){
   run();
 }
 
+/* ============ рейтинг актёров по нашим оценкам ============
+   Состав каждого просмотренного проекта берём тем же castGet (кэш 45 дней), считаем среднюю оценку по главным ролям. */
+const ACS={casts:new Map(),run:false,done:0,total:0,fail:0,err:""};
+const AC_TOP=10;
+const acItems=()=>DB.items.filter(it=>it.status!=="planned"&&it.status!=="proposed"&&castRef(it)&&isNum(itemScore(it)));
+function acRows(){
+  const R=DB.raters,who=UI.acWho&&R.includes(UI.acWho)?UI.acWho:"all",min=Math.max(1,+UI.acMin||2),m=new Map();
+  for(const it of acItems()){
+    const L=ACS.casts.get(it.id);if(!L)continue;
+    const sc=who==="all"?itemScore(it):itemScore(it,who);if(!isNum(sc))continue;
+    for(const c of L.filter(c=>c.k).slice(0,AC_TOP)){
+      let e=m.get(c.i);if(!e){e={id:c.i,n:c.n,p:c.p,sc:[]};m.set(c.i,e)}
+      if(!e.sc.some(x=>x.it===it))e.sc.push({it,s:sc,ch:c.c});
+    }
+  }
+  const rows=[...m.values()].filter(e=>e.sc.length>=min).map(e=>{
+    const per={};for(const n of R)per[n]=avg(e.sc.map(x=>itemScore(x.it,n)));
+    return Object.assign(e,{cnt:e.sc.length,score:avg(e.sc.map(x=>x.s)),per});
+  });
+  const sort=UI.acSort==="cnt"?"cnt":"score";
+  rows.sort((a,b)=>sort==="cnt"?b.cnt-a.cnt||b.score-a.score:b.score-a.score||b.cnt-a.cnt);
+  return {rows,who,min,sort};
+}
+function acRowHTML(e,i,who){
+  const best=e.sc.slice().sort((a,b)=>b.s-a.s).slice(0,3);
+  const per=DB.raters.length>1&&who==="all"?`<span class="acper">${DB.raters.map(n=>`<span title="${esc(n)}">${esc(n.charAt(0))} ${scBadge(e.per[n],"sm")}</span>`).join("")}</span>`:"";
+  return `<div class="acr" data-actor="${e.id}" data-an="${esc(e.n)}" role="button" tabindex="0" title="Открыть статью об актёре">
+    <span class="acn">${i+1}</span>
+    <span class="acph">${e.p?`<img src="${tmdbImg(e.p,"w92")}" alt="" loading="lazy">`:`<i class="ph0">${esc(initials(e.n))}</i>`}</span>
+    <span class="acm"><b>${esc(e.n)}</b><small>${e.cnt} ${plural(e.cnt,"проект","проекта","проектов")} · ${best.map(x=>esc(x.it.title)+" "+f1(x.s)).join(" · ")}</small></span>
+    ${per}<span class="acs">${scBadge(e.score)}</span>${favBtn(e.id,e.n,e.p)}</div>`;
+}
+function acListHTML(){
+  const {rows,who,min,sort}=acRows();
+  if(!rows.length)return `<div class="empty">${min>1?"Нет актёров с таким числом проектов — попробуйте «от 1».":"Пока нечего показать."}</div>`;
+  const lim=Math.min(rows.length,Math.max(30,+UI.acLim||30));
+  return `<div class="aclist">${rows.slice(0,lim).map((e,i)=>acRowHTML(e,i,who)).join("")}</div>${rows.length>lim?`<p style="text-align:center;margin:12px 0 0"><button class="btn" data-acmore="${lim+30}">Показать ещё (${rows.length-lim})</button></p>`:""}`;
+}
+function acPaint(){const b=document.getElementById("acList");if(b)b.innerHTML=acListHTML()}
+function acProg(){
+  const t=document.getElementById("acProg");if(!t)return;
+  t.querySelector("span").textContent=`${ACS.done} из ${ACS.total}`;
+  const bar=t.querySelector("i");if(bar)bar.style.width=(ACS.total?Math.round(ACS.done/ACS.total*100):0)+"%";
+}
+async function acRun(){
+  if(ACS.run)return;
+  if(!apiKey("tmdb")){toast("Нужен ключ TMDB (вкладка «Каталог» или «Данные»)");return}
+  const W=acItems().filter(it=>!ACS.casts.has(it.id));
+  ACS.run=true;ACS.done=0;ACS.total=W.length;ACS.fail=0;ACS.err="";
+  if(UI.tab==="analytics"&&UI.sub==="actors")render();
+  let i=0,stop=false;
+  const worker=async()=>{
+    while(i<W.length&&!stop){
+      const it=W[i++];
+      try{const l=await castGet(it,0);ACS.casts.set(it.id,l||[])}
+      catch(e){
+        const m=String(e&&e.message||"");
+        if(/404/.test(m))ACS.casts.set(it.id,[]);
+        else{ACS.fail++;if(/401|api key/i.test(m)){ACS.err="TMDB не принял ключ";stop=true}else if(m==="Failed to fetch"&&ACS.fail>=3){ACS.err="нет связи с TMDB";stop=true}}
+      }
+      ACS.done++;acProg();
+    }
+  };
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  ACS.run=false;
+  if(UI.tab==="analytics"&&UI.sub==="actors")render();
+}
+function vActors(){
+  const R=DB.raters,all=acItems(),have=all.filter(it=>ACS.casts.has(it.id)),left=all.length-have.length;
+  const head=`<div class="ptitle"><div><h1>Актёры</h1><p>Кто чаще всего снимался в том, что вы смотрели, и как вы это оценили</p></div></div>`;
+  if(!apiKey("tmdb"))return head+`<div class="empty">Для состава актёров нужен ключ TMDB — его можно ввести на вкладке «Каталог» или «Данные».</div>`;
+  if(!all.length)return head+`<div class="empty">Пока нет оценённых проектов с данными TMDB.</div>`;
+  if(ACS.run)return head+`<div class="panel acprog" id="acProg"><b>Загружаю составы…</b> <span>${ACS.done} из ${ACS.total}</span><div class="bar"><i style="width:${ACS.total?Math.round(ACS.done/ACS.total*100):0}%"></i></div><p class="dim" style="font-size:12.5px;margin:8px 0 0">Это делается один раз — составы кэшируются на 45 дней.</p></div>`;
+  const W=R.includes(UI.acWho)?UI.acWho:"all",min=String(Math.max(1,+UI.acMin||2)),sort=UI.acSort==="cnt"?"cnt":"score";
+  const note=ACS.err?`<p class="rnote">⚠ ${esc(ACS.err)}</p>`:ACS.fail?`<p class="rnote">⚠ Не удалось загрузить состав у ${ACS.fail} ${plural(ACS.fail,"проекта","проектов","проектов")}.</p>`:"";
+  if(!have.length)return head+`${note}<div class="panel"><p style="margin:0 0 10px">Посчитаем рейтинг по ${all.length} ${plural(all.length,"оценённому проекту","оценённым проектам","оценённым проектам")}: для каждого загрузим состав и возьмём главные роли.</p><button class="btn pri" data-acrun>🎭 Посчитать рейтинг актёров</button></div>`;
+  return head+note+`<div class="toolbar">
+    ${R.length>1?`<div class="seg" data-ui="acWho"><button data-v="all" class="${W==="all"?"on":""}">Общий</button>${R.map(r=>`<button data-v="${esc(r)}" class="${W===r?"on":""}">${esc(r)}</button>`).join("")}</div>`:""}
+    <div class="chips" data-ui="acMin"><span class="dim" style="font-size:13px;align-self:center">Проектов:</span>${["1","2","3","5"].map(v=>`<button class="chip ${min===v?"on":""}" data-v="${v}">от ${v}</button>`).join("")}</div>
+    <div class="seg" data-ui="acSort"><button data-v="score" class="${sort==="score"?"on":""}">По оценке</button><button data-v="cnt" class="${sort==="cnt"?"on":""}">По числу проектов</button></div>
+    <div class="sp"></div>${left?`<button class="btn sm" data-acrun title="Загрузить составы ещё не посчитанных проектов">Догрузить (${left})</button>`:""}</div>
+    <div id="acList">${acListHTML()}</div>
+    <p class="dim" style="font-size:12.5px;margin:12px 0 0">Считаются первые ${AC_TOP} актёров состава каждого проекта; у сериалов — оценка всего сериала. ☆ — в любимые.</p>`;
+}
+
 /* ============ клики: актёры, любимые, проверка аниме ============ */
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-fav],[data-actor],[data-actsel],[data-actx],[data-actcat],[data-actf],[data-actsort],[data-actmore],[data-actbio],[data-castseason],[data-castall],[data-castpick],[data-castretry],[data-alchk],[data-alapply],[data-alpick],[data-alopen]");
+  const t=e.target.closest("[data-fav],[data-actor],[data-actsel],[data-actx],[data-actcat],[data-actf],[data-actsort],[data-actmore],[data-actbio],[data-castseason],[data-castall],[data-castpick],[data-castretry],[data-alchk],[data-alapply],[data-alpick],[data-alopen],[data-acrun],[data-acmore]");
   if(!t)return;
   e.stopPropagation();e.preventDefault();
   const d=t.dataset;
-  if(d.fav){favToggle(d.fav,d.fn,d.fp);return}
+  if(d.fav){favToggle(d.fav,d.fn,d.fp,d.who,t);return}
+  if(d.acrun!==undefined){acRun();return}
+  if(d.acmore){UI.acLim=+d.acmore;saveUI();acPaint();return}
   if(d.actor){openActor(d.actor,d.an);return}
   if(d.actsel){
     if(String(UI.catActor||"")===d.actsel)UI.catActor="";
