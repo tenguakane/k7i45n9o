@@ -1,0 +1,34 @@
+name: boxoffice
+# Раз в день обновляет boxoffice.json — сборы по дням (прокат США) для вкладки «Кассовые сборы → Аналитика».
+on:
+  schedule:
+    - cron: "41 19 * * *"   # каждый день в 19:41 UTC (22:41 по Киеву зимой)
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Сколько фильмов из истории докачать за запуск"
+        default: "350"
+permissions:
+  contents: write
+concurrency:
+  group: boxoffice
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: Собрать сборы
+        run: python tools/boxoffice.py --limit "${{ github.event.inputs.limit || '350' }}"
+      - name: Сохранить в репозиторий
+        run: |
+          git config user.name "boxoffice-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add boxoffice.json
+          if git diff --cached --quiet; then echo "Без изменений"; exit 0; fi
+          git commit -m "Сборы по дням: $(date -u +%F)"
+          git pull --rebase --autostash
+          git push
