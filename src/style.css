@@ -1217,6 +1217,9 @@ html[data-fx="on"] .fx-in .geo-svg .gt{animation:fxPop .5s cubic-bezier(.2,.8,.2
 .ico-x-boom{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M12 2l2.2 5.3L20 6l-2.4 5.2L22 14l-5.6.6L15 20l-3-4.4L9 20l-1.4-5.4L2 14l4.4-2.8L4 6l5.8 1.3z%27/%3E%3C/svg%3E")}
 .ico-x-box{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M3 8l9-5 9 5v9l-9 5-9-5zM3 8l9 5 9-5M12 13v9%27/%3E%3C/svg%3E")}
 .ico-x-clock{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%279%27/%3E%3Cpath d=%27M12 7v5l3 2%27/%3E%3C/svg%3E")}
+.ico-box{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%279%27/%3E%3Cpath d=%27M12 6.5v11M14.8 9.2c-.4-.9-1.4-1.4-2.8-1.4-1.7 0-2.8.8-2.8 2s1 1.7 2.8 2.1 2.8.9 2.8 2.1-1.1 2-2.8 2c-1.4 0-2.4-.5-2.9-1.5%27/%3E%3C/svg%3E")}
+.ico-actors{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%2712%27 cy=%278%27 r=%274%27/%3E%3Cpath d=%27M4 21c0-4 4-6.5 8-6.5s8 2.5 8 6.5%27/%3E%3C/svg%3E")}
+.ico-more{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%275.5%27 cy=%2712%27 r=%271.4%27/%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%271.4%27/%3E%3Ccircle cx=%2718.5%27 cy=%2712%27 r=%271.4%27/%3E%3C/svg%3E")}
 .ico-x-cal{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Crect x=%273%27 y=%275%27 width=%2718%27 height=%2716%27 rx=%272%27/%3E%3Cpath d=%27M3 10h18M8 3v4M16 3v4%27/%3E%3C/svg%3E")}
 .ico-x-chart{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M4 20V11M10 20V5M16 20v-6M21 20H3%27/%3E%3C/svg%3E")}
 .ico-x-check{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M4 12.5l5 5L20 6.5%27/%3E%3C/svg%3E")}
@@ -1848,3 +1851,26 @@ dialog:focus,dialog:focus-visible{outline:none}
 .epr .hl{color:var(--tx2)}
 .epr .hl-f{color:var(--acc);font-weight:600}
 @media(max-width:560px){.hc{min-height:40px}.hmn{min-width:120px}}
+/* без жирного шрифта по всему сайту */
+*,*::before,*::after{font-weight:400!important}
+.pask .prr{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.pask .pq{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pask .pbt{display:flex;gap:4px;flex:none}
+.pask .pbt button{width:30px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.pask .pbt button .ico{width:17px;height:17px}
+.moreb{display:none!important}
+.morepop{display:none}
+.bxr .bxn{flex:none;width:28px;text-align:right;color:var(--tx3);font-size:13px}
+.bxf .inp{width:auto;min-width:0;max-width:100%}
+@media(max-width:820px){
+  .sidebar nav.tabs a.mo{display:none!important}
+  .sidebar nav.tabs a.moreb{display:flex!important}
+  .morepop{display:flex;flex-direction:column;position:fixed;right:10px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:70;min-width:210px;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--bg2);box-shadow:0 12px 40px rgba(0,0,0,.45)}
+  .morepop a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;color:var(--tx);text-decoration:none;font-size:15px}
+  .morepop a:hover,.morepop a.on{background:color-mix(in srgb,var(--tx) 8%,transparent)}
+  .morepop a.on{color:var(--acc)}
+  .morepop .ic{width:24px;display:inline-flex;justify-content:center}
+  .morepop .ico{width:20px;height:20px}
+  .bxf select{flex:1 1 44%}
+  .bxr .bxn{width:22px}
+}

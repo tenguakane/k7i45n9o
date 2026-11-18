@@ -1234,6 +1234,9 @@ html[data-fx="on"] .fx-in .geo-svg .gt{animation:fxPop .5s cubic-bezier(.2,.8,.2
 .ico-x-boom{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M12 2l2.2 5.3L20 6l-2.4 5.2L22 14l-5.6.6L15 20l-3-4.4L9 20l-1.4-5.4L2 14l4.4-2.8L4 6l5.8 1.3z%27/%3E%3C/svg%3E")}
 .ico-x-box{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M3 8l9-5 9 5v9l-9 5-9-5zM3 8l9 5 9-5M12 13v9%27/%3E%3C/svg%3E")}
 .ico-x-clock{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%279%27/%3E%3Cpath d=%27M12 7v5l3 2%27/%3E%3C/svg%3E")}
+.ico-box{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%279%27/%3E%3Cpath d=%27M12 6.5v11M14.8 9.2c-.4-.9-1.4-1.4-2.8-1.4-1.7 0-2.8.8-2.8 2s1 1.7 2.8 2.1 2.8.9 2.8 2.1-1.1 2-2.8 2c-1.4 0-2.4-.5-2.9-1.5%27/%3E%3C/svg%3E")}
+.ico-actors{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%2712%27 cy=%278%27 r=%274%27/%3E%3Cpath d=%27M4 21c0-4 4-6.5 8-6.5s8 2.5 8 6.5%27/%3E%3C/svg%3E")}
+.ico-more{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%275.5%27 cy=%2712%27 r=%271.4%27/%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%271.4%27/%3E%3Ccircle cx=%2718.5%27 cy=%2712%27 r=%271.4%27/%3E%3C/svg%3E")}
 .ico-x-cal{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Crect x=%273%27 y=%275%27 width=%2718%27 height=%2716%27 rx=%272%27/%3E%3Cpath d=%27M3 10h18M8 3v4M16 3v4%27/%3E%3C/svg%3E")}
 .ico-x-chart{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M4 20V11M10 20V5M16 20v-6M21 20H3%27/%3E%3C/svg%3E")}
 .ico-x-check{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M4 12.5l5 5L20 6.5%27/%3E%3C/svg%3E")}
@@ -1865,6 +1868,29 @@ dialog:focus,dialog:focus-visible{outline:none}
 .epr .hl{color:var(--tx2)}
 .epr .hl-f{color:var(--acc);font-weight:600}
 @media(max-width:560px){.hc{min-height:40px}.hmn{min-width:120px}}
+/* без жирного шрифта по всему сайту */
+*,*::before,*::after{font-weight:400!important}
+.pask .prr{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.pask .pq{margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pask .pbt{display:flex;gap:4px;flex:none}
+.pask .pbt button{width:30px;height:28px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.pask .pbt button .ico{width:17px;height:17px}
+.moreb{display:none!important}
+.morepop{display:none}
+.bxr .bxn{flex:none;width:28px;text-align:right;color:var(--tx3);font-size:13px}
+.bxf .inp{width:auto;min-width:0;max-width:100%}
+@media(max-width:820px){
+  .sidebar nav.tabs a.mo{display:none!important}
+  .sidebar nav.tabs a.moreb{display:flex!important}
+  .morepop{display:flex;flex-direction:column;position:fixed;right:10px;bottom:calc(74px + env(safe-area-inset-bottom));z-index:70;min-width:210px;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--bg2);box-shadow:0 12px 40px rgba(0,0,0,.45)}
+  .morepop a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;color:var(--tx);text-decoration:none;font-size:15px}
+  .morepop a:hover,.morepop a.on{background:color-mix(in srgb,var(--tx) 8%,transparent)}
+  .morepop a.on{color:var(--acc)}
+  .morepop .ic{width:24px;display:inline-flex;justify-content:center}
+  .morepop .ico{width:20px;height:20px}
+  .bxf select{flex:1 1 44%}
+  .bxr .bxn{width:22px}
+}
 </style>
 </head>
 <body>
@@ -2268,11 +2294,13 @@ const TABS=[
   {id:"watched",n:"Просмотрено",s:"Список",ic:"🎞"},
   {id:"plan",n:"Планы",s:"Планы",ic:"🗓"},
   {id:"catalog",n:"Каталог",s:"Каталог",ic:"🔥"},
+  {id:"box",n:"Кассовые сборы",s:"Сборы",ic:"💵",more:1},
+  {id:"actors",n:"Актёры",s:"Актёры",ic:"🎭",more:1},
   {id:"quiz",n:"Викторина",s:"Викторина",ic:"🎲"},
   {id:"comics",n:"Кинокомиксы",s:"Комиксы",ic:"💥"},
-  {id:"analytics",n:"Аналитика",s:"Аналитика",ic:"📊"},
+  {id:"analytics",n:"Аналитика",s:"Аналитика",ic:"📊",more:1},
   {id:"guide",n:"Как оценивать",s:"Гайд",ic:"📖"},
-  {id:"data",n:"Данные",s:"Данные",ic:"⚙"}];
+  {id:"data",n:"Данные",s:"Данные",ic:"⚙",more:1}];
 const TABALIAS={stats:"stats",taste:"taste",world:"world"}; // старые ссылки #stats/#taste/#world ведут в «Аналитику»
 /* ============ журнал ошибок: ничего не теряется молча ============ */
 const ERRK="kinoteka.errlog.v1";
@@ -2872,7 +2900,8 @@ function mcuNum(e){const c=e.comics.find(c=>c.franchise==="MCU");return c?c.num:
 /* ============ router / shell ============ */
 function renderTabs(){
   const nav=$("#tabs"),x=nav.scrollLeft;
-  nav.innerHTML=TABS.filter(t=>!tabHidden(t.id)).map(t=>`<a href="#${t.id}" class="${UI.tab===t.id?"on":""}" draggable="false"><span class="ic"><i class="ico ico-${t.id}"></i></span><span class="ln">${t.n}</span><span class="sn">${t.s}</span>${t.id==="data"&&errUnseen()?`<span class="nb err" title="Были сбои — откройте журнал ошибок на вкладке «Данные»">!</span>`:""}${t.id==="plan"&&DB&&contList().length?`<span class="nb" title="Продолжить просмотр">${contList().length}</span>`:""}</a>`).join("");
+  const vis=TABS.filter(t=>!tabHidden(t.id)),moreOn=vis.some(t=>t.more&&UI.tab===t.id);
+  nav.innerHTML=vis.map(t=>`<a href="#${t.id}" class="${UI.tab===t.id?"on":""}${t.more?" mo":""}" draggable="false"><span class="ic"><i class="ico ico-${t.id}"></i></span><span class="ln">${t.n}</span><span class="sn">${t.s}</span>${t.id==="data"&&errUnseen()?`<span class="nb err" title="Были сбои — откройте журнал ошибок на вкладке «Данные»">!</span>`:""}${t.id==="plan"&&DB&&contList().length?`<span class="nb" title="Продолжить просмотр">${contList().length}</span>`:""}</a>`).join("")+`<a href="#more" class="moreb${moreOn?" on":""}" id="moreBtn" draggable="false" aria-haspopup="true" aria-expanded="false"><span class="ic"><i class="ico ico-more"></i></span><span class="ln">Ещё</span><span class="sn">Ещё</span></a>`;
   nav.scrollLeft=x;tabsArrows();
   if(renderTabs.last!==UI.tab){renderTabs.last=UI.tab;const a=$("a.on",nav);if(a){const l=a.offsetLeft-nav.offsetLeft,r=l+a.offsetWidth;if(l<nav.scrollLeft+30||r>nav.scrollLeft+nav.clientWidth-30)nav.scrollTo({left:l-nav.clientWidth/2+a.offsetWidth/2,behavior:"smooth"})}}
 }
@@ -2897,7 +2926,7 @@ window.addEventListener("hashchange",route);
 function render(top){
   renderTabs();
   const v=$("#view");
-  const f={watched:vWatched,plan:vPlan,comics:vComics,analytics:vAnalytics,catalog:vCatalog,quiz:vQuiz,guide:vGuide,data:vData}[UI.tab]||vWatched;
+  const f={watched:vWatched,plan:vPlan,comics:vComics,analytics:vAnalytics,catalog:vCatalog,box:vBox,actors:vPeople,quiz:vQuiz,guide:vGuide,data:vData}[UI.tab]||vWatched;
   const y=window.scrollY,switched=render.lastTab!==UI.tab;render.lastTab=UI.tab;
   v.innerHTML=f();
   if(switched){v.classList.remove("tab-in");void v.offsetWidth;v.classList.add("tab-in")}
@@ -3307,8 +3336,8 @@ function askRow(it){
   const st=propState(it);
   return `<div class="pask ${st}">${DB.raters.map(n=>{const r=replyOf(it,n);
     return `<div class="prr"><div class="pq"><b>${esc(n)}</b> · ${REPLY_TXT[r]}</div><div class="pbt">
-    <button type="button" data-reply="${it.id}" data-who="${esc(n)}" data-v="seen" class="${r==="seen"?"on":""}" title="${esc(n)} уже смотрел(а) этот проект">Смотрел(а)</button>
-    <button type="button" data-reply="${it.id}" data-who="${esc(n)}" data-v="new" class="${r==="new"?"on":""}" title="${esc(n)} ещё не смотрел(а) — можно смотреть вместе">Не смотрел(а)</button></div></div>`}).join("")}</div>`;
+    <button type="button" data-reply="${it.id}" data-who="${esc(n)}" data-v="seen" class="${r==="seen"?"on":""}" title="${esc(n)} уже смотрел(а) этот проект" aria-label="${esc(n)}: смотрел(а)" aria-pressed="${r==="seen"}"><i class="ico ico-eye"></i></button>
+    <button type="button" data-reply="${it.id}" data-who="${esc(n)}" data-v="new" class="${r==="new"?"on":""}" title="${esc(n)} ещё не смотрел(а) — можно смотреть вместе" aria-label="${esc(n)}: не смотрел(а)" aria-pressed="${r==="new"}"><i class="ico ico-eyeoff"></i></button></div></div>`}).join("")}</div>`;
 }
 function propCard(it){
   const sn=seenList(it);
@@ -3507,7 +3536,7 @@ const HIST_RE=/^\d{4}-\d\d-\d\d/;
 function histEvents(){
   const out=[];let undated=0;
   for(const it of DB.items){
-    if(isProp(it))continue;
+    if(isProp(it)||it.past)continue;
     const wl=Array.isArray(it.wl)?it.wl:[];
     const sd=new Map((it.seasons||[]).filter(x=>HIST_RE.test(x.watchedAt||"")).map(x=>[x.n,String(x.watchedAt).slice(0,10)]));
     const wd=it.status==="watched"&&HIST_RE.test(it.watchedAt||"")?String(it.watchedAt).slice(0,10):null;
@@ -3572,6 +3601,167 @@ function vHist(){
   ${day}
   ${undated?`<p class="dim" style="font-size:12.5px;margin:14px 0 0">${undated} ${plural(undated,"просмотренный проект","просмотренных проекта","просмотренных проектов")} без даты — укажите её в «✎ Изменить», и они появятся в календаре.</p>`:""}`;
 }
+/* ---- «Ещё» на телефоне: всплывающий список редких вкладок ---- */
+function moreClose(){const m=document.getElementById("morePop");if(m)m.remove();const b=document.getElementById("moreBtn");if(b)b.setAttribute("aria-expanded","false")}
+function moreOpen(){
+  if(document.getElementById("morePop")){moreClose();return}
+  const L=TABS.filter(t=>t.more&&!tabHidden(t.id));
+  const m=document.createElement("div");m.id="morePop";m.className="morepop";m.setAttribute("role","menu");
+  m.innerHTML=L.map(t=>`<a href="#${t.id}" role="menuitem" class="${UI.tab===t.id?"on":""}"><span class="ic"><i class="ico ico-${t.id}"></i></span>${esc(t.n)}</a>`).join("")||`<p class="dim" style="margin:8px 12px">Все вкладки скрыты в настройках.</p>`;
+  document.body.appendChild(m);
+  const b=document.getElementById("moreBtn");if(b)b.setAttribute("aria-expanded","true");
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("#moreBtn");
+  if(b){e.preventDefault();e.stopPropagation();moreOpen();return}
+  if(document.getElementById("morePop")&&!(e.target.closest&&e.target.closest("#morePop")&&!e.target.closest("#morePop a")))moreClose();
+},true);
+window.addEventListener("hashchange",moreClose);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")moreClose()});
+
+/* ============ Кассовые сборы: фильмы TMDB с фильтрами (жанр, годы, язык, сортировка) ============ */
+const BOX={key:"",list:[],page:0,pages:1,tot:0,run:false,err:""};
+const BOX_SORTS=[["revenue.desc","По сборам"],["vote_average.desc","По рейтингу TMDB"],["popularity.desc","По популярности"],["primary_release_date.desc","Сначала новые"]];
+const BOX_LANGS=[["","Любой язык"],["en","Английский"],["ru","Русский"],["uk","Украинский"],["ja","Японский"],["ko","Корейский"],["zh","Китайский"],["fr","Французский"],["de","Немецкий"],["es","Испанский"],["it","Итальянский"],["hi","Хинди"]];
+function boxParams(){
+  const sort=BOX_SORTS.some(x=>x[0]===UI.boxSort)?UI.boxSort:"revenue.desc";
+  const P={language:"ru-RU",include_adult:"false",sort_by:sort};
+  if(UI.boxGenre)P.with_genres=String(UI.boxGenre);
+  let a=+UI.boxFrom||0,b=+UI.boxTo||0;if(a&&b&&a>b)[a,b]=[b,a];
+  if(a)P["primary_release_date.gte"]=a+"-01-01";
+  if(b)P["primary_release_date.lte"]=b+"-12-31";
+  else if(sort==="primary_release_date.desc")P["primary_release_date.lte"]=todayStr();
+  if(UI.boxLang)P.with_original_language=UI.boxLang;
+  if(sort==="vote_average.desc")P["vote_count.gte"]="1000";
+  if(sort==="primary_release_date.desc")P["vote_count.gte"]="50";
+  return P;
+}
+async function boxMoney(){
+  const need=BOX.list.filter(o=>!MET.has(o.k));let i=0;
+  const work=async()=>{while(i<need.length){const o=need[i++];try{await metaGet({type:"movie",id:o.id})}catch(_){MET.set(o.k,{b:null,r:null,wd:"",imdb:"",err:1})}boxPaint()}};
+  await Promise.all([work(),work(),work(),work()]);
+}
+async function boxLoad(more){
+  if(BOX.run||!apiKey("tmdb"))return;
+  const P=boxParams(),key=JSON.stringify(P);
+  if(!more&&BOX.key===key&&BOX.page>0){boxPaint();boxMoney();return}
+  if(BOX.key!==key||!more)Object.assign(BOX,{key,list:[],page:0,pages:1,tot:0,err:""});
+  if(BOX.page>=BOX.pages)return;
+  BOX.run=true;boxPaint();
+  try{
+    const page=BOX.page+1,ck="box:"+key+":"+page;
+    let r=await cacheGet(ck,12*3600e3);
+    if(!r){const d=await tmdbGet("/discover/movie",{...P,page});r={res:(d.results||[]).filter(x=>x.poster_path).map(x=>{const o=catNorm(x,"movie");o.ov=String(o.ov||"").slice(0,220);return o}),pages:Math.min(d.total_pages||1,25),tot:d.total_results||0};cachePut(ck,r)}
+    if(BOX.key!==key)return;
+    BOX.page=page;BOX.pages=r.pages;BOX.tot=r.tot;
+    for(const o of r.res)if(!BOX.list.some(x=>x.k===o.k))BOX.list.push(o);
+  }catch(e){if(BOX.key===key)BOX.err=e.message==="Failed to fetch"?"нет связи с TMDB":e.message}
+  finally{BOX.run=false}
+  boxPaint();boxMoney();
+}
+function boxRow(o,n,ix){
+  XREG.set(o.k,o);
+  const m=MET.get(o.k),st=catState(o,ix),g=[...new Set((o.g||[]).flatMap(i=>TG[i]||[]))].slice(0,3).join(", ");
+  const roi=m&&isNum(m.b)&&isNum(m.r)?m.r/m.b:null;
+  const money=!m?`<span class="dim">⏳</span>`:isNum(m.r)?`<b>${fmtMoney(m.r)}</b>`:`<span class="dim">нет данных</span>`;
+  const sub=m&&isNum(m.b)?`бюджет ${fmtMoney(m.b)}${roi?` · ×${roi>=10?Math.round(roi):roi.toFixed(1).replace(".",",")}`:""}`:"";
+  const stt=st?`<span class="epb">${st.status==="watched"?"смотрели":st.status==="watching"?"смотрим":"в планах"}</span>`:"";
+  return `<div class="epr bxr" data-cprev="${o.k}"><span class="bxn">${n}</span><div class="mini">${o.p?`<img loading="lazy" src="${tmdbImg(o.p,"w92")}" alt="">`:`<span class="ph0">${esc(initials(o.title))}</span>`}</div><div class="eb"><b>${esc(o.title)}</b><span class="dim">${o.y||"—"}${g?" · "+esc(g):""}${isNum(o.v)&&o.vc>=50?` · ★ ${o.v.toFixed(1)}`:""} ${stt}</span></div><div class="epd">${money}<small class="dim">${esc(sub)}</small></div></div>`;
+}
+function boxPaint(){
+  const box=document.getElementById("boxBody");if(!box)return;
+  if(!apiKey("tmdb")){box.innerHTML=`<div class="panel"><h3>Нужен ключ TMDB</h3><p class="muted" style="margin:6px 0 0">Сборы и бюджеты берутся из TMDB. Ключ добавляется во вкладке <a href="#data">«Данные»</a>.</p></div>`;return}
+  const ix=catIndex(),my=UI.boxMy==="mine"||UI.boxMy==="new"?UI.boxMy:"all";
+  const L=BOX.list.filter(o=>{if(my==="all")return true;const st=catState(o,ix),w=st&&st.status==="watched";return my==="mine"?w:!w});
+  const err=BOX.err?`<p class="rnote">⚠ ${esc(BOX.err)} <button class="btn sm" id="boxRetry">Повторить</button></p>`:"";
+  const more=BOX.page<BOX.pages&&BOX.page>0?`<p style="margin:12px 0 0"><button class="btn" id="boxMore" ${BOX.run?"disabled":""}>${BOX.run?"⏳ Загружаю…":"Показать ещё"}</button></p>`:"";
+  box.innerHTML=err+(BOX.run&&!BOX.list.length?`<p class="dim">⏳ Загружаю…</p>`:L.length?`<p class="dim" style="margin:0 0 10px">${BOX.tot?`Найдено ${BOX.tot.toLocaleString("ru-RU")} ${plural(BOX.tot,"фильм","фильма","фильмов")} · показано ${BOX.list.length}`:`Показано ${BOX.list.length}`}${my!=="all"?` · по фильтру: ${L.length}`:""}</p><div class="eps-l">${L.map(o=>boxRow(o,BOX.list.indexOf(o)+1,ix)).join("")}</div>${more}`:(BOX.err?"":`<div class="empty">${BOX.list.length?"По этому фильтру среди загруженных фильмов ничего нет — попробуйте «Показать ещё» или другой фильтр.":"Ничего не нашлось. Попробуйте другие годы или жанр."}</div>${more}`));
+}
+function vBox(){
+  setTimeout(()=>{boxLoad(false)},0);
+  const yr=new Date().getFullYear(),years=[];for(let y=yr;y>=1920;y--)years.push(y);
+  const sel=(key,opts,cur,title)=>`<select class="inp" data-uis="${key}" title="${title}">${opts.map(([v,n])=>`<option value="${esc(String(v))}" ${String(cur||"")===String(v)?"selected":""}>${esc(n)}</option>`).join("")}</select>`;
+  const my=UI.boxMy==="mine"||UI.boxMy==="new"?UI.boxMy:"all";
+  const sort=BOX_SORTS.some(x=>x[0]===UI.boxSort)?UI.boxSort:"revenue.desc";
+  const active=!!(UI.boxGenre||UI.boxFrom||UI.boxTo||UI.boxLang||sort!=="revenue.desc"||my!=="all");
+  return `<div class="ptitle"><div><h1>Кассовые сборы</h1><p>Фильмы мира по сборам, рейтингу и популярности — с фильтрами по жанру, годам и языку</p></div></div>
+  <div class="toolbar bxf">
+    ${sel("boxGenre",[["","Все жанры"],...CG_MOVIE],UI.boxGenre,"Жанр")}
+    ${sel("boxFrom",[["","Год от"],...years.map(y=>[y,y])],UI.boxFrom,"Год выхода: с")}
+    ${sel("boxTo",[["","Год до"],...years.map(y=>[y,y])],UI.boxTo,"Год выхода: по")}
+    ${sel("boxLang",BOX_LANGS,UI.boxLang,"Язык оригинала")}
+    ${sel("boxSort",BOX_SORTS,sort,"Сортировка")}
+    ${active?`<button class="btn sm ghost" id="boxReset">Сбросить</button>`:""}
+  </div>
+  <div class="toolbar"><div class="chips" data-ui="boxMy"><button class="chip ${my==="all"?"on":""}" data-v="all">Все</button><button class="chip ${my==="new"?"on":""}" data-v="new">Мы не смотрели</button><button class="chip ${my==="mine"?"on":""}" data-v="mine">Мы смотрели</button></div></div>
+  <div id="boxBody"></div>`;
+}
+document.addEventListener("click",e=>{
+  const r=e.target.closest&&e.target.closest("#boxMore,#boxRetry,#boxReset");if(!r)return;
+  e.stopPropagation();e.preventDefault();
+  if(r.id==="boxReset"){for(const k of["boxGenre","boxFrom","boxTo","boxLang","boxSort","boxMy"])delete UI[k];saveUI();render();return}
+  if(r.id==="boxRetry"){BOX.err="";boxLoad(true);return}
+  boxLoad(true);
+},true);
+
+/* ============ Вкладка «Актёры»: популярные, любимые, поиск по имени ============ */
+const PPL={pop:[],page:0,pages:1,run:false,err:"",found:null,q:""};
+async function pplPopular(more){
+  if(PPL.run||!apiKey("tmdb"))return;
+  if(PPL.page>0&&!more){pplPaint();return}
+  if(PPL.page>=PPL.pages)return;
+  PPL.run=true;PPL.err="";pplPaint();
+  try{
+    const page=PPL.page+1,ck="ppl:pop:"+page;let r=await cacheGet(ck,12*3600e3);
+    if(!r){const d=await tmdbGet("/person/popular",{language:"ru-RU",page});r={res:(d.results||[]).map(pplNorm),pages:Math.min(d.total_pages||1,25)};cachePut(ck,r)}
+    PPL.page=page;PPL.pages=r.pages;for(const a of r.res)if(!PPL.pop.some(x=>x.i===a.i))PPL.pop.push(a);
+  }catch(e){PPL.err=e.message==="Failed to fetch"?"нет связи с TMDB":e.message}
+  finally{PPL.run=false}
+  pplPaint();
+}
+const pplNorm=x=>({i:x.id,n:x.name||"?",p:x.profile_path||"",c:(x.known_for||[]).map(k=>k.title||k.name).filter(Boolean).slice(0,2).join(", "),g:x.gender||0,d:x.known_for_department||"",e:0});
+async function pplSearch(q){
+  q=String(q||"").trim();PPL.q=q;PPL.found=null;PPL.err="";
+  if(!q||!apiKey("tmdb")){pplPaint();return}
+  PPL.run=true;pplPaint();
+  try{const d=await tmdbGet("/search/person",{query:q,language:"ru-RU",include_adult:"false"});if(PPL.q===q)PPL.found=(d.results||[]).map(pplNorm)}
+  catch(e){PPL.err=e.message==="Failed to fetch"?"нет связи с TMDB":e.message}
+  finally{PPL.run=false}
+  pplPaint();
+}
+function pplPaint(){
+  const box=document.getElementById("pplBody");if(!box)return;
+  if(!apiKey("tmdb")){box.innerHTML=`<div class="panel"><h3>Нужен ключ TMDB</h3><p class="muted" style="margin:6px 0 0">Список актёров берётся из TMDB. Ключ добавляется во вкладке <a href="#data">«Данные»</a>.</p></div>`;return}
+  const mode=["pop","fav"].includes(UI.pplMode)?UI.pplMode:"pop",G=UI.pplG==="f"||UI.pplG==="m"?UI.pplG:"all";
+  const gf=a=>G==="all"||(G==="f"?a.g===1:a.g===2);
+  let L,empty="";
+  if(PPL.found){L=PPL.found.filter(gf);empty="По этому запросу никого не нашлось."}
+  else if(mode==="fav"){L=favShown().map(f=>({i:f.id,n:f.n||"Актёр",p:f.p||"",c:DB.raters.length>1?favInit(f):"",g:0})).filter(a=>G==="all"||!a.g);empty="Любимых актёров пока нет. Отметьте ☆ в составе любого проекта или в статье об актёре."}
+  else{L=PPL.pop.filter(a=>(!a.d||a.d==="Acting")&&gf(a));empty=PPL.run?"":"Пока никого."}
+  const err=PPL.err?`<p class="rnote">⚠ ${esc(PPL.err)}</p>`:"";
+  const more=!PPL.found&&mode==="pop"&&PPL.page>0&&PPL.page<PPL.pages?`<p style="margin:12px 0 0"><button class="btn" id="pplMore" ${PPL.run?"disabled":""}>${PPL.run?"⏳ Загружаю…":"Показать ещё"}</button></p>`:"";
+  box.innerHTML=err+(PPL.run&&!L.length?`<p class="dim">⏳ Загружаю…</p>`:L.length?`<div class="actgrid">${L.map(a=>actCard(a,null)).join("")}</div>${more}`:`<div class="empty">${esc(empty)}</div>${more}`);
+}
+function vPeople(){
+  setTimeout(()=>{if((["pop","fav"].includes(UI.pplMode)?UI.pplMode:"pop")==="pop"&&!PPL.found)pplPopular(false);else pplPaint()},0);
+  const mode=["pop","fav"].includes(UI.pplMode)?UI.pplMode:"pop",G=UI.pplG==="f"||UI.pplG==="m"?UI.pplG:"all";
+  const nf=favList().length;
+  return `<div class="ptitle"><div><h1>Актёры</h1><p>Популярные актёры мира, ваши любимые и поиск по имени</p></div></div>
+  <form class="toolbar" id="pplForm"><input class="inp" id="pplQ" value="${esc(PPL.q)}" placeholder="Найти актёра по имени" style="flex:1;min-width:200px" autocomplete="off"><button class="btn" type="submit">Найти</button>${PPL.found?`<button class="btn ghost" type="button" id="pplClr">Сбросить поиск</button>`:""}</form>
+  <div class="toolbar"><div class="seg" data-ui="pplMode"><button data-v="pop" class="${mode==="pop"?"on":""}">Популярные</button><button data-v="fav" class="${mode==="fav"?"on":""}">Любимые <small>${nf}</small></button></div>
+    <div class="chips" data-ui="pplG"><button class="chip ${G==="all"?"on":""}" data-v="all">Все</button><button class="chip ${G==="f"?"on":""}" data-v="f">Актрисы</button><button class="chip ${G==="m"?"on":""}" data-v="m">Актёры</button></div>
+    ${mode==="fav"&&DB.raters.length>1&&!PPL.found?`<div class="seg" data-ui="favWho"><button data-v="all" class="${favWhoCur()==="all"?"on":""}">Все</button><button data-v="&" class="${favWhoCur()==="&"?"on":""}">Оба</button>${DB.raters.map(r=>`<button data-v="${esc(r)}" class="${favWhoCur()===r?"on":""}">${esc(r)}</button>`).join("")}</div>`:""}</div>
+  <div id="pplBody"></div>`;
+}
+document.addEventListener("submit",e=>{
+  if(!e.target||e.target.id!=="pplForm")return;e.preventDefault();pplSearch(document.getElementById("pplQ").value);
+},true);
+document.addEventListener("click",e=>{
+  const r=e.target.closest&&e.target.closest("#pplMore,#pplClr");if(!r)return;
+  e.stopPropagation();e.preventDefault();
+  if(r.id==="pplClr"){PPL.found=null;PPL.q="";render();return}
+  pplPopular(true);
+},true);
 function planSwitch(){
   const pl=DB.items.filter(i=>i.status==="planned"),nS=pl.filter(isUpcoming).length,nP=pl.length-nS,nQ=DB.items.filter(isProp).length,cur=UI.planList==="prop"?"prop":UI.planList==="soon"?"soon":UI.planList==="eps"?"eps":UI.planList==="hist"?"hist":"plan",on=cur==="prop";
   return `<div class="plsw"><div class="seg lg" data-ui="planList"><button data-v="plan" class="${cur==="plan"?"on":""}">В планах <small>${nP}</small></button><button data-v="soon" class="${cur==="soon"?"on":""}">🚧 Скоро <small>${nS}</small></button><button data-v="eps" class="${cur==="eps"?"on":""}">📅 Календарь <small>${epsBadge()}</small></button><button data-v="hist" class="${cur==="hist"?"on":""}">🕘 История</button><button data-v="prop" class="${on?"on":""}">🤝 На согласовании <small>${nQ}</small></button></div></div>`;
@@ -4209,8 +4399,13 @@ function castGet(it,season){
     let r;
     if(ref.type==="movie")r=await tmdbGet(`/movie/${ref.id}/credits`,{language:"ru-RU"});
     else if(s)r=await tmdbGet(`/tv/${ref.id}/season/${s}/credits`,{language:"ru-RU"});
-    else r=await tmdbGet(`/tv/${ref.id}/aggregate_credits`,{language:"ru-RU"});
-    const list=castNorm(r.cast);cachePut(key,{list});return list;
+    else{
+      r=await tmdbGet(`/tv/${ref.id}/aggregate_credits`,{language:"ru-RU"});
+      /* у части мультсериалов сводного состава нет — пробуем обычный и общий список без языка */
+      if(!(r.cast||[]).length)try{r=await tmdbGet(`/tv/${ref.id}/credits`,{language:"ru-RU"})}catch(_){}
+      if(!(r.cast||[]).length)try{r=await tmdbGet(`/tv/${ref.id}/aggregate_credits`)}catch(_){}
+    }
+    const list=castNorm(r.cast);if(list.length)cachePut(key,{list});return list;
   });
 }
 
@@ -5038,10 +5233,11 @@ async function finOpened(it){
   let el=slot();if(!el)return;
   const roi=isNum(m.b)&&isNum(m.r)?m.r/m.b:null;
   const money=(isNum(m.b)||isNum(m.r))?`<div class="finrow">${isNum(m.b)?`<span class="finc">💰 <span class="dim">Бюджет</span> <b>${fmtMoney(m.b)}</b></span>`:""}${isNum(m.r)?`<span class="finc">💵 <span class="dim">Сборы</span> <b>${fmtMoney(m.r)}</b></span>`:""}${roi?`<span class="finc ${roi>=1?"up":"down"}" title="Сборы ÷ бюджет">${roi>=1?"▲":"▼"} ×${roi.toFixed(roi>=10?0:1).replace(".",",")}</span>`:""}</div>`:"";
-  el.innerHTML=money;
+  const note=ref.type==="tv"&&!money?`<p class="dim" style="font-size:12.5px;margin:0 0 6px">Бюджет и сборы TMDB для сериалов не публикует — это не ошибка, данных об этом нет вообще.</p>`:"";
+  el.innerHTML=money+note;
   try{
     const o=await awForItem(it);el=slot();if(!el)return;
-    el.innerHTML=money+awHTML(o,false);
+    el.innerHTML=money+note+awHTML(o,false);
   }catch(e){el=slot();if(el)el.innerHTML=money+`<p class="dim" style="font-size:12.5px;margin:6px 0 0">Премии сейчас недоступны (${esc(e.message)}).</p>`}
 }
 async function actAwFill(P){
@@ -6321,6 +6517,7 @@ function openEdit(id,preset){
       ${WSRC.map(s=>`<div class="f xw ${s.k==="mal"?"s2":"s1"}"><label>${s.s||s.n}</label><input class="inp" id="x_${s.k}" inputmode="decimal" placeholder="${s.k==="rt"?"%":s.k==="mc"?"0–100":"0–10"}" value="${isNum(it.ext?.[s.k])?it.ext[s.k]:""}"></div>`).join("")}
       <div class="f s2 wv"><label>№ в порядке просмотра</label><input class="inp" id="eOrd" type="number" value="${it.order||""}"></div>
       <div class="f s2 wv"><label>Дата просмотра</label><input class="inp" id="eDate" type="date" value="${it.watchedAt?String(it.watchedAt).slice(0,10):""}"></div>
+      <div class="f wv" style="grid-column:1/-1"><label class="chk" style="font-size:13.5px;font-weight:500"><input type="checkbox" id="ePast" ${it.past?"checked":""}><span>Смотрели давно — проект добавлен только ради оценки (не попадёт в «Лисий год» и «Историю»)</span></label></div>
     </div></div></div>
   <div class="df">${isNew?"":`<span class="dim" style="font-size:12.5px;align-self:center">Оценки меняются кнопкой «Оценить» в карточке</span>`}<div class="sp"></div><button class="btn" data-close>Отмена</button><button class="btn pri" id="eSave">${isNew&&it.status==="watched"?"Далее: оценка →":"Сохранить"}</button></div>`;
   const d=showDlg(html);
@@ -6379,7 +6576,7 @@ function openEdit(id,preset){
     if(picked){o.tmdb=picked.tmdb;if(picked.coll)o.coll=picked.coll;o.relChk=Date.now()}
     if(o.kind==="series"){o.seasonEpisodes=$("#eSE",d).value.split(/[,;\s]+/).map(Number).filter(n=>n>0);if(!o.seasonEpisodes.length)delete o.seasonEpisodes;o.seasons=o.seasons||[];o.seasonsTotal=+$("#eSeas",d).value||null;o.episodes=+$("#eEps",d).value||null;o.episodeDuration=numOr($("#eEpD",d).value);o.totalDuration=+$("#eTot",d).value||null;o.duration=null}
     else{o.duration=numOr($("#eDur",d).value)}
-    if(o.status==="watched"){o.order=+$("#eOrd",d).value||o.order||nextOrder();o.watchedAt=$("#eDate",d).value||o.watchedAt||null}
+    if(o.status==="watched"){o.order=+$("#eOrd",d).value||o.order||nextOrder();o.watchedAt=$("#eDate",d).value||o.watchedAt||null;if($("#ePast",d)?.checked)o.past=true;else delete o.past}
     if(o.status==="watching"){const ps=+$("#ePS",d).value;o.progress={season:ps>0?ps:null,episode:Math.max(0,+$("#ePE",d).value||0)};o.progressAt=Date.now()}else delete o.progress;
     if(isNew)DB.items.push(o);
     closeDlg();commit();
@@ -6405,7 +6602,8 @@ function openRate(id,opt={}){
   <div class="db">
     ${ser?`<div class="row" style="margin-bottom:12px"><div class="seg" id="rTgt"><button data-v="s" class="${season!=null?"on":""}">${isArc(it)?"Арка":"Сезон"}</button><button data-v="w" class="${season==null?"on":""}">${isArc(it)?"Аниме целиком":"Сериал целиком"}</button></div>
       ${isArc(it)?`<select class="inp" id="rSn" style="max-width:min(340px,100%)" ${season==null?"disabled":""}>${it.arcs.map(a=>`<option value="${a.n}" ${a.n===(season??1)?"selected":""}>${a.n}. ${esc(a.name)}${a.filler?" (филлер)":""} · эп. ${a.from}–${a.to||"…"}${(it.seasons||[]).some(s=>s.n===a.n&&hasRatings(s.ratings))?" ✓":""}</option>`).join("")}</select>`:`<input class="inp" id="rSn" type="number" min="1" style="width:80px" value="${season??1}" ${season==null?"disabled":""}>`}<span class="dim" id="rSnH" style="font-size:13px"></span></div>`:""}
-    ${finish?`<div class="row" style="margin-bottom:12px"><label class="dim" style="font-size:13px">Дата просмотра</label><input class="inp" type="date" id="rDate" value="${new Date().toISOString().slice(0,10)}"><label class="dim" style="font-size:13px">№ просмотра</label><input class="inp" type="number" id="rOrd" style="width:90px" value="${it.order||nextOrder()}"></div>`:""}
+    ${finish?`<div class="row" style="margin-bottom:12px"><label class="dim" style="font-size:13px">Дата просмотра</label><input class="inp" type="date" id="rDate" value="${new Date().toISOString().slice(0,10)}"><label class="dim" style="font-size:13px">№ просмотра</label><input class="inp" type="number" id="rOrd" style="width:90px" value="${it.order||nextOrder()}"></div>
+    <label class="chk" style="font-size:13px;font-weight:500;margin:-4px 0 12px"><input type="checkbox" id="rPast" ${it.past?"checked":""}><span>Смотрели давно — только оценить (не считать в «Лисьем годе» и «Истории»)</span></label>`:""}
     <table class="rtbl"><thead><tr><th></th>${CATS.map(c=>`<th data-ch="${c.k}">${c.ic} ${c.n}<button type="button" class="q" data-q-ch="${c.k}" aria-label="Что значит: ${c.n}" title="Что значит «${c.n}»">?</button></th>`).join("")}<th>Среднее</th></tr></thead>
       <tbody id="rBody"></tbody></table>
     <div class="rres"><span class="dim" id="rAt" style="font-weight:400;font-size:12.5px;margin-right:auto"></span>Итог ${"<span id='rTot'></span>"}</div>
@@ -6447,7 +6645,7 @@ function openRate(id,opt={}){
     ["input","change"].forEach(ev=>$("#rSn",d).addEventListener(ev,()=>{season=+$("#rSn",d).value||1;fill()}));
   }
   fill();
-  const finishMeta=()=>{if(!finish)return;delete it.progress;it.status="watched";it.order=+$("#rOrd",d).value||nextOrder();it.watchedAt=$("#rDate",d).value||null;wlog(it,season!=null?"s":"f",season,null,it.watchedAt||todayStr())};
+  const finishMeta=()=>{if(!finish)return;delete it.progress;it.status="watched";it.order=+$("#rOrd",d).value||nextOrder();it.watchedAt=$("#rDate",d).value||null;if($("#rPast",d)?.checked)it.past=true;else delete it.past;if(!it.past)wlog(it,season!=null?"s":"f",season,null,it.watchedAt||todayStr())};
   $("#rSave",d).onclick=()=>{
     const res={};let any=false;const prev=getR(),now=new Date().toISOString(),logs=[];
     DB.raters.forEach(n=>{const o={};let h=false;CATS.forEach(c=>{const inp=$(`input[data-r="${CSS.escape(n)}"][data-k="${c.k}"]`,d);const v=parse(inp.value);o[c.k]=v;if(isNum(v))h=true});if(h){
@@ -6981,9 +7179,9 @@ async function shotBlob(node,title){
   const c=document.createElement("canvas");c.width=cw*K;c.height=ch*K;const x=c.getContext("2d");x.scale(K,K);
   x.fillStyle=bg;x.fillRect(0,0,cw,ch);
   const g=x.createRadialGradient(cw*.9,0,0,cw*.9,0,cw*.7);g.addColorStop(0,"rgba(139,123,255,.16)");g.addColorStop(1,"rgba(139,123,255,0)");x.fillStyle=g;x.fillRect(0,0,cw,ch);
-  if(title){x.fillStyle=tx;x.font=`700 22px ${font}`;x.textBaseline="top";x.fillText(title,P,P)}
+  if(title){x.fillStyle=tx;x.font=`400 22px ${font}`;x.textBaseline="top";x.fillText(title,P,P)}
   x.drawImage(img,P,P+th,W,H);
-  x.fillStyle=tx3;x.font=`600 13px ${font}`;x.textBaseline="middle";x.fillText("🦊 Лисьи оценки · "+new Date().toLocaleDateString("ru-RU"),P,ch-fh/2-6);
+  x.fillStyle=tx3;x.font=`400 13px ${font}`;x.textBaseline="middle";x.fillText("🦊 Лисьи оценки · "+new Date().toLocaleDateString("ru-RU"),P,ch-fh/2-6);
   return await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error("не удалось создать PNG")),"image/png"));
 }
 async function doShot(node,title,name){
@@ -7507,7 +7705,7 @@ document.addEventListener("click",e=>{
    Считается по просмотренным и начатым проектам с известной датой просмотра (поле «Дата просмотра»
    или первая оценка в журнале). Истории — полноэкранные слайды с автопереходом. */
 const WR={y:null,i:0,slides:[],data:null};
-const wrIn=i=>i.status==="watched"||i.status==="watching";
+const wrIn=i=>!i.past&&(i.status==="watched"||i.status==="watching");
 function wrDate(it){
   if(it.status==="watching"){if(it.progressAt)return new Date(it.progressAt);return itemDate(it)}
   const m=typeof it.watchedAt==="string"&&it.watchedAt.match(/^(\d{4})-(\d\d)-(\d\d)/);
