@@ -513,7 +513,7 @@ function contHTML(){
     const pc=kind==="w"?progPct(it):null;
     return `<div class="ccard ${kind==="n"?"nx":""}" data-open="${it.id}"><div class="mini">${posterHTML(it,false)}</div><div class="cb">
       <div class="ch"><div class="ct" title="${esc(it.title)}">${esc(it.title)}</div><div class="ctools">${kind==="w"?`<button class="ctool" data-prog="${it.id}" title="Изменить прогресс" aria-label="Изменить прогресс"><i class="ico ico-edit"></i></button><button class="ctool" data-finish="${it.id}" title="Досмотрели полностью" aria-label="Досмотрели полностью"><i class="ico ico-check"></i></button>`:""}<button class="ctool" data-freeze="${it.id}" title="Заморозить: пока не продолжаем, убрать из списка" aria-label="Заморозить"><i class="ico ico-snow"></i></button></div></div>
-      <div class="cm">${kind==="w"?esc(progLabel(it)):isArc(it)?`Арка «${esc(segName(it,next))}» ещё не начата`:`Сезон ${next} ещё не начат · всего ${it.seasonsTotal}`}</div>
+      <div class="cm">${kind==="w"?esc(progLabel(it)):isArc(it)?`Арка «${esc(segName(it,next))}» ещё не начата`:`Сезон ${next} ещё не начат · всего ${it.seasonsTotal}`}</div>${epsHint(it)}
       ${kind==="w"?`<div class="prog"><i style="width:${pc!=null?(pc*100).toFixed(1):0}%"></i></div><div class="cm2">${pc!=null?`Просмотрено ${Math.round(pc*100)}%`:"Укажите число серий, чтобы видеть процент"}</div>`:`<div class="prog"><i style="width:${((next-1)/it.seasonsTotal*100).toFixed(1)}%"></i></div>`}
       <div class="cact">${kind==="w"?`<button class="btn sm pri" data-ep="${it.id}">＋1 серия</button>${it.progress?.season!=null?`<button class="btn sm" data-sdone="${it.id}">${segW(it,"done")}</button>`:""}`:`<button class="btn sm pri" data-start="${it.id}" data-sn="${next}">▶ ${isArc(it)?"Начать арку":"Начать сезон "+next}</button>`}</div>
     </div></div>`}).join("")}</div>${frozenHTML(F)}</section>`;
@@ -529,14 +529,16 @@ function bumpEp(id){
   const it=itemById(id);if(!it)return;delete it.frozen;delete it.frozenAt;
   const p=it.progress||(it.progress={season:it.seasonsTotal?1:null,episode:0});
   p.episode=(p.episode||0)+1;it.progressAt=Date.now();
-  if(p.season!=null){const e=seasonEps(it,p.season);if(e&&p.episode>=e){p.episode=e;commit();toast(isArc(it)?`Арка «${segName(it,p.season)}» досмотрена — оцените её`:`Сезон ${p.season} досмотрен — оцените его`);seasonDone(id);return}}
-  else{const t=totalEps(it);if(t&&p.episode>=t){p.episode=t;commit();toast("Все серии просмотрены — поставьте оценку");openRate(id,{finish:true,season:null});return}}
+  if(p.season!=null){const e=seasonEps(it,p.season);if(e&&p.episode>=e){p.episode=e;wlog(it,"e",p.season,e);commit();toast(isArc(it)?`Арка «${segName(it,p.season)}» досмотрена — оцените её`:`Сезон ${p.season} досмотрен — оцените его`);seasonDone(id);return}}
+  else{const t=totalEps(it);if(t&&p.episode>=t){p.episode=t;wlog(it,"e",null,t);commit();toast("Все серии просмотрены — поставьте оценку");openRate(id,{finish:true,season:null});return}}
+  wlog(it,"e",p.season,p.episode);
   commit();toast(`${it.title}: ${progLabel(it)}`);
 }
 function seasonDone(id){
   const it=itemById(id);if(!it)return;const S=it.progress?.season||1;
   openRate(id,{season:S,onSaved:()=>{
-    if(it.seasonsTotal&&S>=it.seasonsTotal){it.status="watched";delete it.progress;it.order=it.order||nextOrder();it.watchedAt=it.watchedAt||new Date().toISOString().slice(0,10);toast("Сериал досмотрен полностью 🦊")}
+    wlog(it,"s",S);
+    if(it.seasonsTotal&&S>=it.seasonsTotal){wlog(it,"f");it.status="watched";delete it.progress;it.order=it.order||nextOrder();it.watchedAt=it.watchedAt||new Date().toISOString().slice(0,10);toast("Сериал досмотрен полностью 🦊")}
     else{it.progress={season:S+1,episode:0};it.progressAt=Date.now()}
   }});
 }
@@ -568,7 +570,8 @@ function openProgress(id){
   $("#pMode",d).onclick=e=>{const b=e.target.closest("[data-v]");if(!b)return;bySeason=b.dataset.v==="s";$$("#pMode button",d).forEach(x=>x.classList.toggle("on",x===b));info()};
   d.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{const[f,dl]=b.dataset.st.split(":");const inp=$("#"+f,d);inp.value=Math.max(f==="pS"?1:0,(+inp.value||0)+ +dl);info()});
   ["#pS","#pE"].forEach(q=>$(q,d).addEventListener("input",info));
-  $("#pSave",d).onclick=()=>{it.status="watching";it.progress={season:bySeason?(+$("#pS",d).value||1):null,episode:Math.max(0,+$("#pE",d).value||0)};it.progressAt=Date.now();closeDlg();commit();toast("Прогресс сохранён")};
+  $("#pSave",d).onclick=()=>{const old=it.progress||{season:null,episode:0};it.status="watching";it.progress={season:bySeason?(+$("#pS",d).value||1):null,episode:Math.max(0,+$("#pE",d).value||0)};it.progressAt=Date.now();
+    if((old.season??null)===(it.progress.season??null)&&it.progress.episode>(old.episode||0))for(let e=(old.episode||0)+1;e<=it.progress.episode&&e<=(old.episode||0)+40;e++)wlog(it,"e",it.progress.season,e);closeDlg();commit();toast("Прогресс сохранён")};
   $("#pStop",d).onclick=()=>{delete it.progress;it.status=hasRatings(it.ratings)||seasonsRated(it).length?"watched":"planned";closeDlg();commit();toast(it.status==="watched"?"Перенесено в просмотренное":"Возвращено в планы")};
 }
 function comicsMap(){const m={};for(const c of DB.catalog){if(c.link?.itemId){(m[c.link.itemId]=m[c.link.itemId]||[]).push(c)}}return m}
@@ -1092,9 +1095,244 @@ async function propFavFill(){
     el.innerHTML=hit.slice(0,4).map(({f})=>`<span class="pfc" title="${esc(f.n)}${multi?" — любит: "+(favBoth(f)?"оба":esc(favBy(f).join(", "))):""}">⭐ ${esc(f.n)}${multi?` <em>${esc(favInit(f))}</em>`:""}</span>`).join("")+(hit.length>4?`<span class="pfc">+${hit.length-4}</span>`:"");
   }
 }
+/* ============ календарь выхода серий: сериалы из «Продолжить просмотр» ============
+   TMDB знает дату следующей серии (next_episode_to_air), последнюю вышедшую и число серий в сезонах.
+   Сравниваем с нашим прогрессом и показываем, что уже можно смотреть и что выйдет и когда. */
+const EPS={data:new Map(),run:false,done:0,total:0,tried:false,prem:null,premErr:false};
+async function premGet(force){
+  const key="prem:v1";
+  if(!force){const c=await cacheGet(key,6*3600e3);if(c)return c.list}
+  const t=todayStr(),to=new Date();to.setDate(to.getDate()+150);
+  const lte=to.getFullYear()+"-"+String(to.getMonth()+1).padStart(2,"0")+"-"+String(to.getDate()).padStart(2,"0");
+  const base={language:"ru-RU",include_adult:"false",sort_by:"popularity.desc","primary_release_date.gte":t,"primary_release_date.lte":lte,with_release_type:"2|3"};
+  const R=await Promise.allSettled([1,2].map(page=>tmdbGet("/discover/movie",{...base,page})));
+  if(R.every(r=>r.status==="rejected"))throw R[0].reason;
+  const seen=new Set(),list=[];
+  for(const r of R){if(r.status!=="fulfilled")continue;for(const x of r.value.results||[]){
+    const o=catNorm(x,"movie");if(!o.p||!o.rd||o.rd<t||seen.has(o.k))continue;seen.add(o.k);o.pop=x.popularity||0;o.ov=String(o.ov||"").slice(0,220);list.push(o)}}
+  list.sort((a,b)=>b.pop-a.pop);
+  const top=list.slice(0,30);cachePut(key,{list:top});return top;
+}
+async function tvAirGet(ref){
+  const key="air:"+ref.id,c=await cacheGet(key,6*3600e3);if(c)return c;
+  const d=await tmdbGet(`/tv/${ref.id}`,{language:"ru-RU"});
+  const ep=x=>x&&x.air_date?{d:x.air_date,s:x.season_number,e:x.episode_number,n:String(x.name||"").slice(0,80)}:null;
+  const o={st:d.status||"",prod:!!d.in_production,next:ep(d.next_episode_to_air),last:ep(d.last_episode_to_air),
+    S:(d.seasons||[]).filter(x=>x.season_number>0).map(x=>({n:x.season_number,c:x.episode_count||0}))};
+  cachePut(key,o);return o;
+}
+/* сколько серий вышло и сколько мы посмотрели (по сезонам TMDB); null — если посчитать нельзя */
+function epsCount(it,a,kind,next){
+  if(isArc(it)||!a||!a.S.length)return null;
+  const lastS=a.last?a.last.s:0,lastE=a.last?a.last.e:0;
+  let aired=0;for(const s of a.S){if(s.n<lastS)aired+=s.c;else if(s.n===lastS)aired+=Math.min(lastE||s.c,s.c)}
+  let seen=0;
+  if(kind==="w"){const S=it.progress&&it.progress.season,E=(it.progress&&it.progress.episode)||0;if(S==null)return null;for(const s of a.S)if(s.n<S)seen+=s.c;seen+=E}
+  else{for(const s of a.S)if(s.n<next)seen+=s.c}
+  return{aired,seen,behind:Math.max(0,aired-seen)};
+}
+function epsEntries(){
+  const out=[];
+  for(const {it,kind,next} of contList()){
+    const r=castRef(it);if(!r||r.type!=="tv")continue;
+    const a=EPS.data.get(it.id);if(!a)continue;
+    out.push({it,kind,a,cnt:epsCount(it,a,kind,next)});
+  }
+  return out;
+}
+const epsDays=d=>Math.round((new Date(d+"T00:00:00")-new Date(todayStr()+"T00:00:00"))/864e5);
+const epsWhen=n=>n<=0?"сегодня":n===1?"завтра":n<7?`через ${n} ${plural(n,"день","дня","дней")}`:`через ${n} ${plural(n,"день","дня","дней")}`;
+const epsDate=d=>new Date(d+"T00:00:00").toLocaleDateString("ru-RU",{weekday:"short",day:"numeric",month:"long"});
+const epsTag=e=>e?`S${e.s}E${e.e}`:"";
+function epsHint(it){
+  const E=epsEntries().find(x=>x.it===it);if(!E)return"";
+  const b=E.cnt&&E.cnt.behind,n=E.a.next;
+  if(b>0)return `<div class="cm2 epn" data-epsh="${it.id}">Вышло ещё ${b} ${plural(b,"серия","серии","серий")}</div>`;
+  if(n&&epsDays(n.d)>=0)return `<div class="cm2 epn soon" data-epsh="${it.id}">${epsTag(n)} · ${epsWhen(epsDays(n.d))}</div>`;
+  return"";
+}
+function epsPatch(){
+  document.querySelectorAll(".ccard[data-open]").forEach(c=>{
+    const it=itemById(c.dataset.open);if(!it||c.querySelector("[data-epsh]"))return;
+    const h=epsHint(it);if(h){const m=c.querySelector(".cm");if(m)m.insertAdjacentHTML("afterend",h)}
+  });
+  const sw=document.querySelector('.plsw [data-v="eps"] small');if(sw)sw.textContent=epsBadge();
+}
+const epsBadge=()=>{
+  const n=epsEntries().filter(x=>(x.cnt&&x.cnt.behind>0)||(x.a.next&&epsDays(x.a.next.d)<=7&&epsDays(x.a.next.d)>=0)).length+epsFilms().filter(f=>epsDays(f.d)<=7).length;
+  return n?String(n):"";
+};
+async function epsLoad(force){
+  if(EPS.run||!apiKey("tmdb"))return;
+  const L=contList().filter(x=>{const r=castRef(x.it);return r&&r.type==="tv"&&(force||!EPS.data.has(x.it.id))});
+  const needPrem=force||!EPS.prem;
+  if(!L.length&&!needPrem){epsPatch();epsPaint();return}
+  Object.assign(EPS,{run:true,done:0,total:L.length});epsPaint();
+  let i=0;
+  const work=async()=>{while(i<L.length){const {it}=L[i++];try{EPS.data.set(it.id,await tvAirGet(castRef(it)))}catch(_){}EPS.done++;epsPaint()}};
+  const pj=needPrem?premGet(force).then(l=>{EPS.prem=l;EPS.premErr=false}).catch(()=>{EPS.prem=[];EPS.premErr=true}).then(epsPaint):null;
+  await Promise.all([work(),work(),work(),pj]);
+  EPS.run=false;epsPaint();epsPatch();
+}
+function epsKick(){if(EPS.tried||!apiKey("tmdb"))return;EPS.tried=true;setTimeout(()=>epsLoad(false),1800)}
+/* фильмы календаря: свои записи из «Скоро» с известной датой + громкие премьеры из TMDB (без дублей) */
+function epsFilms(){
+  const t=todayStr(),out=[],used=new Set(),ix=catIndex();
+  for(const it of DB.items){
+    if(it.status!=="planned"||!it.relDate||it.relDate<t)continue;
+    out.push({k:"mine",it,d:it.relDate});const r=castRef(it);if(r)used.add(refKey(r));
+  }
+  for(const x of EPS.prem||[]){
+    if(used.has(x.k)||x.rd<t)continue;
+    const st=catState(x,ix);
+    if(st){if(st.status!=="planned"||st.relDate)continue;out.push({k:"mine",it:st,d:x.rd})}
+    else out.push({k:"film",x,d:x.rd});
+  }
+  return out;
+}
+function epsFilmRow(f){
+  const dd=epsDays(f.d),date=`<div class="epd">${esc(epsDate(f.d))}<small class="dim">${epsWhen(dd)}</small></div>`;
+  if(f.k==="mine"){const it=f.it;return `<div class="epr" data-open="${it.id}"><div class="mini">${posterHTML(it,false)}</div><div class="eb"><b>${esc(it.title)}</b><span class="dim">${esc(it.type||"Фильм")} · <span class="epb">в ваших планах</span></span></div>${date}</div>`}
+  const x=f.x;XREG.set(x.k,x);
+  const g=[...new Set((x.g||[]).flatMap(i=>TG[i]||[]))].slice(0,2).join(", ");
+  return `<div class="epr" data-cprev="${x.k}"><div class="mini">${x.p?`<img loading="lazy" src="${tmdbImg(x.p,"w92")}" alt="">`:`<span class="ph0">${esc(initials(x.title))}</span>`}</div><div class="eb"><b>${esc(x.title)}</b><span class="dim">Премьера фильма${g?" · "+esc(g):""}</span></div>${date}<button class="btn sm" data-cadd="${x.k}">＋ В планы</button></div>`;
+}
+function epsRow(E,mode){
+  const {it,a,cnt}=E,n=a.next,l=a.last;
+  const poster=`<div class="mini">${posterHTML(it,false)}</div>`;
+  if(mode==="ready")return `<div class="epr" data-open="${it.id}">${poster}<div class="eb"><b>${esc(it.title)}</b><span class="dim">Вышло ещё ${cnt.behind} ${plural(cnt.behind,"серия","серии","серий")}${l?` · последняя ${epsTag(l)}`:""}</span></div><button class="btn sm pri" data-ep="${it.id}">＋1 серия</button></div>`;
+  if(mode==="soon"){const dd=epsDays(n.d);return `<div class="epr" data-open="${it.id}">${poster}<div class="eb"><b>${esc(it.title)}</b><span class="dim">${epsTag(n)}${n.n?` «${esc(n.n)}»`:""}</span></div><div class="epd">${esc(epsDate(n.d))}<small class="dim">${epsWhen(dd)}</small></div></div>`}
+  const why=/ended|canceled/i.test(a.st)?(/canceled/i.test(a.st)?"Сериал закрыт":"Сериал завершён"):"Дата следующей серии пока не объявлена";
+  return `<div class="epr" data-open="${it.id}">${poster}<div class="eb"><b>${esc(it.title)}</b><span class="dim">${why}${l?` · последняя ${epsTag(l)}`:""}</span></div></div>`;
+}
+function epsIcs(){
+  const z=d=>d.replace(/-/g,""),nx=d=>{const t=new Date(d+"T00:00:00");t.setDate(t.getDate()+1);return t.getFullYear()+String(t.getMonth()+1).padStart(2,"0")+String(t.getDate()).padStart(2,"0")};
+  const esc2=t=>String(t).replace(/[\\;,]/g,m=>"\\"+m).replace(/\n/g," ");
+  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Лисьи оценки//Календарь//RU","CALSCALE:GREGORIAN"];
+  const ev=(uid,d,sum)=>L.push("BEGIN:VEVENT",`UID:${uid}@lisi-ocenki`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,"").slice(0,15)}Z`,`DTSTART;VALUE=DATE:${z(d)}`,`DTEND;VALUE=DATE:${nx(d)}`,`SUMMARY:${esc2(sum)}`,"END:VEVENT");
+  for(const {it,a} of epsEntries()){const n=a.next;if(n&&epsDays(n.d)>=0)ev(`eps-${it.id}-${n.s}-${n.e}`,n.d,it.title+" · "+epsTag(n)+(n.n?" «"+n.n+"»":""))}
+  for(const f of epsFilms()){const t=f.k==="mine"?f.it.title:f.x.title;ev(`film-${f.k==="mine"?f.it.id:f.x.k.replace(":","-")}`,f.d,t+" · премьера")}
+  L.push("END:VCALENDAR");
+  return L.join("\r\n");
+}
+function epsPaint(){
+  const box=document.getElementById("epsBody");if(!box)return;
+  if(!apiKey("tmdb")){box.innerHTML=`<div class="panel"><h3>Нужен ключ TMDB</h3><p class="muted" style="margin:6px 0 0">Даты выхода серий и премьер берутся из TMDB. Ключ добавляется во вкладке <a href="#data">«Данные»</a>.</p></div>`;return}
+  const F=UI.epsF==="tv"||UI.epsF==="movie"?UI.epsF:"all";
+  const all=contList(),tv=all.filter(x=>{const r=castRef(x.it);return r&&r.type==="tv"}),noRef=all.length-tv.length;
+  const E=F==="movie"?[]:epsEntries(),films=F==="tv"?[]:epsFilms();
+  const ready=E.filter(x=>x.cnt&&x.cnt.behind>0).sort((a,b)=>b.cnt.behind-a.cnt.behind||cmpRu(a.it.title,b.it.title));
+  const ev=[...E.filter(x=>x.a.next&&epsDays(x.a.next.d)>=0).map(e=>({d:e.a.next.d,t:e.it.title,html:epsRow(e,"soon")})),
+            ...films.map(f=>({d:f.d,t:f.k==="mine"?f.it.title:f.x.title,html:epsFilmRow(f)}))].sort((a,b)=>a.d.localeCompare(b.d)||cmpRu(a.t,b.t));
+  const rest=E.filter(x=>!ready.includes(x)&&!(x.a.next&&epsDays(x.a.next.d)>=0)).sort((a,b)=>cmpRu(a.it.title,b.it.title));
+  const grp=[["Сегодня и завтра",d=>d<=1],["На этой неделе",d=>d>1&&d<7],["В ближайший месяц",d=>d>=7&&d<31],["Позже",d=>d>=31]];
+  const prog=EPS.run?`<p class="dim" style="margin:0 0 10px">⏳ Загружаю даты${EPS.total?`: ${EPS.done} из ${EPS.total}`:""}…</p>`:"";
+  const sec=(h,rows)=>rows.length?`<section class="eps-s"><h3>${h} <span class="nb">${rows.length}</span></h3><div class="eps-l">${rows.join("")}</div></section>`:"";
+  const empty=!EPS.run&&!ready.length&&!ev.length&&!rest.length;
+  box.innerHTML=prog+
+    sec("Уже вышло — можно смотреть",ready.map(r=>epsRow(r,"ready")))+
+    grp.map(([h,f])=>sec(h,ev.filter(x=>f(epsDays(x.d))).map(x=>x.html))).join("")+
+    (rest.length?`<details class="eps-s eps-rest"><summary>Сериалы без новых серий <span class="nb">${rest.length}</span></summary><div class="eps-l">${rest.map(r=>epsRow(r,"rest")).join("")}</div></details>`:"")+
+    (empty?`<div class="empty">${F==="movie"?"Громких премьер не нашлось.":F==="tv"?(all.length?"Нет серий с известной датой выхода.":"Здесь появятся сериалы из «Продолжить просмотр»."):"Пока нечего показать: нет сериалов в просмотре и ожидаемых фильмов."}${EPS.premErr?" Премьеры не загрузились — нажмите «Обновить».":""}</div>`:"")+
+    (EPS.premErr&&!empty&&F!=="tv"?`<p class="rnote" style="margin:0 0 10px">⚠ Громкие премьеры не загрузились (нет связи с TMDB). Нажмите «↻ Обновить».</p>`:"")+
+    (noRef&&F!=="movie"?`<p class="dim" style="font-size:12.5px;margin:14px 0 0">${noRef} ${plural(noRef,"сериал","сериала","сериалов")} без привязки к TMDB — для них даты неизвестны. Откройте «✎ Изменить» и выберите проект через поиск.</p>`:"");
+}
+function vEps(){
+  setTimeout(()=>{epsLoad(false);epsPaint()},0);
+  const F=UI.epsF==="tv"||UI.epsF==="movie"?UI.epsF:"all";
+  return `<div class="ptitle"><div><h1>Планы</h1><p>Новые серии ваших сериалов и громкие премьеры фильмов</p></div></div>
+  ${planSwitch()}
+  <div class="toolbar"><div class="chips" data-ui="epsF"><button class="chip ${F==="all"?"on":""}" data-v="all">Всё</button><button class="chip ${F==="tv"?"on":""}" data-v="tv">Серии</button><button class="chip ${F==="movie"?"on":""}" data-v="movie">Фильмы</button></div><div class="sp"></div><button class="btn sm" id="epsRefresh" title="Загрузить данные заново">↻ Обновить</button><button class="btn sm" id="epsIcs" title="Скачать серии и премьеры в календарь (.ics)">📆 В календарь</button></div>
+  <div id="epsBody"></div>`;
+}
+document.addEventListener("click",e=>{
+  const r=e.target.closest&&e.target.closest("#epsRefresh,#epsIcs");if(!r)return;
+  e.stopPropagation();e.preventDefault();
+  if(r.id==="epsRefresh"){EPS.data.clear();EPS.prem=null;epsLoad(true);return}
+  const txt=epsIcs();if(!/BEGIN:VEVENT/.test(txt)){toast("Пока нет серий и премьер с известной датой");return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"text/calendar;charset=utf-8"}));a.download="vyhod-serij.ics";document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+  toast("Календарь скачан — откройте файл, чтобы добавить серии и премьеры в календарь телефона");
+},true);
+/* ---- журнал просмотров: it.wl=[{d,k,s,e}] — k: "e" серия, "s" сезон/арка досмотрены, "f" фильм или сериал досмотрены.
+   Хранится прямо в записи, поэтому синхронизируется с облаком вместе с ней. Старые записи подтягиваются из дат просмотра. ---- */
+function wlog(it,k,s,e,d){
+  if(!it||!Array.isArray(DB.items)||!DB.items.includes(it))return;
+  d=String(d||todayStr()).slice(0,10);const L=it.wl||(it.wl=[]);
+  if(L.some(x=>x.d===d&&x.k===k&&(x.s??null)===(s??null)&&(x.e??null)===(e??null)))return;
+  const o={d,k};if(s!=null)o.s=s;if(e!=null)o.e=e;L.push(o);
+}
+const HIST_RE=/^\d{4}-\d\d-\d\d/;
+function histEvents(){
+  const out=[];let undated=0;
+  for(const it of DB.items){
+    if(isProp(it))continue;
+    const wl=Array.isArray(it.wl)?it.wl:[];
+    const sd=new Map((it.seasons||[]).filter(x=>HIST_RE.test(x.watchedAt||"")).map(x=>[x.n,String(x.watchedAt).slice(0,10)]));
+    const wd=it.status==="watched"&&HIST_RE.test(it.watchedAt||"")?String(it.watchedAt).slice(0,10):null;
+    for(const x of wl){
+      if(!x||!HIST_RE.test(x.d||""))continue;
+      if(x.k==="s"&&sd.has(x.s))continue;
+      if(x.k==="f"&&(wd||it.status!=="watched"))continue;
+      out.push({d:x.d,it,k:x.k,s:x.s??null,e:x.e??null});
+    }
+    for(const[n,d]of sd)out.push({d,it,k:"s",s:n,e:null});
+    if(wd)out.push({d:wd,it,k:"f",s:null,e:null});
+    else if(it.status==="watched"&&!wl.some(x=>x.k==="f")){const dt=itemDate(it);if(dt&&!isNaN(dt))out.push({d:dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0"),it,k:"f",s:null,e:null});else if(hasRatings(it.ratings)||seasonsRated(it).length)undated++}
+  }
+  out.undated=undated;return out;
+}
+function histRanges(a){a=[...new Set(a)].sort((x,y)=>x-y);const r=[];let i=0;while(i<a.length){let j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;r.push(j>i?`${a[i]}–${a[j]}`:String(a[i]));i=j+1}return r}
+function histLines(it,evs){
+  const L=[],seg=n=>isArc(it)?`Арка «${segName(it,n)}»`:`Сезон ${n}`;
+  const eps=new Map();
+  for(const x of evs)if(x.k==="e"){const key=x.s==null?0:x.s;(eps.get(key)||eps.set(key,[]).get(key)).push(x.e)}
+  for(const[sn,list]of [...eps].sort((a,b)=>a[0]-b[0])){const r=histRanges(list),n=new Set(list).size;L.push({k:"e",t:`${sn?seg(sn)+" · ":""}${n===1?"серия":"серии"} ${r.join(", ")}`})}
+  for(const x of evs.filter(x=>x.k==="s").sort((a,b)=>a.s-b.s))L.push({k:"s",t:isArc(it)?`${seg(x.s)} досмотрена`:`${seg(x.s)} досмотрен`});
+  if(evs.some(x=>x.k==="f"))L.push({k:"f",t:it.kind==="series"?"Сериал досмотрен":"Фильм посмотрели"});
+  return L;
+}
+function histMonthOf(d){return String(d).slice(0,7)}
+function vHist(){
+  const F=UI.histF==="tv"||UI.histF==="movie"?UI.histF:"all";
+  const HE=histEvents(),undated=HE.undated||0,all=HE.filter(x=>F==="all"||(F==="tv"?x.it.kind==="series":x.it.kind!=="series"));
+  const today=todayStr(),byDay=new Map();
+  for(const x of all)(byDay.get(x.d)||byDay.set(x.d,[]).get(x.d)).push(x);
+  let M=/^\d{4}-\d\d$/.test(UI.histM||"")?UI.histM:"";
+  if(!M){const ds=[...byDay.keys()].sort();M=histMonthOf(ds.length?ds[ds.length-1]:today)}
+  const [Y,Mo]=M.split("-").map(Number),first=new Date(Y,Mo-1,1),dim=new Date(Y,Mo,0).getDate(),lead=(first.getDay()+6)%7;
+  const mv=n=>{const d=new Date(Y,Mo-1+n,1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")};
+  const inM=[...byDay.keys()].filter(d=>histMonthOf(d)===M).sort();
+  let sel=UI.histD&&histMonthOf(UI.histD)===M&&byDay.has(UI.histD)?UI.histD:"";
+  if(!sel)sel=byDay.has(today)&&histMonthOf(today)===M?today:(inM.length?inM[inM.length-1]:"");
+  const cells=[];for(let i=0;i<lead;i++)cells.push(`<i class="hc hc0"></i>`);
+  for(let d=1;d<=dim;d++){
+    const ds=M+"-"+String(d).padStart(2,"0"),ev=byDay.get(ds)||[],cls=["hc"];
+    if(ds===today)cls.push("td");if(ds===sel)cls.push("sel");if(ev.length)cls.push("has");
+    const kinds=["f","s","e"].filter(k=>ev.some(x=>x.k===k)),n=new Set(ev.map(x=>x.it.id)).size;
+    cells.push(ev.length?`<button class="${cls.join(" ")}" data-v="${ds}" title="${n} ${plural(n,"проект","проекта","проектов")}"><b>${d}</b><span class="hd">${kinds.map(k=>`<i class="hk-${k}"></i>`).join("")}</span><small>${n}</small></button>`:`<span class="${cls.join(" ")}"><b>${d}</b></span>`);
+  }
+  const mon=inM.flatMap(d=>byDay.get(d)),mi=new Set(mon.map(x=>x.it.id)),films=new Set(mon.filter(x=>x.k==="f"&&x.it.kind!=="series").map(x=>x.it.id)).size,eps=mon.filter(x=>x.k==="e").length,sn=mon.filter(x=>x.k==="s").length;
+  const sum=mon.length?[mi.size?`${mi.size} ${plural(mi.size,"проект","проекта","проектов")}`:"",films?`${films} ${plural(films,"фильм","фильма","фильмов")}`:"",eps?`${eps} ${plural(eps,"серия","серии","серий")}`:"",sn?`${sn} ${plural(sn,"сезон","сезона","сезонов")}`:""].filter(Boolean).join(" · "):"В этом месяце ничего не отмечено";
+  let day="";
+  if(sel){
+    const ev=byDay.get(sel)||[],g=new Map();for(const x of ev)(g.get(x.it.id)||g.set(x.it.id,[]).get(x.it.id)).push(x);
+    const dt=new Date(sel+"T00:00:00"),WD=["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"],MG=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+    day=`<section class="eps-s"><h3>${dt.getDate()} ${MG[dt.getMonth()]}, ${WD[dt.getDay()]} <span class="nb">${g.size}</span></h3><div class="eps-l">${[...g.values()].map(evs=>{const it=evs[0].it,L=histLines(it,evs);return `<div class="epr" data-open="${it.id}"><div class="mini">${posterHTML(it,false)}</div><div class="eb"><b>${esc(it.title)}</b>${L.map(l=>`<span class="hl hl-${l.k}">${esc(l.t)}</span>`).join("")}</div></div>`}).join("")}</div></section>`;
+  }else day=`<div class="empty">${all.length?"Выберите день с отметкой в календаре.":"Здесь появятся фильмы и серии, которые вы отметите просмотренными: «＋1 серия», «Смотрели — оценить» и т. п."}</div>`;
+  return `<div class="ptitle"><div><h1>Планы</h1><p>Что и когда вы уже посмотрели</p></div></div>
+  ${planSwitch()}
+  <div class="toolbar"><div class="chips" data-ui="histF"><button class="chip ${F==="all"?"on":""}" data-v="all">Всё</button><button class="chip ${F==="tv"?"on":""}" data-v="tv">Серии</button><button class="chip ${F==="movie"?"on":""}" data-v="movie">Фильмы</button></div><div class="sp"></div>
+    <div class="hnav" data-ui="histM"><button class="btn sm icon" data-v="${mv(-1)}" title="Предыдущий месяц" id="hPrev">‹</button><b class="hmn">${MONTHS[Mo-1]} ${Y}</b><button class="btn sm icon" data-v="${mv(1)}" title="Следующий месяц" id="hNext">›</button></div>
+    ${M!==histMonthOf(today)?`<div class="chips" data-ui="histM"><button class="chip" data-v="${histMonthOf(today)}" id="hToday">Сегодня</button></div>`:""}</div>
+  <p class="dim" style="margin:0 0 10px">${esc(sum)}</p>
+  <div class="hgrid"><div class="hwd">${["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(w=>`<span>${w}</span>`).join("")}</div><div class="hdays" data-ui="histD" id="hDays">${cells.join("")}</div></div>
+  <p class="hleg"><span><i class="hk-f"></i>досмотрели</span><span><i class="hk-s"></i>сезон</span><span><i class="hk-e"></i>серии</span></p>
+  ${day}
+  ${undated?`<p class="dim" style="font-size:12.5px;margin:14px 0 0">${undated} ${plural(undated,"просмотренный проект","просмотренных проекта","просмотренных проектов")} без даты — укажите её в «✎ Изменить», и они появятся в календаре.</p>`:""}`;
+}
 function planSwitch(){
-  const pl=DB.items.filter(i=>i.status==="planned"),nS=pl.filter(isUpcoming).length,nP=pl.length-nS,nQ=DB.items.filter(isProp).length,cur=UI.planList==="prop"?"prop":UI.planList==="soon"?"soon":"plan",on=cur==="prop";
-  return `<div class="plsw"><div class="seg lg" data-ui="planList"><button data-v="plan" class="${cur==="plan"?"on":""}">В планах <small>${nP}</small></button><button data-v="soon" class="${cur==="soon"?"on":""}">🚧 Скоро <small>${nS}</small></button><button data-v="prop" class="${on?"on":""}">🤝 На согласовании <small>${nQ}</small></button></div></div>`;
+  const pl=DB.items.filter(i=>i.status==="planned"),nS=pl.filter(isUpcoming).length,nP=pl.length-nS,nQ=DB.items.filter(isProp).length,cur=UI.planList==="prop"?"prop":UI.planList==="soon"?"soon":UI.planList==="eps"?"eps":UI.planList==="hist"?"hist":"plan",on=cur==="prop";
+  return `<div class="plsw"><div class="seg lg" data-ui="planList"><button data-v="plan" class="${cur==="plan"?"on":""}">В планах <small>${nP}</small></button><button data-v="soon" class="${cur==="soon"?"on":""}">🚧 Скоро <small>${nS}</small></button><button data-v="eps" class="${cur==="eps"?"on":""}">📅 Календарь <small>${epsBadge()}</small></button><button data-v="hist" class="${cur==="hist"?"on":""}">🕘 История</button><button data-v="prop" class="${on?"on":""}">🤝 На согласовании <small>${nQ}</small></button></div></div>`;
 }
 function vProp(){
   setTimeout(propFavFill,0);
@@ -1277,6 +1515,8 @@ function planUniHTML(U,list){
 }
 function vPlan(){
   if(UI.planList==="prop")return vProp();
+  if(UI.planList==="eps")return vEps();
+  if(UI.planList==="hist")return vHist();
   const U=buildUni();
   const soonTab=UI.planList==="soon";
   const all=DB.items.filter(i=>i.status==="planned"&&isUpcoming(i)===soonTab);
@@ -1557,6 +1797,43 @@ async function catAdd(k,mode){
   }catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}
   finally{CATB.delete(k)}
 }
+/* ============ трейлеры: TMDB (videos) → встроенный плеер YouTube ============ */
+async function trailersGet(ref){
+  const key="vid:"+refKey(ref),c=await cacheGet(key,14*864e5);
+  if(c&&(c.list.length||Date.now()-(c.at||0)<2*864e5))return c.list;   /* пустой ответ перепроверяем через 2 дня: трейлер мог появиться */
+  const r=await tmdbGet(`/${ref.type}/${ref.id}/videos`,{language:"ru-RU",include_video_language:"ru,en,null"});
+  const rank=v=>(v.type==="Trailer"?0:3)+(v.official?0:1)+(v.iso_639_1==="ru"?0:v.iso_639_1==="en"?.5:1);
+  const list=(r.results||[]).filter(v=>v.site==="YouTube"&&v.key&&(v.type==="Trailer"||v.type==="Teaser"))
+    .sort((a,b)=>rank(a)-rank(b)||String(b.published_at||"").localeCompare(String(a.published_at||"")))
+    .slice(0,6).map(v=>({k:v.key,t:v.type,l:v.iso_639_1||"",y:String(v.published_at||"").slice(0,4)}));
+  cachePut(key,{list,at:Date.now()});return list;
+}
+const trlBtnHTML=(ref,title)=>ref&&ref.id?`<button class="btn" data-trl="${ref.type}:${ref.id}" data-trln="${esc(title)}" title="Смотреть трейлер здесь же">▶ Трейлер</button>`:"";
+const trlBoxHTML=it=>castRef(it)?`<div class="dsec trl" id="trlBox" data-noshot hidden></div>`:"";
+function trlPaint(box,i){
+  const T=box._trl;if(!T)return;const v=T.list[i];
+  const lab=x=>(x.t==="Trailer"?"Трейлер":"Тизер")+(x.l?" · "+x.l.toUpperCase():"")+(x.y?" · "+x.y:"");
+  box.hidden=false;
+  box.innerHTML=`<div class="trl-h"><h4>Трейлер · ${esc(T.title)}</h4><button type="button" class="btn sm ghost" data-trlclose>Закрыть</button></div>
+    <div class="trl-fr"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.k)}?autoplay=1&rel=0" title="${esc(T.title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <div class="chips" style="margin-top:8px">${T.list.length>1?T.list.map((x,j)=>`<button type="button" class="chip ${j===i?"on":""}" data-trlpick="${j}">${esc(lab(x))}</button>`).join(""):""}<a class="btn sm" href="https://www.youtube.com/watch?v=${encodeURIComponent(v.k)}" target="_blank" rel="noopener">Открыть на YouTube ↗</a></div>`;
+  box.scrollIntoView({block:"nearest",behavior:"smooth"});
+}
+document.addEventListener("click",async e=>{
+  const t=e.target.closest&&e.target.closest("[data-trl],[data-trlpick],[data-trlclose]");if(!t)return;
+  const dlg=t.closest("dialog"),box=dlg&&dlg.querySelector("#trlBox");if(!box)return;
+  e.stopPropagation();e.preventDefault();
+  if(t.dataset.trlclose!==undefined){box.querySelectorAll("iframe").forEach(f=>f.remove());box.hidden=true;box.innerHTML="";return}
+  if(t.dataset.trlpick!==undefined){trlPaint(box,+t.dataset.trlpick);return}
+  if(!apiKey("tmdb")){toast("Для трейлеров нужен ключ TMDB (вкладка «Данные» или «Каталог»)");return}
+  const [type,id]=t.dataset.trl.split(":"),title=t.dataset.trln||"";
+  box.hidden=false;box.innerHTML=`<p class="dim" style="margin:0">⏳ Ищу трейлер…</p>`;
+  let list;try{list=await trailersGet({type,id:+id})}catch(err){box.innerHTML=`<p class="rnote">⚠ ${esc(err.message==="Failed to fetch"?"нет связи с TMDB":err.message)}</p>`;return}
+  if(!box.isConnected)return;
+  if(!list.length){box.innerHTML=`<p class="dim" style="margin:0">В TMDB для этого проекта трейлера пока нет. <a class="lnk2" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(title+" трейлер")}">Поискать на YouTube ↗</a></p>`;return}
+  box._trl={list,title};trlPaint(box,0);
+},true);
+
 /* мировые оценки проекта из каталога: IMDb, Rotten Tomatoes, Metacritic (OMDb, нужен ключ) и MyAnimeList (аниме, без ключа).
    Кэш на неделю — бесплатный лимит OMDb небольшой. */
 async function worldGet(ref,type,title){
@@ -1592,8 +1869,8 @@ function catPreview(k){
       ${x.rd&&x.rd>todayStr()?`<p class="muted" style="margin:0 0 10px">📅 Выходит ${esc(new Date(x.rd+"T00:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"}).replace(/\s*г\.$/,""))}</p>`:""}
       <p class="syn${x.ov?"":" dim"}">${x.ov?esc(x.ov):"Описания на русском пока нет."}</p>
       <div class="dsec" id="catWorld" data-k="${esc(x.k)}" data-noshot style="margin-top:14px"></div></div></div>
-    ${finBoxHTML(catAsItem(x))}${document.querySelector("#dlg[open] #castBox")?"":castBoxHTML()}</div>
-  <div class="df">${ACT.back?`<button class="btn ghost" data-actor="${ACT.back}">← К актёру</button>`:""}<a class="btn" href="https://www.themoviedb.org/${x.t}/${x.id}?language=ru-RU" target="_blank" rel="noopener">TMDB ↗</a>${st||ACT.back?"":`<button class="btn ghost" data-chide="${x.k}">Не интересно</button>`}<button class="btn" data-csimk="${x.k}">≈ Похожие</button><div class="sp"></div>${st?(st.status===PROP?`<button class="btn" data-toplan="${st.id}">＋ В планы</button>`:""):`<button class="btn" data-cadd="${x.k}">＋ В планы</button><button class="btn" data-cprop="${x.k}">🤝 На согласование</button>`}${!st||st.status==="planned"||st.status===PROP?`<button class="btn pri" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:""}</div>`;
+    <div class="dsec trl" id="trlBox" data-noshot hidden></div>${finBoxHTML(catAsItem(x))}${document.querySelector("#dlg[open] #castBox")?"":castBoxHTML()}</div>
+  <div class="df">${ACT.back?`<button class="btn ghost" data-actor="${ACT.back}">← К актёру</button>`:""}${trlBtnHTML({type:x.t,id:x.id},x.title)}<a class="btn" href="https://www.themoviedb.org/${x.t}/${x.id}?language=ru-RU" target="_blank" rel="noopener">TMDB ↗</a>${st||ACT.back?"":`<button class="btn ghost" data-chide="${x.k}">Не интересно</button>`}<button class="btn" data-csimk="${x.k}">≈ Похожие</button><div class="sp"></div>${st?(st.status===PROP?`<button class="btn" data-toplan="${st.id}">＋ В планы</button>`:""):`<button class="btn" data-cadd="${x.k}">＋ В планы</button><button class="btn" data-cprop="${x.k}">🤝 На согласование</button>`}${!st||st.status==="planned"||st.status===PROP?`<button class="btn pri" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:""}</div>`;
   showDlg(html,"dlg2");
   catWorldFill(x,st);
   finOpened(catAsItem(x));
@@ -2954,7 +3231,8 @@ async function qzMakeOne(kind,pool){
     for(const it of qzShuf(fresh(pool.filter(i=>i.tmdb&&i.tmdb.id))).slice(0,4)){
       const L=await qzCastOf(it),main=L.filter(a=>a.o<12&&a.k!==0);
       if(!main.length)continue;
-      const right=qzPick(main),wrong=await qzDecoyActors(it,pool,new Set(L.map(a=>a.i)),3);
+      const right=qzPick(main),seenN=new Set([normT(right.n)]);
+      const wrong=(await qzDecoyActors(it,pool,new Set(L.map(a=>a.i)),6)).filter(a=>{const k=normT(a.n);if(seenN.has(k))return false;seenN.add(k);return true}).slice(0,3);   /* тёзки правильного ответа и дубли имён не годятся */
       if(wrong.length<3)continue;
       return{...base,it,prompt:`Кто из этих актёров снимался в «${it.title}»?`,img:qzHasImg(it)?it.poster:null,small:true,
         opts:qzShuf([right,...wrong]).map(a=>({label:a.n,ok:a.i===right.i})),
@@ -3688,7 +3966,7 @@ document.addEventListener("click",e=>{
 /* ============ dialogs ============ */
 function showDlg(html,id="dlg"){const d=document.getElementById(id);d.classList.remove("pbg");d.style.removeProperty("--pcol");delete d.dataset.pid;d.innerHTML=html;if(!d.open)d.showModal();d.tabIndex=-1;d.focus({preventScroll:true});d.scrollTop=0;return d}
 function closeDlg(id="dlg"){const d=document.getElementById(id);if(d.open)d.close()}
-["dlg","dlg2"].forEach(id=>{const d=document.getElementById(id);d.addEventListener("click",e=>{if(e.target===d)d.close();if(e.target.closest("[data-close]"))d.close()})});
+["dlg","dlg2"].forEach(id=>{const d=document.getElementById(id);d.addEventListener("click",e=>{if(e.target===d)d.close();if(e.target.closest("[data-close]"))d.close()});d.addEventListener("close",()=>d.querySelectorAll("iframe").forEach(f=>f.remove()))});
 
 /* detail */
 function segTable(it){
@@ -3737,11 +4015,12 @@ function openDetail(id,season){
       </tbody></table>${useSeasonsAvg?`<p class="dim" style="font-size:12.5px">Оценки — среднее по ${arc?"аркам":"сезонам"}.</p>`:""}${ratedAtLine(R,useSeasonsAvg)}`:""}
       ${!sObj?worldBlock(it,tot):""}
       ${!sObj?finBoxHTML(it):""}
-      ${castBoxHTML()}
+      ${!sObj?trlBoxHTML(it):""}${castBoxHTML()}
       ${ser&&!sObj?segTable(it):""}
       ${ser&&!sObj?alBlockHTML(it):""}
     </div></div></div>
   <div class="df"><button class="btn danger ghost" id="dDel">Удалить</button><div class="sp"></div>
+    ${!sObj?trlBtnHTML(castRef(it),it.title):""}
     <button class="btn icon" data-shot="#detShot" data-shot-title="${esc(it.title)}${sObj?" · "+esc(segName(it,season)):""}" title="Копировать карточку картинкой"><i class="ico ico-cam"></i></button>
     <button class="btn" data-tags="${it.id}" title="Теги">🏷</button>
     ${canFreeze(it)?(it.frozen?`<button class="btn" data-unfreeze="${it.id}">Разморозить</button>`:`<button class="btn" data-freeze="${it.id}" title="Пока не продолжаем — убрать из «Продолжить просмотр»"><i class="ico ico-snow"></i> Заморозить</button>`):""}
@@ -3926,7 +4205,7 @@ function openRate(id,opt={}){
     ["input","change"].forEach(ev=>$("#rSn",d).addEventListener(ev,()=>{season=+$("#rSn",d).value||1;fill()}));
   }
   fill();
-  const finishMeta=()=>{if(!finish)return;delete it.progress;it.status="watched";it.order=+$("#rOrd",d).value||nextOrder();it.watchedAt=$("#rDate",d).value||null};
+  const finishMeta=()=>{if(!finish)return;delete it.progress;it.status="watched";it.order=+$("#rOrd",d).value||nextOrder();it.watchedAt=$("#rDate",d).value||null;wlog(it,season!=null?"s":"f",season,null,it.watchedAt||todayStr())};
   $("#rSave",d).onclick=()=>{
     const res={};let any=false;const prev=getR(),now=new Date().toISOString(),logs=[];
     DB.raters.forEach(n=>{const o={};let h=false;CATS.forEach(c=>{const inp=$(`input[data-r="${CSS.escape(n)}"][data-k="${c.k}"]`,d);const v=parse(inp.value);o[c.k]=v;if(isNum(v))h=true});if(h){
@@ -3937,7 +4216,7 @@ function openRate(id,opt={}){
     if(!any&&!finish){toast("Введите хотя бы одну оценку");return}
     DB.log.push(...logs);
     if(season==null){it.ratings=res}
-    else{it.seasons=it.seasons||[];let s=it.seasons.find(s=>s.n===season);if(!s){s={n:season,ratings:{},order:it.seasons.length+1,watchedAt:finish?($("#rDate",d)?.value||null):new Date().toISOString().slice(0,10)};it.seasons.push(s);it.seasons.sort((a,b)=>a.n-b.n)}
+    else{it.seasons=it.seasons||[];let s=it.seasons.find(s=>s.n===season);if(!s){s={n:season,ratings:{},order:it.seasons.length+1,watchedAt:finish?($("#rDate",d)?.value||null):new Date().toISOString().slice(0,10)};it.seasons.push(s);it.seasons.sort((a,b)=>a.n-b.n);wlog(it,"s",season,null,s.watchedAt||todayStr())}
       if(any)s.ratings=res;else it.seasons=it.seasons.filter(x=>x!==s);
       if(it.seasonsTotal&&season>it.seasonsTotal)it.seasonsTotal=season}
     finishMeta();
@@ -4640,7 +4919,7 @@ document.addEventListener("click",e=>{
    (css/230-icons-x.css). Срабатывает на любом тексте, который появляется в документе, поэтому
    отдельно править шаблоны не нужно. В <option>, title, placeholder иконок быть не может — там смайлы убираются.
    Карта и сами иконки генерируются legacy/make_icons.py. */
-const EMO_MAP={"🦊": "fox", "🎬": "film", "🎞": "strip", "🎨": "art", "☁": "cloud", "📅": "cal", "🗓": "cal", "↻": "redo", "↺": "undo2", "🔎": "search", "🔍": "search", "⚲": "search", "★": "star", "⭐": "star", "🎭": "masks", "🎲": "dice", "🎰": "slot", "🧸": "teddy", "🍿": "popcorn", "📊": "chart", "⬆": "up", "⬇": "down", "⏳": "hourglass", "↗": "ext", "↔": "swap", "👁": "eye", "🚧": "cone", "🌐": "globe", "🌍": "globe", "🗺": "map", "🤝": "link", "📺": "tv", "🖼": "image", "🔁": "repeat", "🏆": "trophy", "🕓": "clock", "⏱": "timer", "❤": "heart", "💛": "heart", "💾": "save", "⚔": "swords", "📜": "scroll", "🔥": "flame", "📋": "clip", "✎": "pencil", "✨": "sparkle", "🌙": "moon", "☀": "sun", "🌑": "newmoon", "🌊": "wave", "🌲": "tree", "💎": "gem", "🌇": "sunset", "🌌": "galaxy", "🎉": "party", "🙂": "smile", "😄": "grin", "😂": "laugh", "😱": "scared", "🤔": "think", "🧐": "monocle", "🥲": "relief", "🚀": "rocket", "🚫": "ban", "🎯": "target", "🗑": "trash", "↩": "back", "📦": "box", "🎮": "gamepad", "📝": "notes", "⚖": "scales", "📖": "book", "⚙": "gear", "📲": "phone", "🎧": "phones", "💥": "boom", "🏷": "tag", "☕": "coffee", "🍜": "noodles", "🌸": "flower", "⚠": "warn", "✓": "check", "✔": "check", "✕": "x", "✗": "x", "✖": "x", "🍒": "flower", "💰": "money", "💵": "money", "🎂": "cake", "🎖": "medal", "🏅": "medal", "✍": "pencil", "💡": "bulb", "🆕": "sparkle", "✝": "cross", "📍": "pin", "🎤": "mic", "🧩": "puzzle", "🌟": "star", "☆": "staro", "▶": "play", "ℹ": "info", "⟳": "redo"};
+const EMO_MAP={"🦊": "fox", "🎬": "film", "🎞": "strip", "🎨": "art", "☁": "cloud", "📅": "cal", "🗓": "cal", "🕘": "clock", "↻": "redo", "↺": "undo2", "🔎": "search", "🔍": "search", "⚲": "search", "★": "star", "⭐": "star", "🎭": "masks", "🎲": "dice", "🎰": "slot", "🧸": "teddy", "🍿": "popcorn", "📊": "chart", "⬆": "up", "⬇": "down", "⏳": "hourglass", "↗": "ext", "↔": "swap", "👁": "eye", "🚧": "cone", "🌐": "globe", "🌍": "globe", "🗺": "map", "🤝": "link", "📺": "tv", "🖼": "image", "🔁": "repeat", "🏆": "trophy", "🕓": "clock", "⏱": "timer", "❤": "heart", "💛": "heart", "💾": "save", "⚔": "swords", "📜": "scroll", "🔥": "flame", "📋": "clip", "✎": "pencil", "✨": "sparkle", "🌙": "moon", "☀": "sun", "🌑": "newmoon", "🌊": "wave", "🌲": "tree", "💎": "gem", "🌇": "sunset", "🌌": "galaxy", "🎉": "party", "🙂": "smile", "😄": "grin", "😂": "laugh", "😱": "scared", "🤔": "think", "🧐": "monocle", "🥲": "relief", "🚀": "rocket", "🚫": "ban", "🎯": "target", "🗑": "trash", "↩": "back", "📦": "box", "🎮": "gamepad", "📝": "notes", "⚖": "scales", "📖": "book", "⚙": "gear", "📲": "phone", "🎧": "phones", "💥": "boom", "🏷": "tag", "☕": "coffee", "🍜": "noodles", "🌸": "flower", "⚠": "warn", "✓": "check", "✔": "check", "✕": "x", "✗": "x", "✖": "x", "🍒": "flower", "💰": "money", "💵": "money", "🎂": "cake", "🎖": "medal", "🏅": "medal", "✍": "pencil", "💡": "bulb", "🆕": "sparkle", "✝": "cross", "📍": "pin", "🎤": "mic", "🧩": "puzzle", "🌟": "star", "☆": "staro", "▶": "play", "ℹ": "info", "⟳": "redo", "📆": "cal"};
 const EMO_RX=new RegExp("("+Object.keys(EMO_MAP).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")[\\uFE0E\\uFE0F]?","gu");
 const EMO_TEST=new RegExp(EMO_RX.source,"u");
 const EMO_SKIP=new Set(["SCRIPT","STYLE","TEXTAREA","TITLE","OPTION","NOSCRIPT"]);
@@ -5395,4 +5674,5 @@ document.addEventListener("keydown",e=>{if(e.key==="/"&&!e.target.matches("input
     if(!joinCloud(inv,true))cloudConnect()}
   else cloudConnect();
   setTimeout(()=>fillPosters(true),2500);
+  epsKick();
 })();

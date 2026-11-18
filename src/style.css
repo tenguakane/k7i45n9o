@@ -1216,6 +1216,7 @@ html[data-fx="on"] .fx-in .geo-svg .gt{animation:fxPop .5s cubic-bezier(.2,.8,.2
 .ico-x-book{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M2 5a2 2 0 0 1 2-1h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H2zM22 5a2 2 0 0 0-2-1h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h8z%27/%3E%3C/svg%3E")}
 .ico-x-boom{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M12 2l2.2 5.3L20 6l-2.4 5.2L22 14l-5.6.6L15 20l-3-4.4L9 20l-1.4-5.4L2 14l4.4-2.8L4 6l5.8 1.3z%27/%3E%3C/svg%3E")}
 .ico-x-box{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M3 8l9-5 9 5v9l-9 5-9-5zM3 8l9 5 9-5M12 13v9%27/%3E%3C/svg%3E")}
+.ico-x-clock{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%2712%27 cy=%2712%27 r=%279%27/%3E%3Cpath d=%27M12 7v5l3 2%27/%3E%3C/svg%3E")}
 .ico-x-cal{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Crect x=%273%27 y=%275%27 width=%2718%27 height=%2716%27 rx=%272%27/%3E%3Cpath d=%27M3 10h18M8 3v4M16 3v4%27/%3E%3C/svg%3E")}
 .ico-x-chart{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M4 20V11M10 20V5M16 20v-6M21 20H3%27/%3E%3C/svg%3E")}
 .ico-x-check{--m:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23000%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M4 12.5l5 5L20 6.5%27/%3E%3C/svg%3E")}
@@ -1803,3 +1804,47 @@ dialog:focus,dialog:focus-visible{outline:none}
 .ico-x-staro{--m:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M12%203.5l2.6%205.4%205.9.8-4.3%204.1%201%205.9L12%2017l-5.2%202.7%201-5.9L3.5%209.7l5.9-.8z'/%3E%3C/svg%3E")}
 .ico-x-play{--m:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M7%204.5v15l12-7.5z'%20fill='%23000'/%3E%3C/svg%3E")}
 .ico-x-info{--m:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M12%2011v5.5'/%3E%3Ccircle%20cx='12'%20cy='7.8'%20r='1'%20fill='%23000'%20stroke='none'/%3E%3C/svg%3E")}
+.trl{margin-top:14px}
+.trl-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.trl-h h4{margin:0}
+.trl-fr{position:relative;aspect-ratio:16/9;border-radius:var(--r);overflow:hidden;background:#000;border:1px solid var(--line)}
+.trl-fr iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.eps-s{margin:0 0 20px}
+.eps-s>h3,.eps-rest>summary{margin:0 0 10px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;cursor:default}
+.eps-rest>summary{cursor:pointer;color:var(--tx2)}
+.eps-l{display:flex;flex-direction:column;gap:8px}
+.epr{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--card-g);cursor:pointer}
+.epr:hover{border-color:var(--acc)}
+.epr .mini{width:38px;height:54px}
+.epr .eb{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.epr .eb b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.epr .eb span{font-size:13px}
+.epr .epd{flex:none;text-align:right;font-weight:700;font-size:14px;display:flex;flex-direction:column}
+.epr .epd small{font-weight:500;font-size:12px}
+.cm2.epn{color:var(--acc);font-weight:700}
+.cm2.epn.soon{color:var(--tx2);font-weight:600}
+.epr .btn.sm{flex:none}
+.epb{color:var(--acc);font-weight:600}
+.hnav{display:flex;align-items:center;gap:8px}
+.hmn{min-width:150px;text-align:center;font-size:15px}
+.hgrid{max-width:560px;margin:0 0 6px}
+.hwd,.hdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.hwd span{text-align:center;font-size:12px;color:var(--tx3);padding:2px 0 4px}
+.hc{position:relative;aspect-ratio:1/.85;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--card-g);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--tx3);font:inherit;padding:0}
+.hc0{border:0;background:none}
+.hc b{font-size:14px;font-weight:600}
+.hc.has{color:var(--tx);cursor:pointer}
+.hc.has:hover{border-color:var(--acc)}
+.hc.td{border-color:var(--tx2)}
+.hc.sel{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc) inset}
+.hc small{position:absolute;top:3px;right:6px;font-size:10.5px;color:var(--tx2);font-weight:700}
+.hd{display:flex;gap:3px;height:6px}
+.hk-f,.hk-s,.hk-e{display:inline-block;width:6px;height:6px;border-radius:50%}
+.hk-f{background:var(--acc)}
+.hk-s{background:#e0a030}
+.hk-e{background:var(--tx3)}
+.hleg{display:flex;gap:14px;margin:6px 0 18px;font-size:12px;color:var(--tx3)}
+.hleg span{display:flex;align-items:center;gap:5px}
+.epr .hl{color:var(--tx2)}
+.epr .hl-f{color:var(--acc);font-weight:600}
+@media(max-width:560px){.hc{min-height:40px}.hmn{min-width:120px}}
