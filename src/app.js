@@ -141,7 +141,7 @@ const UIK="kinoteka.ui.v1";
 let UI={qzSub:"play",qzWho:"turn",qzLen:"10",qzProj:"asked",sub:"stats",hiddenTabs:["comics"],catCat:"movie",catSort:"popular",catGenre:"",catYear:"",catHide:true,catQ:"",planView:"list",planSeen:"all",planUni:"",tab:"watched",type:"all",comics:"all",bucket:null,rater:"all",sort:"order",dir:-1,mode:"whole",view:"cards",q:"",genre:"",uni:"marvel",cOrder:"num",planType:"all",planSort:"added",serType:"all",serQ:"",theme:"dark",tag:"",tA:"",tB:"",wSrc:"all",wWho:"all",wSort:"rel",omdbKey:"",gridSize:178,hideScores:false,group:"none",gColl:{},compact:false,stPer:"month"};
 try{Object.assign(UI,JSON.parse(localStorage.getItem(UIK)||"{}"))}catch(e){logErr("Настройки интерфейса",e,1)}
 /* новые типы вопросов викторины включаем тем, кто раньше сохранял свой выбор */
-if(Array.isArray(UI.qzTypes)&&UI.qzTypesV!==3){for(const k of["cast","role","actorfilm","actorbio","common","odd","favact"])if(!UI.qzTypes.includes(k))UI.qzTypes.push(k);UI.qzTypesV=3}
+if(Array.isArray(UI.qzTypes)&&UI.qzTypesV!==4){for(const k of["cast","role","actorfilm","actorbio","common","odd","favact","money","award"])if(!UI.qzTypes.includes(k))UI.qzTypes.push(k);UI.qzTypesV=4}
 if(!UI.catStatusShown){UI.catHide=false;UI.catStatusShown=1}  /* в каталоге по умолчанию видны статусы (смотрели / в планах / на согласовании) */
 UI.reorder=false;
 function tabHidden(id){return id!=="data"&&Array.isArray(UI.hiddenTabs)&&UI.hiddenTabs.includes(id)}
@@ -689,6 +689,7 @@ function wMatch(e,sc,skipBucket){
   if(UI.type!=="all"&&e.it.type!==UI.type)return false;
   if(!comicsMatch(e,UI.comics))return false;
   if(UI.genre&&!e.it.genres.includes(UI.genre))return false;
+  if(UI.aw&&!awFilterOk(e.it,UI.aw))return false;
   if(UI.tag&&!(e.it.tags||[]).includes(UI.tag))return false;
   if(UI.rater!=="all"){const has=isNum(e.per[UI.rater]);if(UI.unr==="only"?has:!has)return false}
   if(UI.q&&!e.title.toLowerCase().includes(UI.q.toLowerCase()))return false;
@@ -710,6 +711,9 @@ function wSort(list,sc){
     mcu:(a,b)=>(mcuNum(a)-mcuNum(b))*d||a.order-b.order,
     diff:(a,b)=>(Math.abs((a.per[R[0]]??0)-(a.per[R[1]]??0))-Math.abs((b.per[R[0]]??0)-(b.per[R[1]]??0)))*d,
     world:(a,b)=>{const g=e=>{const w=worldScore(e.it),v=sc(e);return isNum(w)&&isNum(v)?v-w:-99};return (g(a)-g(b))*d||cmpRu(a.title,b.title)},
+    budget:(a,b)=>((finV(a.it,"b")??-1)-(finV(b.it,"b")??-1))*d||cmpRu(a.title,b.title),
+    revenue:(a,b)=>((finV(a.it,"r")??-1)-(finV(b.it,"r")??-1))*d||cmpRu(a.title,b.title),
+    awards:(a,b)=>((awScore(a.it)??-1)-(awScore(b.it)??-1))*d||cmpRu(a.title,b.title),
   };
   return list.sort(S[UI.sort]||S.order);
 }
@@ -718,8 +722,8 @@ function watchedState(){
   const list=wSort(all.filter(e=>wMatch(e,sc)),sc);
   return {all,list,sc,rater,rk:wRanks(list,sc)};
 }
-function wActiveFilters(){return [UI.type!=="all",UI.bucket,UI.comics!=="all",UI.genre,UI.rater!=="all",UI.rater!=="all"&&UI.unr==="only"].filter(Boolean).length}
-function wHasFilters(){return (UI.rater!=="all"&&UI.unr==="only")||UI.type!=="all"||UI.bucket||UI.comics!=="all"||UI.genre||UI.tag||UI.q||UI.rater!=="all"}
+function wActiveFilters(){return [UI.type!=="all",UI.bucket,UI.comics!=="all",UI.genre,UI.aw,UI.rater!=="all",UI.rater!=="all"&&UI.unr==="only"].filter(Boolean).length}
+function wHasFilters(){return (UI.rater!=="all"&&UI.unr==="only")||UI.type!=="all"||UI.bucket||UI.comics!=="all"||UI.genre||UI.aw||UI.tag||UI.q||UI.rater!=="all"}
 
 /* --- components --- */
 function segHTML(key,opts,cur){return `<div class="seg" data-ui="${key}">${opts.map(([v,n,t])=>`<button data-v="${esc(v)}" class="${cur===v?"on":""}"${t?` title="${t}"`:""}>${n}</button>`).join("")}</div>`}
@@ -738,6 +742,7 @@ function wHeaderHTML(st){
     </div></div>`;
 }
 function wFiltersHTML(st){
+  if(UI.aw)finKick("awards");
   const sc=st.sc,typesPresent={};st.all.forEach(e=>typesPresent[e.it.type]=(typesPresent[e.it.type]||0)+1);
   const genres=[...new Set(DB.items.flatMap(i=>i.genres))].sort(cmpRu);
   const bc={};BUCKETS.forEach(b=>bc[b.k]=st.all.filter(e=>{if(UI.type!=="all"&&e.it.type!==UI.type)return false;if(!comicsMatch(e,UI.comics))return false;const v=sc(e);return isNum(v)&&b.f(v)}).length);
@@ -749,13 +754,16 @@ function wFiltersHTML(st){
     ${fltHTML("Чей топ",segHTML("rater",[["all","Общий"],...DB.raters.map(r=>[r,esc(r)])],UI.rater))}
     ${UI.rater!=="all"?fltHTML("Без оценки",segHTML("unr",[["hide","Скрыть"],["only","Только без оценки "+esc(UI.rater)]],UI.unr==="only"?"only":"hide")):""}
     ${fltHTML("Жанр",selectHTML("genre",[["","Любой"],...genres.map(g=>[g,esc(g)])],UI.genre))}
+    ${fltHTML("Оскар",selectHTML("aw",[["","Любые"],["win","Лауреаты (есть Оскар)"],["nom","Номинанты (в т.ч. лауреаты)"],["none","Без Оскара"]],UI.aw||""))}
+    ${UI.aw?finBannerHTML("awards"):""}
     ${tags.length?fltHTML("Тег",selectHTML("tag",[["","Любой"],...tags.map(([t,c])=>[t,`#${esc(t)} (${c})`])],UI.tag)):""}
   </div>`;
 }
 function wToolbarHTML(st){
+  finKick(UI.sort);
   const scores=st.list.map(st.sc).filter(isNum),mins=st.list.filter(e=>e.season==null).reduce((s,e)=>s+watchedMinutes(e.it),0);
   const rAvg=n=>avg(st.list.map(e=>e.per[n]));
-  const sortOpts=[["order","По порядку просмотра"],["score",st.rater?"По оценке: "+esc(st.rater):"По итоговой оценке"],["title","По названию"],["year","По году выхода"],["mcu","Хронология Marvel"],["diff","По расхождению оценок"],["world","Мы выше мира ↔ ниже"]];
+  const sortOpts=[["order","По порядку просмотра"],["score",st.rater?"По оценке: "+esc(st.rater):"По итоговой оценке"],["title","По названию"],["year","По году выхода"],["mcu","Хронология Marvel"],["diff","По расхождению оценок"],["world","Мы выше мира ↔ ниже"],["budget","💰 По бюджету"],["revenue","💵 По кассовым сборам"],["awards","🏆 По наградам (Оскар)"]];
   return `<div class="toolbar">
     <div class="search"><input class="inp" id="q" placeholder="Поиск по названию" value="${esc(UI.q)}"></div>
     ${selectHTML("sort",sortOpts,UI.sort)}
@@ -777,6 +785,7 @@ function vWatched(){
   ${UI.reorder?`<div class="reorder-bar"><span>Перетащите карточку на новое место${matchMedia("(pointer:coarse)").matches?", взявшись за значок ⠿":""}. Порядок сохраняется сразу после отпускания.</span><button class="btn sm pri" id="reorderDone">Готово</button></div>`:`${contHTML()}`}
   ${wFiltersHTML(st)}
   ${wToolbarHTML(st)}
+  ${finBannerHTML(UI.sort)}
   ${UI.view!=="list"?`${gridSizerHTML()}`:""}
   <div id="wlist">${body}</div>`;
 }
@@ -822,7 +831,7 @@ function cardHTML(e,i,rk,sc,reorder){
       <div class="poster">${posterHTML(it)}${r?`<span class="rk">#${r}</span>`:""}<span class="sct">${scBadge(sc(e),"big")}</span>${reorder?`<span class="drag-h" aria-hidden="true">⠿</span>`:""}</div>
       <div class="body">
         <div class="t">${esc(e.title)}</div>
-        <div class="m"><span class="tag">${esc(it.type)}</span>${it.status==="watching"&&e.season==null?`<span class="stt c" style="padding:1px 7px">Смотрим</span>`:""}${it.year?`<span>${it.year}</span>`:""}${e.sub?`<span>${e.sub}</span>`:""}${extChip(it)}</div>
+        <div class="m"><span class="tag">${esc(it.type)}</span>${it.status==="watching"&&e.season==null?`<span class="stt c" style="padding:1px 7px">Смотрим</span>`:""}${it.year?`<span>${it.year}</span>`:""}${e.sub?`<span>${e.sub}</span>`:""}${extChip(it)}${finChip(e)}</div>
         ${it.genres.length?`<div class="gen">${it.genres.map(esc).join(", ")}</div>`:""}${tagChips(it)}
         <div class="pr">${DB.raters.map(n=>`<span>${esc(n)} ${scBadge(e.per[n],"sm")}</span>`).join("")}</div>
       </div>
@@ -1268,14 +1277,16 @@ function vPlan(){
   const nSeen=all.filter(i=>seenList(i).length).length;
   let list=all.slice();
   if(UI.planType!=="all")list=list.filter(i=>i.type===UI.planType);
+  if(UI.planAw){finKick("awards");list=list.filter(i=>awFilterOk(i,UI.planAw))}
   if(UI.planSeen==="new")list=list.filter(i=>!seenList(i).length);
   else if(UI.planSeen==="seen")list=list.filter(i=>seenList(i).length);
   const uniNames=[...U.groups].filter(([n,a])=>a.some(i=>i.status==="planned")).map(([n])=>n).sort(cmpRu);
   if(UI.planUni&&!uniNames.includes(UI.planUni))UI.planUni="";
   const uni=UI.planView==="uni";
-  const nAct=(UI.planSeen!=="all"?1:0)+(UI.planUni?1:0)+(uni?1:0)+((UI.planSort||"added")!=="added"?1:0);
+  const nAct=(UI.planSeen!=="all"?1:0)+(UI.planUni?1:0)+(uni?1:0)+((UI.planSort||"added")!=="added"?1:0)+(UI.planAw?1:0);
   if(UI.planUni&&!uni)list=list.filter(i=>U.of.get(i.id)===UI.planUni);
-  const S={added:(a,b)=>(a.addedAt||0)-(b.addedAt||0)||(a.id>b.id?1:-1),title:(a,b)=>cmpRu(a.title,b.title),dur:(a,b)=>(totalMinutes(a)||0)-(totalMinutes(b)||0),year:(a,b)=>(a.year||0)-(b.year||0)};
+  const S={added:(a,b)=>(a.addedAt||0)-(b.addedAt||0)||(a.id>b.id?1:-1),title:(a,b)=>cmpRu(a.title,b.title),dur:(a,b)=>(totalMinutes(a)||0)-(totalMinutes(b)||0),year:(a,b)=>(a.year||0)-(b.year||0),budget:(a,b)=>(finV(b,"b")??-1)-(finV(a,"b")??-1)||cmpRu(a.title,b.title),revenue:(a,b)=>(finV(b,"r")??-1)-(finV(a,"r")??-1)||cmpRu(a.title,b.title),awards:(a,b)=>(awScore(b)??-1)-(awScore(a)??-1)||cmpRu(a.title,b.title)};
+  finKick(UI.planSort);
   list.sort(S[UI.planSort]||S.added);
   const up=list.filter(isUpcoming).sort((a,b)=>String(a.relDate||"9999").localeCompare(String(b.relDate||"9999"))||(a.year||9999)-(b.year||9999)||cmpRu(a.title,b.title));
   const rel=list.filter(i=>!isUpcoming(i));
@@ -1297,16 +1308,17 @@ function vPlan(){
     <div class="chips" data-ui="planSeen"><button class="chip ${UI.planSeen==="all"?"on":""}" data-v="all">Любые</button><button class="chip ${UI.planSeen==="new"?"on":""}" data-v="new">Новое для обоих <small>${all.length-nSeen}</small></button><button class="chip ${UI.planSeen==="seen"?"on":""}" data-v="seen">👁 Пересмотр <small>${nSeen}</small></button></div>
     <div class="sp"></div>
     ${uniNames.length?`<select class="inp" data-uis="planUni" title="Фильтр по вселенной или серии"><option value="">Все вселенные и серии</option>${uniNames.map(n=>`<option value="${esc(n)}" ${UI.planUni===n?"selected":""}>${esc(n)}</option>`).join("")}</select>`:""}
-    ${uni?"":`<select class="inp" data-uis="planSort">${[["added","По дате добавления"],["title","По названию"],["dur","По длительности"],["year","По году"]].map(([k,n])=>`<option value="${k}" ${UI.planSort===k?"selected":""}>${n}</option>`).join("")}</select>`}
+    ${selectHTML("planAw",[["","Оскар: любые"],["win","Лауреаты Оскара"],["nom","Номинанты Оскара"],["none","Без Оскара"]],UI.planAw||"")}${UI.planAw?finBannerHTML("awards"):""}
+    ${uni?"":`<select class="inp" data-uis="planSort">${[["added","По дате добавления"],["title","По названию"],["dur","По длительности"],["year","По году"],["budget","💰 По бюджету"],["revenue","💵 По сборам"],["awards","🏆 По наградам (Оскар)"]].map(([k,n])=>`<option value="${k}" ${UI.planSort===k?"selected":""}>${n}</option>`).join("")}</select>${finBannerHTML(UI.planSort)}`}
   </div>`:""}
   <div id="plist">${body}</div>`;
 }
 
 /* ============ аналитика: Статистика + Вкусы + Мы и мир ============ */
-const SUBTABS=[["stats","📊 Статистика"],["taste","🤝 Вкусы"],["world","🌍 Мы и мир"],["wrapped","🦊 Лисий год"],["geo","🗺 География"],["actors","🎭 Актёры"]];
+const SUBTABS=[["stats","📊 Статистика"],["taste","🤝 Вкусы"],["world","🌍 Мы и мир"],["wrapped","🦊 Лисий год"],["geo","🗺 География"],["actors","🎭 Актёры"],["oscar","🏆 Оскар"]];
 function vAnalytics(){
   const sub=SUBTABS.some(s=>s[0]===UI.sub)?UI.sub:"stats";
-  return `<div class="subnav"><div class="seg lg" data-ui="sub" role="tablist">${SUBTABS.map(([k,n])=>`<button role="tab" data-v="${k}" class="${sub===k?"on":""}" aria-selected="${sub===k}">${n}</button>`).join("")}</div></div>`+({stats:vStats,taste:vTaste,world:vWorld,wrapped:vWrapped,geo:vGeo,actors:vActors}[sub])();
+  return `<div class="subnav"><div class="seg lg" data-ui="sub" role="tablist">${SUBTABS.map(([k,n])=>`<button role="tab" data-v="${k}" class="${sub===k?"on":""}" aria-selected="${sub===k}">${n}</button>`).join("")}</div></div>`+({stats:vStats,taste:vTaste,world:vWorld,wrapped:vWrapped,geo:vGeo,actors:vActors,oscar:vOscar}[sub])();
 }
 function tabsPanel(){
   return `<div class="panel" id="tabsP"><h3>Вкладки</h3><p>Какие вкладки показывать в меню (на этом устройстве). Скрытое можно вернуть здесь в любой момент.</p>
@@ -1376,7 +1388,7 @@ const CAT_CATS=[
   {k:"dorama",n:"🍜 Дорамы",kind:"tv",p:{with_origin_country:"KR|JP|CN|TW|TH|HK",without_genres:"16"}},
   {k:"cartoon",n:"🧸 Мультфильмы",kind:"movie",p:{with_genres:"16"},not:"ja"},
   {k:"cartoontv",n:"🧸 Мультсериалы",kind:"tv",p:{with_genres:"16"},not:"ja"}];
-const CAT_SORTS=[["popular","Популярное сейчас"],["top","Лучшие по рейтингу"],["new","Свежие новинки"],["soon","Скоро выйдут · по дате"],["soonpop","Скоро выйдут · по популярности"]];
+const CAT_SORTS=[["popular","Популярное сейчас"],["top","Лучшие по рейтингу"],["new","Свежие новинки"],["soon","Скоро выйдут · по дате"],["soonpop","Скоро выйдут · по популярности"],["revenue","Кассовые сборы (фильмы)"]];
 const CG_MOVIE=[[28,"Боевик"],[12,"Приключения"],[35,"Комедия"],[80,"Криминал"],[99,"Документальный"],[18,"Драма"],[10751,"Семейный"],[14,"Фэнтези"],[36,"История"],[27,"Ужасы"],[9648,"Детектив"],[10749,"Мелодрама"],[878,"Фантастика"],[53,"Триллер"],[10752,"Военный"],[37,"Вестерн"]];
 const CG_TV=[[10759,"Боевик и приключения"],[35,"Комедия"],[80,"Криминал"],[99,"Документальный"],[18,"Драма"],[10751,"Семейный"],[9648,"Детектив"],[10765,"Фантастика и фэнтези"],[10768,"Война и политика"],[10764,"Реалити"]];
 const CAT={key:"",tok:0,loading:false,items:[],seen:new Set(),page:0,total:1,totalRes:0,err:""};
@@ -1396,6 +1408,7 @@ function catReq(page){
   else if(UI.catSort==="new"){p.sort_by=dk+".desc";p[dk+".lte"]=today;p["vote_count.gte"]=8}
   else if(UI.catSort==="soon"){p.sort_by=dk+".asc";p[dk+".gte"]=today}
   else if(UI.catSort==="soonpop"){p.sort_by="popularity.desc";p[dk+".gte"]=today}
+  else if(UI.catSort==="revenue"&&!tv){p.sort_by="revenue.desc";p["vote_count.gte"]=300}
   else p.sort_by="popularity.desc";
   return{path:"/discover/"+c.kind,params:p};
 }
@@ -1676,8 +1689,8 @@ async function crewFill(it,box){
 function personGet(id){
   id=+id;
   return once("person:"+id,async()=>{
-    const c=await cacheGet("person:"+id,PERS_TTL);if(c&&c.v===2)return c;
-    const d=await tmdbGet(`/person/${id}`,{language:"ru-RU",append_to_response:"combined_credits"});
+    const c=await cacheGet("person:"+id,PERS_TTL);if(c&&c.v===3)return c;
+    const d=await tmdbGet(`/person/${id}`,{language:"ru-RU",append_to_response:"combined_credits,external_ids"});
     let bio=d.biography||"",bioLang="ru";
     if(!bio){try{const e=await tmdbGet(`/person/${id}`,{language:"en-US"});bio=e.biography||"";bioLang="en"}catch(_){}}
     const cr=[],seen=new Set();
@@ -1704,7 +1717,7 @@ function personGet(id){
       cr.push(o);
     }
     cr.sort((a,b)=>b.pop-a.pop);
-    const o={v:2,g:d.gender||0,dep:d.known_for_department||"",id,n:d.name||"",p:d.profile_path||"",bd:d.birthday||"",dd:d.deathday||"",pob:d.place_of_birth||"",bio,bioLang,imdb:d.imdb_id||"",cr:cr.slice(0,150)};
+    const o={v:3,wd:(d.external_ids&&d.external_ids.wikidata_id)||"",g:d.gender||0,dep:d.known_for_department||"",id,n:d.name||"",p:d.profile_path||"",bd:d.birthday||"",dd:d.deathday||"",pob:d.place_of_birth||"",bio,bioLang,imdb:d.imdb_id||"",cr:cr.slice(0,150)};
     cachePut("person:"+id,o);return o;
   });
 }
@@ -1852,7 +1865,28 @@ function castChipsHTML(it){
   if(n>10)return `<div style="margin:0 0 10px"><select class="inp" data-castsel style="max-width:220px"><option value="0">Весь сериал</option>${Array.from({length:n},(_,i)=>`<option value="${i+1}" ${cur===i+1?"selected":""}>Сезон ${i+1}</option>`).join("")}</select></div>`;
   return `<div class="chips" style="margin:0 0 10px"><button class="chip ${cur?"":"on"}" data-castseason="0">Весь сериал</button>${Array.from({length:n},(_,i)=>`<button class="chip ${cur===i+1?"on":""}" data-castseason="${i+1}">Сезон ${i+1}</button>`).join("")}</div>`;
 }
-const actCard=(a,K)=>{const kn=K&&K.get(a.i);return `<div class="actw${isFav(a.i)?" fav":""}"><button type="button" class="actc" data-actor="${a.i}" data-an="${esc(a.n)}" title="Статья об актёре: ${esc(a.n)}"><span class="ap">${a.p?`<img loading="lazy" src="${tmdbImg(a.p,"w185")}" alt="">`:`<i>${esc(initials(a.n))}</i>`}</span><b>${esc(a.n)}</b><small>${esc(a.c||"")}${a.c&&a.e>1?` · ${a.e} эп.`:""}</small>${kn?`<em class="akn" title="${esc("Мы уже видели: "+kn.map(x=>x.it.title).slice(0,6).join(", "))}">👁 ${kn.length} ${plural(kn.length,"проект","проекта","проектов")} · ${f1(avg(kn.map(x=>x.s)))}</em>`:""}</button>${favBtn(a.i,a.n,a.p)}</div>`};
+const awBadge=id=>{
+  const o=AWP.get(+id);if(!o)return"";
+  const S=awSum(o),a=S.oscar,rest=Object.entries(S).reduce((t,[,v])=>t+v.w,0);
+  if(a&&a.w)return `<em class="aab win" title="Оскар: ${a.w} ${plural(a.w,"победа","победы","побед")}${a.n>a.w?", номинаций: "+a.n:""}">🏆 ${a.w}</em>`;
+  if(a&&a.n)return `<em class="aab" title="Номинаций на Оскар: ${a.n}">🎖 ${a.n}</em>`;
+  return rest?`<em class="aab" title="Побед в других премиях: ${rest}">🏅 ${rest}</em>`:"";
+};
+async function castAwLoad(it,box){
+  const ids=[...new Set([...box.querySelectorAll("[data-aab]")].map(x=>+x.dataset.aab))].filter(i=>!AWP.has(i));
+  let k=0;
+  const paint=id=>{const el=box.querySelector(`[data-aab="${id}"]`);if(el)el.innerHTML=awBadge(id)};
+  const work=async()=>{
+    while(k<ids.length){
+      const id=ids[k++];
+      if(!box.isConnected||CASTUI.id!==it.id||!UI.castAw)return;
+      try{const P=await personGet(id);if(P.wd)await awForPerson(P);else AWP.set(id,{list:[]})}catch(_){}
+      paint(id);
+    }
+  };
+  await Promise.all([work(),work(),work()]);
+}
+const actCard=(a,K)=>{const kn=K&&K.get(a.i);return `<div class="actw${isFav(a.i)?" fav":""}"><button type="button" class="actc" data-actor="${a.i}" data-an="${esc(a.n)}" title="Статья об актёре: ${esc(a.n)}"><span class="ap">${a.p?`<img loading="lazy" src="${tmdbImg(a.p,"w185")}" alt="">`:`<i>${esc(initials(a.n))}</i>`}</span><b>${esc(a.n)}</b><small>${esc(a.c||"")}${a.c&&a.e>1?` · ${a.e} эп.`:""}</small>${kn?`<em class="akn" title="${esc("Мы уже видели: "+kn.map(x=>x.it.title).slice(0,6).join(", "))}">👁 ${kn.length} ${plural(kn.length,"проект","проекта","проектов")} · ${f1(avg(kn.map(x=>x.s)))}</em>`:""}</button>${favBtn(a.i,a.n,a.p)}<span class="aabw" data-aab="${a.i}">${awBadge(a.i)}</span></div>`};
 /* где ещё мы видели актёров этого проекта — по составам, которые уже посчитаны или лежат в кэше (без запросов в сеть) */
 async function acWarm(){
   for(const it of acItems()){
@@ -1903,10 +1937,12 @@ async function castPaint(it){
   const K=acKnown(it),shown=CASTUI.all?list:list.slice(0,14);
   box.innerHTML=`<h4>Актёры${season?` · сезон ${season}`:""} <span class="dim" style="font-weight:600;text-transform:none;letter-spacing:0">· ${list.length}${list.length>=80?"+":""}</span></h4>${chips}<div class="crewrow"></div>
     ${castVoice(it)?`<p class="dim" style="font-size:12.5px;margin:0 0 8px">Для озвучки TMDB указывает актёров, которые говорят голосами героев.</p>`:""}
+    <p style="margin:0 0 10px"><button type="button" class="chip ${UI.castAw?"on":""}" data-castaw="1" aria-pressed="${!!UI.castAw}">🏆 Премии актёров</button>${UI.castAw?` <span class="dim" style="font-size:12.5px">🏆 — «Оскар», 🎖 — номинации, 🏅 — другие премии</span>`:""}</p>
     <div class="actgrid">${shown.map(a=>actCard(a,K)).join("")}</div>
     ${list.length>shown.length?`<p style="margin:10px 0 0"><button class="btn sm" data-castall="1">Показать всех (${list.length})</button></p>`:CASTUI.all&&list.length>14?`<p style="margin:10px 0 0"><button class="btn sm ghost" data-castall="0">Свернуть</button></p>`:""}
     <p class="dim" style="font-size:12px;margin:8px 0 0">Нажмите на актёра — откроется статья с его фильмографией. ☆ — в любимые.</p>`;
   crewFill(it,box);
+  if(UI.castAw)castAwLoad(it,box);
 }
 function castOpened(it,season){
   if(CASTUI.id!==it.id)Object.assign(CASTUI,{id:it.id,season:0,all:false});
@@ -1951,6 +1987,7 @@ function actPaint(full){
       ${facts.length?`<div class="chips" style="margin-bottom:6px">${facts.map(f=>`<span class="tag">${f}</span>`).join("")}</div>`:""}
       <p class="muted" style="margin:8px 0 0">В нашем списке: смотрели <b>${nW}</b>${nIn?` · ещё в планах/на согласовании <b>${nIn}</b>`:""} · не смотрели <b>${rows.length-nW}</b> из ${rows.length} работ</p>
       ${actScoreLine(rows)}
+      ${P.wd?`<div class="finbox" id="actAw"></div>`:""}
       ${bio}</div></div>
     <div class="toolbar" style="margin-top:6px"><div class="chips"><button class="chip ${A.f==="new"?"on":""}" data-actf="new">Ещё не смотрели <small>${rows.length-nW}</small></button><button class="chip ${A.f==="seen"?"on":""}" data-actf="seen">Смотрели <small>${nW}</small></button><button class="chip ${A.f==="all"?"on":""}" data-actf="all">Все <small>${rows.length}</small></button></div><div class="sp"></div>
       <div class="seg"><button data-actsort="pop" class="${A.sort==="pop"?"on":""}">Известные</button><button data-actsort="year" class="${A.sort==="year"?"on":""}">Новые</button></div></div>
@@ -1958,8 +1995,9 @@ function actPaint(full){
     ${vis.length>shown.length?`<p style="text-align:center;margin:14px 0 0"><button class="btn" data-actmore>Показать ещё (${vis.length-shown.length})</button></p>`:""}`;
   const foot=`<div class="df"><a class="btn" href="https://www.themoviedb.org/person/${P.id}?language=ru-RU" target="_blank" rel="noopener">TMDB ↗</a>${P.imdb?`<a class="btn" href="https://www.imdb.com/name/${esc(P.imdb)}/" target="_blank" rel="noopener">IMDb ↗</a>`:""}<div class="sp"></div><button class="btn pri" data-actcat="${P.id}" data-an="${esc(P.n)}" title="Открыть каталог только с работами этого актёра">🔥 В каталоге — что ещё не смотрели</button></div>`;
   const v=document.getElementById("actView");
-  if(!full&&v&&d.open&&v.querySelector(".actbio")){v.innerHTML=html;return}
+  if(!full&&v&&d.open&&v.querySelector(".actbio")){v.innerHTML=html;actAwFill(P);return}
   showDlg(`<div class="dh"><h2>Актёр</h2><button class="btn icon ghost" data-close aria-label="Закрыть">✕</button></div><div class="db" id="actView">${html}</div>${foot}`,"dlg2");
+  actAwFill(P);
 }
 
 /* ============ ПРОВЕРКА АНИМЕ: AniList (бесплатно, без ключа) — все ли сезоны добавлены на сайт ============
@@ -2253,12 +2291,13 @@ function vActors(){
 
 /* ============ клики: актёры, любимые, проверка аниме ============ */
 document.addEventListener("click",e=>{
-  const t=e.target.closest("[data-fav],[data-actor],[data-actsel],[data-actx],[data-actcat],[data-actf],[data-actsort],[data-actmore],[data-actbio],[data-castseason],[data-castall],[data-castpick],[data-castretry],[data-alchk],[data-alapply],[data-alpick],[data-alopen],[data-acrun],[data-acmore]");
+  const t=e.target.closest("[data-fav],[data-actor],[data-actsel],[data-actx],[data-actcat],[data-actf],[data-actsort],[data-actmore],[data-actbio],[data-castseason],[data-castall],[data-castaw],[data-castpick],[data-castretry],[data-alchk],[data-alapply],[data-alpick],[data-alopen],[data-acrun],[data-acmore],[data-finload]");
   if(!t)return;
   e.stopPropagation();e.preventDefault();
   const d=t.dataset;
   if(d.fav){favToggle(d.fav,d.fn,d.fp,d.who,t);return}
   if(d.acrun!==undefined){acRun();return}
+  if(d.finload){finLoad(d.finload,true);return}
   if(d.acmore){UI.acLim=+d.acmore;saveUI();acPaint();return}
   if(d.actor){openActor(d.actor,d.an);return}
   if(d.actsel){
@@ -2273,6 +2312,7 @@ document.addEventListener("click",e=>{
   if(d.actmore!==undefined&&ACT.cur){ACT.cur.lim+=24;actPaint();return}
   if(d.actbio!==undefined&&ACT.cur){ACT.cur.bio=!ACT.cur.bio;actPaint();return}
   if(d.castseason!==undefined){CASTUI.season=+d.castseason;CASTUI.all=false;const it=itemById(CASTUI.id);if(it)castPaint(it);return}
+  if(d.castaw!==undefined){UI.castAw=!UI.castAw;saveUI();const it=itemById(CASTUI.id);if(it)castPaint(it);return}
   if(d.castall!==undefined){CASTUI.all=d.castall==="1";const it=itemById(CASTUI.id);if(it)castPaint(it);return}
   if(d.castpick){const [iid,tp,id]=d.castpick.split("|"),it=itemById(iid);if(it){it.tmdb={type:tp,id:+id};save();castPaint(it)}return}
   if(d.castretry){const it=itemById(d.castretry);if(it)castPaint(it);return}
@@ -2286,9 +2326,322 @@ document.addEventListener("change",e=>{
   if(s){CASTUI.season=+s.value;CASTUI.all=false;const it=itemById(CASTUI.id);if(it)castPaint(it)}
 });
 
+/* ============ бюджет, сборы и премии ============
+   Бюджет и сборы — из TMDB (только фильмы). Премии — из Wikidata (открытое API, без ключа): Оскар и другие,
+   у проектов и у актёров. Всё кэшируется в IndexedDB, поэтому повторно в сеть не ходит. */
+const META_TTL=30*864e5,AW_TTL=30*864e5,WDL_TTL=180*864e5;
+const MET=new Map(),AWI=new Map(),AWP=new Map();      /* ref → {b,r,wd}; ref → награды проекта; id актёра → награды */
+const FINS={run:false,done:0,total:0,kind:"",fail:0,err:""};
+const refKey=r=>r.type+":"+r.id;
+const FIN_SORTS=new Set(["budget","revenue","awards"]);
+function fmtMoney(n){
+  if(!isNum(n)||n<=0)return"—";
+  if(n>=1e9)return"$"+(n/1e9).toFixed(n>=1e10?0:2).replace(".",",")+" млрд";
+  if(n>=1e6){const v=n/1e6;return"$"+(v>=100?String(Math.round(v)):v.toFixed(1).replace(".0","").replace(".",","))+" млн"}
+  if(n>=1e3)return"$"+Math.round(n/1e3)+" тыс.";
+  return"$"+n;
+}
+function metaGet(ref){
+  const key=`meta:${ref.type}:${ref.id}`;
+  return once(key,async()=>{
+    const c=await cacheGet(key,META_TTL);if(c){MET.set(refKey(ref),c);return c}
+    const d=await tmdbGet(`/${ref.type}/${ref.id}`,{append_to_response:"external_ids"});
+    const x=d.external_ids||{};
+    const o={b:+d.budget>0?+d.budget:null,r:+d.revenue>0?+d.revenue:null,wd:x.wikidata_id||"",imdb:x.imdb_id||d.imdb_id||""};
+    cachePut(key,o);MET.set(refKey(ref),o);return o;
+  });
+}
+const finV=(it,k)=>{const r=castRef(it),m=r&&MET.get(refKey(r));return m&&isNum(m[k])?m[k]:null};
+
+/* --- Wikidata --- */
+async function wdFetch(params){
+  const u=new URL("https://www.wikidata.org/w/api.php");
+  for(const k in params)u.searchParams.set(k,params[k]);
+  u.searchParams.set("format","json");u.searchParams.set("origin","*");
+  let r;
+  for(let t=0;t<3;t++){
+    r=await fetch(u);
+    if(r.status!==429&&r.status!==503)break;
+    const ra=+r.headers.get("Retry-After");await new Promise(res=>setTimeout(res,Math.min(5000,(ra>0?ra*1000:1500*(t+1)))));
+  }
+  if(!r.ok)throw new Error("Wikidata ответила "+r.status);
+  const j=await r.json();if(j&&j.error)throw new Error("Wikidata: "+(j.error.info||j.error.code));return j;
+}
+const wdId=sn=>{const v=sn&&sn.datavalue&&sn.datavalue.value;return v&&v.id||""};
+const wdYr=sn=>{const t=sn&&sn.datavalue&&sn.datavalue.value&&sn.datavalue.value.time,m=/^[+-]?(\d{4})/.exec(t||"");return m&&+m[1]>1850?+m[1]:null};
+function wdParse(j,prop,kind){
+  const out=[];
+  for(const st of(j.claims&&j.claims[prop])||[]){
+    if(st.rank==="deprecated")continue;
+    const a=wdId(st.mainsnak);if(!a)continue;const q=st.qualifiers||{};
+    out.push({k:kind,a,y:wdYr((q.P585||[])[0]),w:wdId((q.P1686||[])[0])});
+  }
+  return out;
+}
+async function wdLabels(ids){
+  const res={},need=[];
+  for(const id of ids){const c=await cacheGet("wdl:"+id,WDL_TTL);if(c)res[id]=c;else need.push(id)}
+  for(let i=0;i<need.length;i+=40){
+    const part=need.slice(i,i+40),j=await wdFetch({action:"wbgetentities",ids:part.join("|"),props:"labels",languages:"ru|en"});
+    for(const id of part){
+      const e=(j.entities&&j.entities[id])||{},l=e.labels||{};
+      const o={ru:l.ru?l.ru.value:"",en:l.en?l.en.value:""};cachePut("wdl:"+id,o);res[id]=o;
+    }
+  }
+  return res;
+}
+const AW_FAM=[
+  ["oscar","Оскар",/^academy (honorary )?awards?\b|^oscar\b/i],
+  ["globe","Золотой глобус",/golden globe/i],
+  ["bafta","BAFTA",/bafta|british academy/i],
+  ["emmy","Эмми",/emmy/i],
+  ["sag","Гильдия киноактёров",/screen actors guild|sag award/i],
+  ["critics","Critics' Choice",/critics'? choice/i],
+  ["fest","Фестивали",/cannes|palme d.or|venice|golden lion|berlin|golden bear|sundance|locarno|san sebasti/i],
+  ["razzie","Золотая малина",/razzie|golden raspberry/i]];
+const awFam=en=>{for(const [k,n,re] of AW_FAM)if(re.test(en||""))return k;return"other"};
+const awFamName=k=>(AW_FAM.find(f=>f[0]===k)||[0,"Другие премии"])[1];
+function awBuild(raw,L){
+  const by=new Map();
+  for(const x of raw){
+    const key=x.a+"|"+(x.w||"");let e=by.get(key);
+    if(!e){const lb=L[x.a]||{};e={f:awFam(lb.en||lb.ru),l:lb.ru||lb.en||x.a,en:lb.en||"",y:x.y,w:x.w?((L[x.w]||{}).ru||(L[x.w]||{}).en||""):"",win:false};by.set(key,e)}
+    if(x.k==="w"){e.win=true;if(x.y)e.y=x.y}else if(!e.y&&x.y)e.y=x.y;
+  }
+  return [...by.values()];
+}
+function awGetWd(wd){
+  if(!/^Q\d+$/.test(wd||""))return Promise.resolve({list:[],none:1});
+  return once("aw:"+wd,async()=>{
+    const c=await cacheGet("aw:"+wd,AW_TTL);if(c)return c;
+    const [a,b]=await Promise.all([wdFetch({action:"wbgetclaims",entity:wd,property:"P166"}),wdFetch({action:"wbgetclaims",entity:wd,property:"P1411"})]);
+    const raw=[...wdParse(a,"P166","w"),...wdParse(b,"P1411","n")];
+    const L=await wdLabels([...new Set(raw.flatMap(x=>[x.a,x.w].filter(Boolean)))]);
+    const o={list:awBuild(raw,L)};cachePut("aw:"+wd,o);return o;
+  });
+}
+async function awForItem(it){
+  const ref=castRef(it);if(!ref)return null;
+  const k=refKey(ref);if(AWI.has(k))return AWI.get(k);
+  const m=await metaGet(ref),o=await awGetWd(m.wd);AWI.set(k,o);return o;
+}
+async function awForPerson(P){
+  if(AWP.has(P.id))return AWP.get(P.id);
+  const o=await awGetWd(P.wd);AWP.set(P.id,o);return o;
+}
+/* сводка: сколько побед и номинаций в каждой семье премий (номинации включают победы) */
+function awSum(o){
+  const S={};
+  for(const e of(o&&o.list)||[]){const x=S[e.f]||(S[e.f]={w:0,n:0});x.n++;if(e.win)x.w++}
+  return S;
+}
+const awScore=it=>{const r=castRef(it),o=r&&AWI.get(refKey(r));if(!o)return null;const S=awSum(o),a=S.oscar||{w:0,n:0},rest=Object.entries(S).filter(([k])=>k!=="oscar").reduce((t,[,v])=>t+v.w,0);return a.w*10000+a.n*100+Math.min(rest,99)};
+/* «премия «Оскар» за лучшую мужскую роль» → «за лучшую мужскую роль»; английскую подпись сокращаем до самой категории */
+const awShort=l=>{
+  let t=String(l||"").trim();
+  if(/^[A-Za-z]/.test(t))t=t.replace(/^(Primetime |Daytime )?(Academy|Golden Globe|BAFTA|Emmy|Screen Actors Guild|Critics'? Choice)[A-Za-z' ]*? Awards? (for|of) /i,"");
+  else t=t.replace(/^(премия\s+)?[«"][^»"]+[»"]\s*/i,"").replace(/^премия\s+/i,"");
+  return t?t.charAt(0).toLowerCase()===t.charAt(0)&&!/^за\s/.test(t)&&/^[а-яё]/i.test(t)?t.charAt(0).toUpperCase()+t.slice(1):t:String(l||"");
+};
+function awHTML(o,person){
+  const L=(o&&o.list)||[];
+  if(!L.length)return"";
+  const S=awSum(o),fams=["oscar",...AW_FAM.map(f=>f[0]).filter(k=>k!=="oscar"),"other"].filter(k=>S[k]);
+  const chip=k=>{const v=S[k];return `<span class="awchip${k==="oscar"?" osc":""}" title="${esc(awFamName(k))}: ${v.w} ${plural(v.w,"победа","победы","побед")}, ${v.n} ${plural(v.n,"номинация","номинации","номинаций")}">${k==="oscar"?"🏆 ":""}<b>${esc(awFamName(k))}</b> ${v.w?`<span class="awok">${v.w} ${plural(v.w,"победа","победы","побед")}</span> · `:""}${v.n} ${plural(v.n,"номинация","номинации","номинаций")}</span>`};
+  const row=e=>`<li class="${e.win?"win":""}"><span class="awi">${e.win?"🏆":"🎖"}</span><span class="awt">${e.f==="other"||e.f!=="oscar"?`<span class="dim">${esc(awFamName(e.f))}${e.f==="other"?"":""}:</span> `:""}${esc(e.f==="other"?e.l:awShort(e.l))}${person&&e.w?` — «${esc(e.w)}»`:""}</span>${e.y?`<span class="awy">${e.y}</span>`:""}</li>`;
+  const sorted=L.slice().sort((a,b)=>(b.win-a.win)||((b.y||0)-(a.y||0)));
+  const osc=sorted.filter(e=>e.f==="oscar"),rest=sorted.filter(e=>e.f!=="oscar");
+  return `<div class="awbox"><div class="awh">Премии</div><div class="awchips">${fams.map(chip).join("")}</div>
+    ${osc.length?`<ul class="awlist">${osc.slice(0,10).map(row).join("")}</ul>${osc.length>10?`<details class="awmore"><summary>Ещё Оскар (${osc.length-10})</summary><ul class="awlist">${osc.slice(10).map(row).join("")}</ul></details>`:""}`:""}
+    ${rest.length?`<details class="awmore"><summary>Другие премии (${rest.length})</summary><ul class="awlist">${rest.map(row).join("")}</ul></details>`:""}</div>`;
+}
+const finBoxHTML=it=>castRef(it)?`<div class="finbox" data-finbox="${it.id}"></div>`:"";
+async function finOpened(it){
+  const ref=castRef(it);if(!ref||!apiKey("tmdb"))return;
+  const slot=()=>document.querySelector(`.finbox[data-finbox="${CSS.escape(String(it.id))}"]`);
+  let m;try{m=await metaGet(ref)}catch(e){return}
+  let el=slot();if(!el)return;
+  const roi=isNum(m.b)&&isNum(m.r)?m.r/m.b:null;
+  const money=(isNum(m.b)||isNum(m.r))?`<div class="finrow">${isNum(m.b)?`<span class="finc">💰 <span class="dim">Бюджет</span> <b>${fmtMoney(m.b)}</b></span>`:""}${isNum(m.r)?`<span class="finc">💵 <span class="dim">Сборы</span> <b>${fmtMoney(m.r)}</b></span>`:""}${roi?`<span class="finc ${roi>=1?"up":"down"}" title="Сборы ÷ бюджет">${roi>=1?"▲":"▼"} ×${roi.toFixed(roi>=10?0:1).replace(".",",")}</span>`:""}</div>`:"";
+  el.innerHTML=money;
+  try{
+    const o=await awForItem(it);el=slot();if(!el)return;
+    el.innerHTML=money+awHTML(o,false);
+  }catch(e){el=slot();if(el)el.innerHTML=money+`<p class="dim" style="font-size:12.5px;margin:6px 0 0">Премии сейчас недоступны (${esc(e.message)}).</p>`}
+}
+async function actAwFill(P){
+  const slot=()=>document.getElementById("actAw");
+  if(!slot()||!P.wd)return;
+  try{
+    const o=await awForPerson(P);const el=slot();if(!el||!ACT.cur||ACT.cur.P.id!==P.id)return;
+    el.innerHTML=awHTML(o,true);
+  }catch(e){const el=slot();if(el)el.innerHTML=`<p class="dim" style="font-size:12.5px;margin:6px 0 0">Премии сейчас недоступны (${esc(e.message)}).</p>`}
+}
+
+/* --- массовая загрузка для сортировки --- */
+const finRefs=kind=>{
+  const seen=new Set(),out=[];
+  for(const it of DB.items){
+    const r=castRef(it);if(!r)continue;const k=refKey(r);
+    if(kind==="money"&&r.type!=="movie")continue;
+    if(seen.has(k))continue;seen.add(k);out.push(it);
+  }
+  return out;
+};
+const finNeed=kind=>finRefs(kind).filter(it=>kind==="money"?!MET.has(refKey(castRef(it))):!AWI.has(refKey(castRef(it))));
+const finKindOf=sort=>sort==="awards"?"awards":"money";
+async function finLoad(kind,manual){
+  if(FINS.run)return;
+  if(!apiKey("tmdb")){if(manual)toast("Нужен ключ TMDB (вкладка «Каталог» или «Данные»)");return}
+  const W=finNeed(kind);if(!W.length){if(manual)toast("Все данные уже загружены");return}
+  Object.assign(FINS,{run:true,done:0,total:W.length,kind,fail:0,err:""});finProg();
+  let i=0,stop=false;
+  const worker=async()=>{
+    while(i<W.length&&!stop){
+      const it=W[i++];
+      try{if(kind==="money")await metaGet(castRef(it));else await awForItem(it)}
+      catch(e){
+        const m=String(e&&e.message||"");FINS.fail++;
+        if(/ключ TMDB/.test(m)){FINS.err="TMDB не принял ключ";stop=true}
+        else if(/429/.test(m)){FINS.err="Wikidata просит подождать — повторите через минуту";stop=true}
+      }
+      FINS.done++;finProg();
+    }
+  };
+  await Promise.all([worker(),worker(),worker()]);
+  FINS.run=false;
+  if(FINS.err)toast("⚠ "+FINS.err);
+  else if(manual)toast(kind==="money"?"Бюджеты и сборы загружены":"Премии загружены");
+  render();
+}
+function finProg(){
+  for(const t of document.querySelectorAll("[data-finprog]")){
+    const sp=t.querySelector(".fp");if(sp)sp.textContent=`${FINS.done} из ${FINS.total}`;
+    const bar=t.querySelector("i");if(bar)bar.style.width=(FINS.total?Math.round(FINS.done/FINS.total*100):0)+"%";
+  }
+}
+/* при выборе сортировки по бюджету/сборам/наградам данные подтягиваются сами */
+function finKick(sort){
+  if(!FIN_SORTS.has(sort))return;
+  const kind=finKindOf(sort);
+  if(!FINS.run&&finNeed(kind).length&&apiKey("tmdb")&&!FINS["tried"+kind]){FINS["tried"+kind]=true;setTimeout(()=>finLoad(kind,false),0)}
+}
+function finBannerHTML(sort){
+  if(!FIN_SORTS.has(sort))return"";
+  if(!apiKey("tmdb"))return `<div class="finban">Для этой сортировки нужен ключ TMDB (вкладка «Данные»).</div>`;
+  const kind=finKindOf(sort);
+  if(FINS.run)return `<div class="finban" data-finprog>${kind==="money"?"Загружаю бюджеты и сборы":"Загружаю премии"}… <span class="fp">${FINS.done} из ${FINS.total}</span><div class="bar"><i style="width:${FINS.total?Math.round(FINS.done/FINS.total*100):0}%"></i></div></div>`;
+  const all=finRefs(kind),miss=finNeed(kind).length,noRef=DB.items.filter(i=>!castRef(i)).length;
+  const bits=[];
+  if(miss)bits.push(`данных нет у ${miss} ${plural(miss,"проекта","проектов","проектов")} — <button class="lnk2" data-finload="${kind}">загрузить</button>`);
+  if(kind==="money")bits.push("бюджет и сборы есть только у фильмов");
+  if(noRef)bits.push(`${noRef} ${plural(noRef,"запись","записи","записей")} без привязки к TMDB остаются в конце`);
+  return bits.length?`<div class="finban">${bits.join(" · ")}</div>`:"";
+}
+function finChip(e){
+  const it=e.it;
+  if(UI.sort==="budget"){const v=finV(it,"b");return v?`<span class="finv" title="Бюджет">💰 ${fmtMoney(v)}</span>`:""}
+  if(UI.sort==="revenue"){const v=finV(it,"r");return v?`<span class="finv" title="Сборы">💵 ${fmtMoney(v)}</span>`:""}
+  if(UI.sort==="awards"){const r=castRef(it),o=r&&AWI.get(refKey(r));if(!o)return"";const S=awSum(o),a=S.oscar;return a?`<span class="finv" title="Оскар: победы / номинации">🏆 ${a.w} / ${a.n}</span>`:""}
+  return"";
+}
+function finPanelHTML(){
+  const mv=finRefs("money").length,mHave=mv-finNeed("money").length,aAll=finRefs("awards").length,aHave=aAll-finNeed("awards").length;
+  return `<div class="panel"><h3>💰🏆 Бюджеты, сборы и премии</h3><p>Бюджет и кассовые сборы берём из TMDB (только у фильмов), премии — из Wikidata: Оскар, Золотой глобус, BAFTA, Эмми и другие, у проектов и у актёров. Загрузка нужна один раз — данные кэшируются на месяц. Сортировка по этим пунктам есть в списках просмотренного и планов; при выборе она запускает загрузку сама.</p>
+    <div class="row" style="justify-content:flex-start;gap:8px;flex-wrap:wrap"><button class="btn pri" id="finMoney" ${FINS.run?"disabled":""}>💰 Бюджеты и сборы</button><button class="btn pri" id="finAw" ${FINS.run?"disabled":""}>🏆 Премии</button>
+    <span class="dim" style="font-size:13px">загружено: бюджеты ${mHave} из ${mv} · премии ${aHave} из ${aAll}</span></div>
+    ${FINS.run?`<div class="finban" data-finprog style="margin-top:10px">${FINS.kind==="money"?"Загружаю бюджеты и сборы":"Загружаю премии"}… <span class="fp">${FINS.done} из ${FINS.total}</span><div class="bar"><i style="width:${FINS.total?Math.round(FINS.done/FINS.total*100):0}%"></i></div></div>`:""}</div>`;
+}
+
+const OSC_BP=[[1927,"Wings"],[1929,"The Broadway Melody"],[1930,"All Quiet on the Western Front"],[1931,"Cimarron"],[1932,"Grand Hotel"],[1933,"Cavalcade"],[1934,"It Happened One Night"],[1935,"Mutiny on the Bounty"],[1936,"The Great Ziegfeld"],[1937,"The Life of Emile Zola"],[1938,"You Can't Take It with You"],[1939,"Gone with the Wind"],[1940,"Rebecca"],[1941,"How Green Was My Valley"],[1942,"Mrs. Miniver"],[1943,"Casablanca"],[1944,"Going My Way"],[1945,"The Lost Weekend"],[1946,"The Best Years of Our Lives"],[1947,"Gentleman's Agreement"],[1948,"Hamlet"],[1949,"All the King's Men"],[1950,"All About Eve"],[1951,"An American in Paris"],[1952,"The Greatest Show on Earth"],[1953,"From Here to Eternity"],[1954,"On the Waterfront"],[1955,"Marty"],[1956,"Around the World in 80 Days"],[1957,"The Bridge on the River Kwai"],[1958,"Gigi"],[1959,"Ben-Hur"],[1960,"The Apartment"],[1961,"West Side Story"],[1962,"Lawrence of Arabia"],[1963,"Tom Jones"],[1964,"My Fair Lady"],[1965,"The Sound of Music"],[1966,"A Man for All Seasons"],[1967,"In the Heat of the Night"],[1968,"Oliver!"],[1969,"Midnight Cowboy"],[1970,"Patton"],[1971,"The French Connection"],[1972,"The Godfather"],[1973,"The Sting"],[1974,"The Godfather Part II"],[1975,"One Flew Over the Cuckoo's Nest"],[1976,"Rocky"],[1977,"Annie Hall"],[1978,"The Deer Hunter"],[1979,"Kramer vs. Kramer"],[1980,"Ordinary People"],[1981,"Chariots of Fire"],[1982,"Gandhi"],[1983,"Terms of Endearment"],[1984,"Amadeus"],[1985,"Out of Africa"],[1986,"Platoon"],[1987,"The Last Emperor"],[1988,"Rain Man"],[1989,"Driving Miss Daisy"],[1990,"Dances with Wolves"],[1991,"The Silence of the Lambs"],[1992,"Unforgiven"],[1993,"Schindler's List"],[1994,"Forrest Gump"],[1995,"Braveheart"],[1996,"The English Patient"],[1997,"Titanic"],[1998,"Shakespeare in Love"],[1999,"American Beauty"],[2000,"Gladiator"],[2001,"A Beautiful Mind"],[2002,"Chicago"],[2003,"The Lord of the Rings: The Return of the King"],[2004,"Million Dollar Baby"],[2005,"Crash"],[2006,"The Departed"],[2007,"No Country for Old Men"],[2008,"Slumdog Millionaire"],[2009,"The Hurt Locker"],[2010,"The King's Speech"],[2011,"The Artist"],[2012,"Argo"],[2013,"12 Years a Slave"],[2014,"Birdman"],[2015,"Spotlight"],[2016,"Moonlight"],[2017,"The Shape of Water"],[2018,"Green Book"],[2019,"Parasite"],[2020,"Nomadland"],[2021,"CODA"],[2022,"Everything Everywhere All at Once"],[2023,"Oppenheimer"],[2024,"Anora"],[2025,"One Battle After Another"]];
+/* ============ Оскар: фильтры, чек-лист «Лучший фильм» и сравнение с Академией ============ */
+function awFilterOk(it,mode){
+  const r=castRef(it),o=r&&AWI.get(refKey(r));if(!o)return false;
+  const S=awSum(o).oscar||{w:0,n:0};
+  return mode==="win"?S.w>0:mode==="nom"?S.n>0:S.n===0;
+}
+const OSC={run:false,done:0,total:0,fail:0,items:new Map()};
+async function oscResolve(){
+  if(OSC.run||!apiKey("tmdb"))return;
+  const W=OSC_BP.filter(([y])=>!OSC.items.has(y));if(!W.length)return;
+  Object.assign(OSC,{run:true,done:0,total:W.length,fail:0});
+  let i=0;
+  const worker=async()=>{
+    while(i<W.length){
+      const [y,t]=W[i++];
+      try{
+        const key="osc:bp:"+y;let c=await cacheGet(key,365*864e5);
+        if(c&&!c.x&&Date.now()-c.at>30*864e5)c=null;
+        if(!c){
+          const r=await tmdbGet("/search/movie",{query:t,year:y,language:"ru-RU",include_adult:"false"});
+          const L=r.results||[],yy=x=>+String(x.release_date||"").slice(0,4),byVotes=(a,b)=>(b.vote_count||0)-(a.vote_count||0);
+          const pick=L.filter(x=>yy(x)===y).sort(byVotes)[0]||L.filter(x=>Math.abs(yy(x)-y)<=1).sort(byVotes)[0]||null;
+          c={x:pick?catNorm(pick,"movie"):null};cachePut(key,c);
+        }
+        OSC.items.set(y,c.x);if(c.x)XREG.set(c.x.k,c.x);
+      }catch(e){OSC.fail++}
+      OSC.done++;
+      const t2=document.querySelector("[data-oscprog]");if(t2){const sp=t2.querySelector(".fp");if(sp)sp.textContent=`${OSC.done} из ${OSC.total}`;const b=t2.querySelector("i");if(b)b.style.width=Math.round(OSC.done/OSC.total*100)+"%"}
+    }
+  };
+  await Promise.all([worker(),worker(),worker(),worker()]);
+  OSC.run=false;
+  if(UI.tab==="analytics"&&UI.sub==="oscar")render();
+}
+function oscStats(){
+  const rated=DB.items.filter(i=>castRef(i)&&i.status!=="planned"&&i.status!==PROP&&isNum(itemScore(i)));
+  const have=rated.filter(i=>AWI.has(refKey(castRef(i)))),g={win:[],nom:[],none:[]};
+  for(const it of have){const o=awSum(AWI.get(refKey(castRef(it)))).oscar;(o&&o.w?g.win:o&&o.n?g.nom:g.none).push(it)}
+  return{rated,have,g};
+}
+function oscStatsHTML(){
+  const {rated,have,g}=oscStats(),R=DB.raters;
+  const head=`<div class="panel"><h3>🏆 Мы и Академия</h3>`;
+  if(!apiKey("tmdb"))return head+`<p class="dim">Нужен ключ TMDB (вкладка «Данные»).</p></div>`;
+  if(!have.length)return head+`<p class="muted">Сравним ваши оценки с тем, что любит Академия. Для этого нужны данные о премиях: ${rated.length} ${plural(rated.length,"оценённый проект","оценённых проекта","оценённых проектов")}.</p>${FINS.run&&FINS.kind==="awards"?finBannerHTML("awards"):`<button class="btn pri" data-finload="awards">🏆 Загрузить премии</button>`}</div>`;
+  const av=(a,n)=>avg(a.map(i=>itemScore(i,n)));
+  const row=(lab,a)=>`<tr><td class="l">${lab}</td><td class="c">${a.length}</td><td class="c">${a.length?scBadge(av(a),"sm"):"—"}</td>${R.map(n=>`<td class="c">${a.length?scBadge(av(a,n),"sm"):"—"}</td>`).join("")}</tr>`;
+  const all=have;
+  const diff=n=>{if(g.win.length<3||g.none.length<3)return null;const a=av(g.win,n),b=av(g.none,n);return isNum(a)&&isNum(b)?a-b:null};
+  const say=(who,d)=>{if(!isNum(d))return"";const t=d>0.3?"любите то, что любит Академия":d<-0.3?"идёте против Академии":"почти не зависите от мнения Академии";const ad=f1(Math.abs(d)).replace(".",","),z=Math.abs(d)<0.05,sg=z?"0":(d>=0?"+":"−")+ad;return `<li><b>${esc(who)}</b>: оскароносные фильмы оценены ${z?"так же, как":"на <b>"+sg+"</b> "+(d>0?"выше, чем":"ниже, чем")} фильмы без Оскара — ${esc(who==="Вместе"?"вы":who)} ${t}.</li>`};
+  const lines=[say("Вместе",diff(undefined)),...R.map(n=>say(n,diff(n)))].filter(Boolean);
+  const below=g.win.slice().sort((a,b)=>itemScore(a)-itemScore(b)).slice(0,3),above=g.none.slice().sort((a,b)=>itemScore(b)-itemScore(a)).slice(0,3);
+  const chips=a=>a.map(i=>`<button type="button" class="chip sm" data-open="${esc(i.id)}">${esc(i.title)} ${scBadge(itemScore(i),"sm")}</button>`).join(" ");
+  const miss=rated.length-have.length;
+  return head+`<table class="ctbl"><thead><tr><th></th><th>Проектов</th><th>Вместе</th>${R.map(n=>`<th>${esc(n)}</th>`).join("")}</tr></thead><tbody>
+    ${row("🏆 Оскароносные",g.win)}${row("🎖 Номинанты без побед",g.nom)}${row("Без Оскара",g.none)}${row("Все",all)}</tbody></table>
+    ${lines.length?`<ul class="osclines">${lines.join("")}</ul>`:`<p class="dim" style="font-size:12.5px">Для выводов нужно хотя бы по 3 проекта с Оскаром и без него.</p>`}
+    ${below.length?`<p style="margin:10px 0 4px"><span class="dim">Оскароносные, но вам не зашли:</span> ${chips(below)}</p>`:""}
+    ${above.length?`<p style="margin:6px 0 0"><span class="dim">Без Оскара, но вы их любите:</span> ${chips(above)}</p>`:""}
+    ${miss?`<p class="dim" style="font-size:12.5px;margin:10px 0 0">Данные о премиях есть у ${have.length} из ${rated.length}. ${FINS.run&&FINS.kind==="awards"?"":`<button class="lnk2" data-finload="awards">Догрузить</button>`}</p>${FINS.run&&FINS.kind==="awards"?finBannerHTML("awards"):""}`:""}</div>`;
+}
+function oscListHTML(){
+  const head=`<div class="panel"><h3>📋 Лучший фильм: все победители</h3>`;
+  if(!apiKey("tmdb"))return head+`<p class="dim">Нужен ключ TMDB (вкладка «Данные»).</p></div>`;
+  if(OSC.run||OSC.items.size<OSC_BP.length&&!OSC.fail)return head+`<div class="finban" data-oscprog>Подбираю фильмы в TMDB… <span class="fp">${OSC.done} из ${OSC.total||OSC_BP.length}</span><div class="bar"><i style="width:${Math.round(OSC.done/(OSC.total||OSC_BP.length)*100)}%"></i></div></div></div>`;
+  const ix=catIndex(),F=UI.oscF||"new",dir=UI.oscDir==="asc"?"asc":"desc";
+  const all=OSC_BP.map(([y,t])=>({y,t,x:OSC.items.get(y)||null})).map(e=>Object.assign(e,{st:e.x?catState(e.x,ix):null}));
+  const seen=all.filter(e=>e.st&&e.st.status==="watched"),found=all.filter(e=>e.x);
+  let vis=found.filter(e=>F==="all"||(F==="seen"?e.st&&e.st.status==="watched":!(e.st&&e.st.status==="watched")));
+  vis.sort((a,b)=>dir==="asc"?a.y-b.y:b.y-a.y);
+  const lost=all.filter(e=>!e.x);
+  const pct=Math.round(seen.length/OSC_BP.length*100);
+  return head+`<p class="muted" style="margin:0 0 8px">Смотрели <b>${seen.length}</b> из ${OSC_BP.length} <span class="dim">(${pct}%)</span> · осталось <b>${OSC_BP.length-seen.length}</b></p>
+    <div class="prog" style="margin:0 0 12px"><i style="width:${pct}%"></i></div>
+    <div class="toolbar"><div class="chips" data-ui="oscF">${chipHTML("new","Ещё не смотрели",F==="new",found.length-seen.length)}${chipHTML("seen","Смотрели",F==="seen",seen.length)}${chipHTML("all","Все",F==="all",found.length)}</div>
+      <div class="seg" data-ui="oscDir"><button data-v="desc" class="${dir==="desc"?"on":""}">Новые сверху</button><button data-v="asc" class="${dir==="asc"?"on":""}">Старые сверху</button></div></div>
+    ${vis.length?`<div class="ccgrid">${vis.map(e=>{e.x.ch="Лучший фильм · "+e.y;return catCard(e.x,e.st,{noHide:true})}).join("")}</div>`:`<div class="empty">${F==="new"?"Все победители уже просмотрены 🎉":"Здесь пока пусто."}</div>`}
+    ${lost.length?`<p class="dim" style="font-size:12.5px;margin:12px 0 0">Не нашлись в TMDB: ${lost.map(e=>esc(e.t)+" ("+e.y+")").join(", ")}.</p>`:""}
+    ${OSC.fail?`<p class="rnote" style="margin-top:8px">⚠ Не удалось подобрать ${OSC.fail} ${plural(OSC.fail,"фильм","фильма","фильмов")} — откройте вкладку ещё раз.</p>`:""}</div>`;
+}
+function vOscar(){
+  setTimeout(()=>{oscResolve();finKick("awards")},0);
+  return `<div class="ptitle"><div><h1>Оскар</h1><p>Что из «Оскаров» вы уже смотрели и как ваши оценки соотносятся с Академией</p></div></div>${oscStatsHTML()}${oscListHTML()}`;
+}
+
 /* ============ VIEW: викторина ============ */
-const QZ_KINDS=[["poster","🖼 По постеру","Угадай фильм по постеру"],["frame","🎞 По кадру","Угадай проект по кадру"],["plot","📝 По описанию","Угадай по описанию сюжета"],["year","📅 Год выхода","В каком году вышел проект?"],["genre","🎭 Жанр","Какой жанр у этого проекта?"],["duel","⚖️ Кто оценил выше","Кто из вас поставил оценку выше?"],["cast","🎭 Кто снимался","Кто из актёров снимался в проекте?"],["role","🎤 Кого играл","Кого играл(а) актёр в проекте?"],["actorfilm","🎬 Где ещё снимался","В каком проекте снимался(ась) актёр?"],["actorbio","🎂 Год рождения","В каком году родился(ась) актёр?"],["common","🤝 Кто общий","Кто снимался сразу в двух ваших проектах?"],["odd","🧩 Кто лишний","В каком из проектов актёр не снимался?"],["favact","🌟 Любимый актёр","Вопросы про одного из любимых актёров"]];
-const QZ_NEEDKEY=new Set(["frame","cast","role","actorfilm","actorbio","common","odd","favact"]);
+const QZ_KINDS=[["poster","🖼 По постеру","Угадай фильм по постеру"],["frame","🎞 По кадру","Угадай проект по кадру"],["plot","📝 По описанию","Угадай по описанию сюжета"],["year","📅 Год выхода","В каком году вышел проект?"],["genre","🎭 Жанр","Какой жанр у этого проекта?"],["duel","⚖️ Кто оценил выше","Кто из вас поставил оценку выше?"],["cast","🎭 Кто снимался","Кто из актёров снимался в проекте?"],["role","🎤 Кого играл","Кого играл(а) актёр в проекте?"],["actorfilm","🎬 Где ещё снимался","В каком проекте снимался(ась) актёр?"],["actorbio","🎂 Год рождения","В каком году родился(ась) актёр?"],["common","🤝 Кто общий","Кто снимался сразу в двух ваших проектах?"],["odd","🧩 Кто лишний","В каком из проектов актёр не снимался?"],["favact","🌟 Любимый актёр","Вопросы про одного из любимых актёров"],["money","💰 Деньги","Бюджет и кассовые сборы"],["award","🏆 Оскар","Кто и что получил «Оскар»"]];
+const QZ_NEEDKEY=new Set(["frame","cast","role","actorfilm","actorbio","common","odd","favact","money","award"]);
 const QZ={state:"idle",q:null,res:[],used:new Set(),n:10,bd:{},kinds:[],err:""};
 const qzShuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const qzPick=a=>a[Math.floor(Math.random()*a.length)];
@@ -2392,6 +2745,74 @@ async function qzOdd(base,pool){
     return{...base,it:odd,prompt:`В каком из этих проектов НЕ ${qzG(a.g,"снималась","снимался","снимался(ась)")} ${a.n}?`,img:a.p?tmdbImg(a.p,"w342"):null,small:true,
       opts:qzShuf([...three,odd]).map(x=>({label:x.title,ok:x===odd})),
       revImg:a.p?tmdbImg(a.p,"w185"):null,revTitle:`${a.n} — не в «${odd.title}»`,revSub:qzG(a.g,"Снималась в: ","Снимался в: ","Снимался(ась) в: ")+three.map(x=>x.title).join(", ")};
+  }
+  return null;
+}
+/* деньги: что собрало больше всех / сколько стоило */
+const qzRoundBudget=n=>{const st=n>=1e8?5e6:n>=2e7?1e6:5e5;return Math.max(st,Math.round(n/st)*st)};
+async function qzMoney(base,pool){
+  const T=qzShuf(pool.filter(i=>i.tmdb&&i.tmdb.type==="movie"&&i.tmdb.id)).slice(0,10);
+  if(T.length<4)return null;
+  const R=await Promise.allSettled(T.map(i=>metaGet(castRef(i))));
+  const M=T.map((it,k)=>({it,m:R[k].status==="fulfilled"?R[k].value:null})).filter(x=>x.m);
+  for(const sub of qzShuf(["top","budget"])){
+    if(sub==="top"){
+      const L=M.filter(x=>x.m.r);if(L.length<4)continue;
+      const four=L.slice(0,4).sort((a,b)=>b.m.r-a.m.r);
+      if(four[0].m.r<four[1].m.r*1.15)continue;
+      const w=four[0];
+      return{...base,it:w.it,prompt:"Какой из этих проектов собрал в прокате больше всех?",
+        opts:qzShuf(four).map(x=>({label:x.it.title,ok:x===w})),
+        revImg:qzHasImg(w.it)?w.it.poster:null,revTitle:`«${w.it.title}» — ${fmtMoney(w.m.r)}`,
+        revSub:four.filter(x=>x!==w).map(x=>`«${x.it.title}» ${fmtMoney(x.m.r)}`).join(" · ")};
+    }
+    const B=M.filter(x=>x.m.b&&x.m.b>=1e6);if(!B.length)continue;
+    const x=qzPick(B),b=qzRoundBudget(x.m.b),seen=new Set([fmtMoney(b)]),vals=[{v:b,ok:true}];
+    for(const f of qzShuf([.4,.55,.7,1.5,1.9,2.6,3.5])){
+      const v=qzRoundBudget(b*f),l=fmtMoney(v);
+      if(seen.has(l))continue;seen.add(l);vals.push({v,ok:false});
+      if(vals.length>=4)break;
+    }
+    if(vals.length<4)continue;
+    return{...base,it:x.it,prompt:`Сколько стоило снять «${x.it.title}»? Бюджет по данным TMDB`,img:qzHasImg(x.it)?x.it.poster:null,small:true,
+      opts:vals.sort((p,q)=>p.v-q.v).map(o=>({label:fmtMoney(o.v),ok:o.ok})),
+      revImg:qzHasImg(x.it)?x.it.poster:null,revTitle:`«${x.it.title}» — ${fmtMoney(b)}`,revSub:x.m.r?`Сборы: ${fmtMoney(x.m.r)}`:""};
+  }
+  return null;
+}
+/* «Оскар»: какой проект или какой актёр из состава получил статуэтку (данные Викиданных) */
+const qzOscCats=o=>((o&&o.list)||[]).filter(e=>e.f==="oscar"&&e.win).slice(0,3).map(e=>awShort(e.l)+(e.y?` (${e.y})`:"")).join(" · ");
+async function qzAward(base,pool){
+  for(const sub of qzShuf(["film","actor"])){
+    if(sub==="film"){
+      const T=qzShuf(pool.filter(i=>i.tmdb&&i.tmdb.id)).slice(0,12),got=[];
+      for(let k=0;k<T.length;k+=3){
+        const R=await Promise.allSettled(T.slice(k,k+3).map(awForItem));
+        R.forEach((r,j)=>{if(r.status==="fulfilled"&&r.value)got.push({it:T[k+j],S:awSum(r.value).oscar||{w:0,n:0},o:r.value})});
+        if(got.some(x=>x.S.w>0)&&got.filter(x=>x.S.n===0).length>=3)break;
+      }
+      const win=got.filter(x=>x.S.w>0),none=got.filter(x=>x.S.n===0);
+      if(!win.length||none.length<3)continue;
+      const w=qzPick(win),wr=qzShuf(none).slice(0,3);
+      return{...base,it:w.it,prompt:"Какой из ваших проектов получил «Оскар»?",
+        opts:qzShuf([w,...wr]).map(x=>({label:x.it.title,ok:x===w})),
+        revImg:qzHasImg(w.it)?w.it.poster:null,revTitle:`«${w.it.title}» — ${w.S.w} ${plural(w.S.w,"«Оскар»","«Оскара»","«Оскаров»")}`,revSub:qzOscCats(w.o)};
+    }
+    await qzWarmCasts(pool,6);
+    for(const it of qzShuf(pool.filter(i=>i.tmdb&&i.tmdb.id&&ACS.casts.has(i.id))).slice(0,4)){
+      const A=qzTop(it,8);if(A.length<4)continue;
+      const got=[];
+      for(let k=0;k<A.length;k+=3){
+        const R=await Promise.allSettled(A.slice(k,k+3).map(async a=>{const P=await personGet(a.i);return P.wd?await awForPerson(P):{list:[]}}));
+        R.forEach((r,j)=>{if(r.status==="fulfilled")got.push({a:A[k+j],S:awSum(r.value).oscar||{w:0,n:0},o:r.value})});
+      }
+      const win=got.filter(x=>x.S.w>0),none=got.filter(x=>x.S.n===0);
+      if(!win.length||none.length<3)continue;
+      const w=qzPick(win),wr=qzShuf(none).slice(0,3);
+      return{...base,it,prompt:`Кто из актёров «${it.title}» является обладателем «Оскара»?`,img:qzHasImg(it)?it.poster:null,small:true,
+        opts:qzShuf([w,...wr]).map(x=>({label:x.a.n,ok:x===w})),
+        revImg:w.a.p?tmdbImg(w.a.p,"w185"):null,revTitle:`${w.a.n} — ${w.S.w} ${plural(w.S.w,"«Оскар»","«Оскара»","«Оскаров»")}`,revSub:qzOscCats(w.o)};
+    }
   }
   return null;
 }
@@ -2523,6 +2944,8 @@ async function qzMakeOne(kind,pool){
   if(kind==="common")return qzCommon(base,pool);
   if(kind==="odd")return qzOdd(base,pool);
   if(kind==="favact")return qzFavAct(base,pool);
+  if(kind==="money")return qzMoney(base,pool);
+  if(kind==="award")return qzAward(base,pool);
   if(kind==="actorbio"){
     const cy=new Date().getFullYear();
     for(const it of qzShuf(fresh(pool.filter(i=>i.tmdb&&i.tmdb.id))).slice(0,4)){
@@ -3090,6 +3513,7 @@ function vData(){
     <div class="panel"><h3>🌍 Мировые оценки</h3><p>IMDb, Rotten Tomatoes, Metacritic и MyAnimeList. Встроенные данные — на 2026 год (у ${DB.items.filter(i=>worldParts(i).length).length} из ${DB.items.length} записей). Свежие цифры можно подтянуть онлайн: нужен бесплатный ключ <a href="https://www.omdbapi.com/apikey.aspx" target="_blank" rel="noopener">OMDb</a> (приходит на почту за минуту).</p>
       <div class="row" style="margin-bottom:8px"><input class="inp" id="omdbKey" placeholder="Ключ OMDb" value="${esc(apiKey("omdb"))}" style="flex:1;min-width:140px"><button class="btn pri" id="omdbGo">↻ IMDb · RT · MC</button></div>
       <div class="row"><button class="btn" id="malGo" title="Без ключа, через Jikan API">↻ MyAnimeList для аниме</button><button class="btn ghost" id="worldAgain">Вернуть встроенные в пустые поля</button></div></div>
+    ${finPanelHTML()}
     ${alPanelHTML()}
     <div class="panel"><h3>🕓 Время оценок</h3><p>С этой версии каждая новая или изменённая оценка запоминает дату и время, а ещё попадает в журнал — из него строится «Хронология оценок» в статистике.</p>
       <p class="dim" style="margin:0">В журнале: <b style="color:var(--tx)">${DB.log.length}</b> ${plural(DB.log.length,"событие","события","событий")}${DB.log.length?` · последнее ${fmtAt(DB.log[DB.log.length-1].t)}`:""}</p></div>
@@ -3142,7 +3566,7 @@ function bindView(){
   $("#reorderBtn",v)?.addEventListener("click",()=>reo(!UI.reorder));
   $("#reorderDone",v)?.addEventListener("click",()=>reo(false));
   $$("[data-gtoggle]",v).forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.gtoggle;UI.gColl=Object.assign({},UI.gColl);if(UI.gColl[k])delete UI.gColl[k];else UI.gColl[k]=1;saveUI();render()}));
-  $("#resetF",v)?.addEventListener("click",()=>{Object.assign(UI,{type:"all",bucket:null,comics:"all",genre:"",tag:"",q:"",rater:"all",unr:"hide"});saveUI();render()});
+  $("#resetF",v)?.addEventListener("click",()=>{Object.assign(UI,{type:"all",bucket:null,comics:"all",genre:"",aw:"",tag:"",q:"",rater:"all",unr:"hide"});saveUI();render()});
   $("#newSeries",v)?.addEventListener("click",()=>openEdit(null,{type:"Сериал",status:"watched"}));
   $("#addPlan",v)?.addEventListener("click",()=>openEdit(null,{status:"planned"}));
   $("#addProp",v)?.addEventListener("click",()=>openEdit(null,{status:PROP}));
@@ -3177,6 +3601,8 @@ function bindView(){
     try{await tmdbGet("/configuration");toast("✓ Ключ TMDB работает");fillPosters()}catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}});
   $("#malGo",v)?.addEventListener("click",()=>refreshMal());
   $("#alAll",v)?.addEventListener("click",()=>alRunAll(false));
+  $("#finMoney",v)?.addEventListener("click",()=>finLoad("money",true));
+  $("#finAw",v)?.addEventListener("click",()=>finLoad("awards",true));
   $("#alNew",v)?.addEventListener("click",()=>alRunAll(true));
   $$("[data-tabvis]",v).forEach(cb=>cb.addEventListener("change",()=>{const id=cb.dataset.tabvis,h=new Set(UI.hiddenTabs||[]);if(cb.checked)h.delete(id);else h.add(id);UI.hiddenTabs=[...h];saveUI();render()}));
   const cq=$("#catQ",v);if(cq){cq.addEventListener("input",()=>{UI.catQ=cq.value;UI.catSim=null;saveUI();clearTimeout(cq.t);cq.t=setTimeout(()=>{render();const n=$("#catQ");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}},500)})}
@@ -3254,6 +3680,7 @@ function openDetail(id,season){
         ${DB.raters.map(n=>`<tr><td class="l">${esc(n)}</td>${CATS.map(c=>catCell(n,c.k)).join("")}</tr>`).join("")}
       </tbody></table>${useSeasonsAvg?`<p class="dim" style="font-size:12.5px">Оценки — среднее по ${arc?"аркам":"сезонам"}.</p>`:""}${ratedAtLine(R,useSeasonsAvg)}`:""}
       ${!sObj?worldBlock(it,tot):""}
+      ${!sObj?finBoxHTML(it):""}
       ${castBoxHTML()}
       ${ser&&!sObj?segTable(it):""}
       ${ser&&!sObj?alBlockHTML(it):""}
@@ -3268,6 +3695,7 @@ function openDetail(id,season){
   const d=showDlg(html);
   posterBgApply(d,it);
   castOpened(it,season);
+  if(!sObj)finOpened(it);
   $("#dDel",d).onclick=()=>{
     if(sObj){if(!confirm(arc?`Удалить оценку арки «${segName(it,season)}»?`:`Удалить оценку ${season} сезона?`))return;it.seasons=it.seasons.filter(s=>s.n!==season);closeDlg();commit();return}
     if(!confirm(`Удалить «${it.title}»?`))return;DB.items=DB.items.filter(x=>x!==it);DB.catalog.forEach(c=>{if(c.link?.itemId===it.id)c.link=null});closeDlg();commit();toast("Удалено")};
@@ -4389,7 +4817,7 @@ document.addEventListener("click",e=>{
 /* ============ рулетка вечера ============
    Выбирает, что смотреть сегодня, из «Планов» (кроме ещё не вышедших). Фильтры: тип, длительность,
    настроение (по жанрам), «только новое для обоих». Состояние фильтров живёт, пока открыта страница. */
-const RL={cats:null,time:"any",mood:"any",fresh:true,skip:new Set(),busy:false,win:null};
+const RL={cats:null,time:"any",mood:"any",fresh:true,osc:false,skip:new Set(),busy:false,win:null};
 const RL_TIME=[["any","Любая"],["90","до 1,5 ч"],["120","до 2 ч"],["150","до 2,5 ч"]];
 const RL_MOOD=[["any","🎲 Любое",null],
   ["fun","😂 Посмеяться",["Комедия","Семейный","Мультфильм"]],
@@ -4403,6 +4831,7 @@ function rlPool(){
     if(it.status!=="planned"||isUpcoming(it)||RL.skip.has(it.id))return false;
     if(on&&!on.has(qzCatOf(it.type)))return false;
     if(RL.fresh&&seenList(it).length)return false;
+    if(RL.osc&&!awFilterOk(it,"nom"))return false;
     if(lim){const m=it.kind==="series"?parseDurAvg(it.episodeDuration):totalMinutes(it);if(m&&m>lim)return false}
     if(mg&&!(it.genres||[]).some(g=>mg.includes(g)))return false;
     return true;
@@ -4425,6 +4854,7 @@ function rlRender(){
     <div class="rl-flt"><label>Что крутим</label><div class="chips">${cats.map(([k,n,c])=>chip("cat",k,n,on.has(k),` <small>${c}</small>`)).join("")||`<span class="dim">В планах пусто</span>`}</div></div>
     <div class="rl-flt"><label>Сколько есть времени <span class="dim">(у сериалов — длина серии)</span></label><div class="chips">${RL_TIME.map(([v,n])=>chip("time",v,n,RL.time===v)).join("")}</div></div>
     <div class="rl-flt"><label>Настроение</label><div class="chips">${RL_MOOD.map(([v,n])=>chip("mood",v,n,RL.mood===v)).join("")}</div></div>
+    <div class="rl-flt"><label>Вечер Оскара</label><div class="chips">${chip("osc","1","🏆 Только лауреаты и номинанты Оскара",RL.osc)}${RL.osc&&FINS.run?`<span class="dim" style="font-size:12.5px">⏳ загружаю премии…</span>`:""}</div></div>
     <div class="rl-flt"><label>Пересмотры</label><div class="chips">${chip("fresh","1","Только новое для обоих",RL.fresh)}${RL.skip.size?`<button class="chip" data-rl="unskip">Вернуть пропущенные <small>${RL.skip.size}</small></button>`:""}</div></div>
     <div class="rl-info"><b data-count>${pool.length}</b> ${plural(pool.length,"проект","проекта","проектов")} в барабане${pool.length?` · ${Object.entries(mix).map(([n,c])=>`${n.replace(/^\S+\s/,"")} ${c}`).join(", ")}`:""}${avgM?` · фильм в среднем ≈ ${hoursStr(avgM)}`:""}</div>
     <div class="rl-stage" id="rlStage"><div class="rl-mark"></div><div class="rl-reel idle" id="rlReel">${pool.length?prev.map(rlCell).join(""):`<div class="rl-empty">${DB.items.some(i=>i.status==="planned")?"По этим фильтрам ничего не нашлось — ослабьте их.":"План пуст — добавьте что-нибудь в «Каталоге»."}</div>`}</div></div>
@@ -4483,6 +4913,10 @@ document.addEventListener("click",e=>{
     const k=f.dataset.rlk,v=f.dataset.rlv;
     if(k==="cat"){const all=rlCats().map(c=>c[0]);const cur=new Set(RL.cats||all);if(cur.has(v)){if(cur.size>1)cur.delete(v)}else cur.add(v);RL.cats=cur.size===all.length?null:[...cur]}
     else if(k==="time")RL.time=v;else if(k==="mood")RL.mood=v;else if(k==="fresh")RL.fresh=!RL.fresh;
+    else if(k==="osc"){
+      RL.osc=!RL.osc;
+      if(RL.osc&&apiKey("tmdb")&&!FINS.run&&finNeed("awards").length)finLoad("awards",false).then(()=>{if(document.getElementById("rlStage")&&!RL.busy)rlRender()});
+    }
     rlRender();return;
   }
   const act=a.id==="rlSpin"?"spin":a.dataset.rl;

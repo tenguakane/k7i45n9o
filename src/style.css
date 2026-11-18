@@ -1763,3 +1763,32 @@ dialog:focus,dialog:focus-visible{outline:none}
 .crewrow{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 10px;font-size:13px}
 .crewrow:empty{display:none}
 .crewrow .crw{display:inline-flex;flex-wrap:wrap;gap:4px;align-items:center}
+.finbox{margin:0 0 12px}
+.finbox:empty{display:none}
+.finrow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:0 0 8px}
+.finc{font-size:14px}
+.finc.up{color:var(--ok,#3ecf8e);font-weight:700}
+.finc.down{color:var(--bad,#ff6b6b);font-weight:700}
+.finv{font-size:12px;font-weight:700;color:var(--acc)}
+.finban{flex:1 1 100%;font-size:13px;color:var(--tx2);margin:2px 0 10px}
+.finban .bar{height:6px;border-radius:5px;background:rgba(255,255,255,.1);margin-top:6px;overflow:hidden}
+.finban .bar i{display:block;height:100%;background:var(--acc);transition:width .2s}
+.awbox{margin:6px 0 4px}
+.awh{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin:0 0 6px;font-weight:700}
+.awchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.awchip{font-size:12.5px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.07)}
+.awchip.osc{background:rgba(245,197,24,.16);color:#f5c518}
+.awchip .awok{font-weight:700}
+.awlist{list-style:none;margin:0 0 6px;padding:0;display:flex;flex-direction:column;gap:3px;font-size:13.5px}
+.awlist li{display:flex;gap:8px;align-items:baseline}
+.awlist li.win .awt{font-weight:700}
+.awlist .awi{flex:none;width:20px;text-align:center}
+.awlist .awt{flex:1;min-width:0}
+.awlist .awy{color:var(--tx2);flex:none;font-size:12.5px}
+.awmore{margin:4px 0}
+.awmore summary{cursor:pointer;color:var(--acc);font-size:13px}
+.osclines{margin:10px 0 0;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:3px}
+.panel .prog i{display:block;height:100%;background:var(--acc)}
+.aabw{position:absolute;left:5px;top:5px;pointer-events:none}
+.aab{display:inline-block;font-style:normal;font-size:11.5px;font-weight:800;line-height:1;padding:3px 6px;border-radius:999px;background:rgba(19,20,22,.82);color:#fff}
+.aab.win{background:#d4a320;color:#1b1500}
