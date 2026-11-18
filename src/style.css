@@ -1885,7 +1885,7 @@ dialog:focus,dialog:focus-visible{outline:none}
 .bxa-sel button{border:0;background:none;color:var(--tx3);cursor:pointer;font:inherit;padding:0 4px}
 .bxa-sel button:hover{color:var(--tx)}
 .bxa-ch{position:relative;margin-top:10px;border:1px solid var(--line);border-radius:var(--r);background:var(--card-g);padding:6px}
-.bxa-ch svg{display:block;width:100%;height:300px}
+.bxa-ch svg{display:block;width:100%;height:auto}
 .bxa-gl{stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
 .bxa-gl.z{stroke:var(--tx3)}
 .bxa-yt,.bxa-xt{fill:var(--tx3);font-size:11px}
@@ -1918,7 +1918,7 @@ dialog:focus,dialog:focus-visible{outline:none}
 #bxaBody .seg button{white-space:nowrap}
 :root{--bx1:#3987e5;--bx2:#d95926;--bx3:#199e70;--bx4:#c98500;--bx5:#d55181;--bx6:#0ca30c}
 :root[data-theme="light"]{--bx1:#2a78d6;--bx2:#eb6834;--bx3:#1baf7a;--bx4:#eda100;--bx5:#e87ba4;--bx6:#008300}
-@media(max-width:820px){.bxa-ch svg{height:240px}.bxa-rl .bxa-rn{max-width:calc(100% - 150px)}}
+@media(max-width:820px){.bxa-rl .bxa-rn{max-width:calc(100% - 150px)}}
 /* выпадающие списки: в тёмной теме — тёмные */
 select.inp,select{color-scheme:inherit}
 select.inp option,select.inp optgroup,select option{background-color:var(--bg2);color:var(--tx)}

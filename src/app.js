@@ -1460,6 +1460,7 @@ document.addEventListener("click",e=>{
    (GitHub Actions). Суммы в файле — в тысячах долларов. */
 const BXA={db:null,run:false,err:"",byI:null,st:new Map(),ru:new Map(),ruQ:new Set(),q:"",res:null,qRun:false,dbTried:false};
 const BXA_MAX=6;
+window.addEventListener("resize",()=>{const b=document.getElementById("bxaBody");if(b&&BXA.db&&Math.abs(b.clientWidth-(BXA.cw||0))>12){clearTimeout(BXA.rt);BXA.rt=setTimeout(bxaPaint,150)}});
 async function bxaLoad(){
   if(BXA.db||BXA.run)return;
   BXA.run=true;BXA.err="";
@@ -1568,7 +1569,7 @@ function bxaChart(S){
   if(hi<=lo)hi=lo+1;
   const nice=x=>{const p=Math.pow(10,Math.floor(Math.log10(x))),m=x/p;return(m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p};
   const step=nice((hi-lo)/4);lo=Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;
-  const W=760,H=300,L=74,Rr=14,T=12,B=30,pw=W-L-Rr,ph=H-T-B;
+  const bw=(document.getElementById("bxaBody")||{}).clientWidth||760,W=Math.max(300,Math.round(bw-14)),H=window.innerWidth<=820?240:300,L=bw<520?62:74,Rr=14,T=12,B=30,pw=W-L-Rr,ph=H-T-B;BXA.cw=bw;
   const x=i=>L+(N<=1?pw/2:i/(N-1)*pw),y=v=>T+ph-(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*ph;
   const fy=v=>metric==="wk"?bxaPct(v).replace("+0%","0%"):v===0?"0":fmtMoney(v);
   let g="";for(let v=lo;v<=hi+step/2;v+=step){const yy=y(v).toFixed(1);g+=`<line x1="${L}" x2="${W-Rr}" y1="${yy}" y2="${yy}" class="bxa-gl${Math.abs(v)<1e-9?" z":""}"/><text x="${L-8}" y="${yy}" class="bxa-yt">${esc(fy(v))}</text>`}
@@ -1576,7 +1577,7 @@ function bxaChart(S){
   g+=xs.map(i=>`<text x="${x(i).toFixed(1)}" y="${H-8}" class="bxa-xt">${i+1}</text>`).join("");
   const lines=ser.map(s=>{let p="",on=false;s.v.forEach((v,i)=>{if(v==null){on=false;return}p+=(on?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1);on=true});return `<path d="${p}" class="bxa-ln" style="stroke:var(--bx${s.c})"/>`}).join("");
   BXA.chart={ser,N,metric};
-  return `<div class="bxa-ch" id="bxaCh"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="График сборов по дням проката">${g}${lines}<line id="bxaCx" class="bxa-cx" x1="0" x2="0" y1="${T}" y2="${T+ph}" visibility="hidden"/><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="bxaHit" data-l="${L}" data-pw="${pw}" data-w="${W}"/></svg><div class="bxa-tip" id="bxaTip" hidden></div></div>
+  return `<div class="bxa-ch" id="bxaCh"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="График сборов по дням проката">${g}${lines}<line id="bxaCx" class="bxa-cx" x1="0" x2="0" y1="${T}" y2="${T+ph}" visibility="hidden"/><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="bxaHit" data-l="${L}" data-pw="${pw}" data-w="${W}"/></svg><div class="bxa-tip" id="bxaTip" hidden></div></div>
   <p class="dim" style="font-size:12px;margin:4px 0 0;text-align:center">День проката (1 — день премьеры в США)</p>`;
 }
 document.addEventListener("pointermove",e=>{
