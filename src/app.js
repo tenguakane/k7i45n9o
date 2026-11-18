@@ -572,7 +572,14 @@ function openProgress(id){
   $("#pStop",d).onclick=()=>{delete it.progress;it.status=hasRatings(it.ratings)||seasonsRated(it).length?"watched":"planned";closeDlg();commit();toast(it.status==="watched"?"Перенесено в просмотренное":"Возвращено в планы")};
 }
 function comicsMap(){const m={};for(const c of DB.catalog){if(c.link?.itemId){(m[c.link.itemId]=m[c.link.itemId]||[]).push(c)}}return m}
-function itemById(id){return DB.items.find(i=>i.id===id)}
+/* проекты из каталога, которых нет в базе: для них тоже можно показать состав (блок «Актёры» в предпросмотре) */
+const CATIT=new Map();
+function itemById(id){return DB.items.find(i=>i.id===id)||CATIT.get(id)}
+function catAsItem(x){
+  const id="cat:"+x.k;let it=CATIT.get(id);
+  if(!it){it={id,title:x.title,kind:x.t==="tv"?"series":"film",type:catType(x),year:+x.y||0,tmdb:{type:x.t,id:x.id}};CATIT.set(id,it)}
+  return it;
+}
 function nextOrder(){return Math.max(0,...DB.items.map(i=>i.order||0))+1}
 function durLine(it){
   const p=[];
@@ -1420,6 +1427,13 @@ function catSync(){
   const key=JSON.stringify([!!apiKey("tmdb"),UI.catCat,UI.catSort,UI.catGenre,UI.catYear,(UI.catQ||"").trim(),UI.catSim&&UI.catSim.t+UI.catSim.id,catActorOn()?String(UI.catActor)+(UI.catActor==="*"?"|"+favShown().map(f=>f.id).join(","):""):""]);
   if(CAT.key!==key){Object.assign(CAT,{simPath:"",key,tok:CAT.tok+1,loading:false,items:[],seen:new Set(),page:0,total:1,totalRes:0,err:""})}
 }
+/* подходит ли запись под выбранную категорию каталога, жанр и год — для поиска по тексту и режима «любимые актёры»,
+   где TMDB сам не умеет фильтровать */
+const catPass=(x,c)=>x.t===c.kind
+  &&tmdbRawType(x.t,{genre_ids:x.g,origin_country:x.oc,original_language:x.lang})===CAT_TYPE[c.k]
+  &&(!c.not||x.lang!==c.not)
+  &&(!UI.catGenre||(x.g||[]).includes(+UI.catGenre))
+  &&(!UI.catYear||String(x.y)===String(UI.catYear));
 async function catMore(){
   if(CAT.loading||CAT.page>=CAT.total)return;
   if(!apiKey("tmdb")){catPaint();return}
@@ -1432,7 +1446,7 @@ async function catMore(){
     if(UI.catSim&&!(r.results||[]).length&&!CAT.page&&!CAT.simPath){CAT.simPath="similar";const q2=catReq(1);r=await tmdbGet(q2.path,q2.params);if(CAT.tok!==tok)return}
     const c=catCur();let res=r.results||[];
     if(UI.catSim)res=res.map(x=>catNorm(x,UI.catSim.t));
-    else if(path==="/search/multi")res=res.filter(x=>x.media_type==="movie"||x.media_type==="tv").map(x=>catNorm(x,x.media_type));
+    else if(path==="/search/multi")res=res.filter(x=>x.media_type==="movie"||x.media_type==="tv").map(x=>catNorm(x,x.media_type)).filter(x=>catPass(x,c));
     else{res=res.map(x=>catNorm(x,c.kind));if(c.not)res=res.filter(x=>x.lang!==c.not);res=res.filter(x=>tmdbRawType(x.t,{genre_ids:x.g,origin_country:x.oc,original_language:x.lang})===CAT_TYPE[c.k]);if(UI.catSort==="soon"||UI.catSort==="soonpop")res=res.filter(x=>x.p)}
     for(const x of res)if(!CAT.seen.has(x.k)){CAT.seen.add(x.k);CAT.items.push(x)}
     CAT.page=r.page||CAT.page+1;CAT.total=Math.min(r.total_pages||1,500);CAT.totalRes=r.total_results||0;
@@ -1496,7 +1510,7 @@ function catBodyHTML(){
   else if(!CAT.loading&&CAT.page>=CAT.total&&!vis.length)note=`<div class="empty">Ничего не нашлось. Попробуйте другой жанр, год или запрос.</div>`;
   else if(!CAT.loading&&CAT.page&&CAT.page>=CAT.total)note=`<p class="rnote" style="text-align:center">Это всё, что есть в этой подборке</p>`;
   const nh=(DB.recoHide||[]).length;
-  const stat=actor?(CAT.items.length?`<p class="rnote" style="margin:0 0 10px">Работ в TMDB: ${CAT.items.length}${hiddenN?` · скрыто ${hiddenN} по фильтру`:""}${CAT.items.some(x=>x.who&&x.who.length>1)?" · сверху — те, где снимались сразу несколько любимых":""}</p>`:""):CAT.items.length||CAT.loading?`<p class="rnote" style="margin:0 0 10px">Загружено ${CAT.items.length}${CAT.totalRes?` из ~${CAT.totalRes.toLocaleString("ru-RU")}`:""}${hiddenN?` · скрыто ${hiddenN} (уже в списке или «не интересно»)`:""}${nh?` · <button class="lnk2" data-cunhide>вернуть скрытые «не интересно» (${nh})</button>`:""}</p>`:"";
+  const stat=actor?(CAT.items.length?`<p class="rnote" style="margin:0 0 10px">Работ в TMDB: ${CAT.items.length}${hiddenN?` · скрыто ${hiddenN} по фильтру`:""}${CAT.items.some(x=>x.who&&x.who.length>1)?" · сверху — те, где снимались сразу несколько любимых":""}</p>`:""):CAT.items.length||CAT.loading?`<p class="rnote" style="margin:0 0 10px">Загружено ${CAT.items.length}${CAT.totalRes&&!(UI.catQ||"").trim()?` из ~${CAT.totalRes.toLocaleString("ru-RU")}`:""}${hiddenN?` · скрыто ${hiddenN} (уже в списке или «не интересно»)`:""}${nh?` · <button class="lnk2" data-cunhide>вернуть скрытые «не интересно» (${nh})</button>`:""}</p>`:"";
   return stat+`<div class="ccgrid">${vis.map(([x,st])=>catCard(x,st,{noHide:actor})).join("")}${sk}</div>${note}<div id="catSentinel" style="height:1px"></div>`;
 }
 function catPaint(){const el=$("#catBody");if(el)el.innerHTML=catBodyHTML()}
@@ -1543,6 +1557,30 @@ async function catAdd(k,mode){
   }catch(e){toast("⚠ "+(e.message==="Failed to fetch"?"нет связи с TMDB":e.message))}
   finally{CATB.delete(k)}
 }
+/* мировые оценки проекта из каталога: IMDb, Rotten Tomatoes, Metacritic (OMDb, нужен ключ) и MyAnimeList (аниме, без ключа).
+   Кэш на неделю — бесплатный лимит OMDb небольшой. */
+async function worldGet(ref,type,title){
+  const key="wr:"+refKey(ref),hasKey=!!apiKey("omdb");
+  const c=await cacheGet(key,7*864e5);
+  if(c&&(c.om||!hasKey))return c;
+  const m=await metaGet(ref);
+  const [om,mal]=await Promise.all([hasKey&&m.imdb?omdbById(m.imdb).catch(()=>null):null,c&&c.mal!==undefined?c.mal:(type==="Аниме"?malScore(title):null)]);
+  const o={om:hasKey,imdb:om&&isNum(om.imdb)?om.imdb:null,rt:om&&isNum(om.rt)?om.rt:null,mc:om&&isNum(om.mc)?om.mc:null,mal:isNum(mal)?mal:null};
+  cachePut(key,o);return o;
+}
+async function catWorldFill(x,st){
+  const slot=()=>{const e=document.getElementById("catWorld");return e&&e.dataset.k===x.k?e:null};
+  if(!slot()||!apiKey("tmdb"))return;
+  let o=null;try{o=await worldGet({type:x.t,id:x.id},catType(x),x.orig||x.title)}catch(e){}
+  const el=slot();if(!el)return;
+  const ext=Object.assign({},(st&&st.ext)||{});
+  if(o)for(const kk of["imdb","rt","mc","mal"])if(isNum(o[kk]))ext[kk]=o[kk];
+  const P=worldParts({ext}),w=P.length?avg(P.map(q=>q.v)):null;
+  const tm=isNum(x.v)&&x.vc>=5?`<div class="wpill" style="--wc:#01b4e4"><span>TMDB</span><b>${x.v.toFixed(1)}</b></div>`:"";
+  const hint=!apiKey("omdb")?`<p class="dim" style="font-size:12.5px;margin:6px 0 0">IMDb, Rotten Tomatoes и Metacritic подтягиваются с бесплатным ключом OMDb — добавьте его во вкладке <a href="#data" data-close>«Данные»</a>.</p>`:"";
+  if(!P.length&&!tm){el.innerHTML=hint?`<h4>Мировые оценки</h4>${hint}`:"";return}
+  el.innerHTML=`<h4>Мировые оценки</h4><div class="wrow">${tm}${P.map(q=>`<div class="wpill" style="--wc:${q.c}"><span>${q.s||q.n}</span><b>${q.fmt(q.raw)}</b></div>`).join("")}${isNum(w)?`<div class="wpill tot"><span>Мир (0–5)</span><b>${f1(w)}</b></div>`:""}</div>${P.length?`<p class="dim" style="font-size:12px;margin:6px 0 0">«Мир» — среднее мировых оценок без TMDB, приведённых к шкале 0–5.${x.t==="tv"&&(isNum(ext.rt)||isNum(ext.mc))?" RT и Metacritic у сериалов — по 1 сезону.":""}</p>`:`<p class="dim" style="font-size:12.5px;margin:6px 0 0">Других оценок для этого проекта нет.</p>`}${hint}`;
+}
 function catPreview(k){
   const x=catFind(k);if(!x)return;
   const st=catState(x,catIndex()),g=[...new Set(x.g.flatMap(i=>TG[i]||[]))];
@@ -1552,9 +1590,14 @@ function catPreview(k){
       ${x.orig&&x.orig!==x.title?`<p class="dim" style="margin:0 0 10px">${esc(x.orig)}</p>`:""}
       ${g.length?`<div class="chips" style="margin-bottom:12px">${g.map(t=>`<span class="tag am">${esc(t)}</span>`).join("")}</div>`:""}
       ${x.rd&&x.rd>todayStr()?`<p class="muted" style="margin:0 0 10px">📅 Выходит ${esc(new Date(x.rd+"T00:00:00").toLocaleDateString("ru-RU",{day:"numeric",month:"long",year:"numeric"}).replace(/\s*г\.$/,""))}</p>`:""}
-      <p class="syn${x.ov?"":" dim"}">${x.ov?esc(x.ov):"Описания на русском пока нет."}</p></div></div></div>
+      <p class="syn${x.ov?"":" dim"}">${x.ov?esc(x.ov):"Описания на русском пока нет."}</p>
+      <div class="dsec" id="catWorld" data-k="${esc(x.k)}" data-noshot style="margin-top:14px"></div></div></div>
+    ${finBoxHTML(catAsItem(x))}${document.querySelector("#dlg[open] #castBox")?"":castBoxHTML()}</div>
   <div class="df">${ACT.back?`<button class="btn ghost" data-actor="${ACT.back}">← К актёру</button>`:""}<a class="btn" href="https://www.themoviedb.org/${x.t}/${x.id}?language=ru-RU" target="_blank" rel="noopener">TMDB ↗</a>${st||ACT.back?"":`<button class="btn ghost" data-chide="${x.k}">Не интересно</button>`}<button class="btn" data-csimk="${x.k}">≈ Похожие</button><div class="sp"></div>${st?(st.status===PROP?`<button class="btn" data-toplan="${st.id}">＋ В планы</button>`:""):`<button class="btn" data-cadd="${x.k}">＋ В планы</button><button class="btn" data-cprop="${x.k}">🤝 На согласование</button>`}${!st||st.status==="planned"||st.status===PROP?`<button class="btn pri" data-cwatch="${x.k}">✓ Смотрели — оценить</button>`:""}</div>`;
   showDlg(html,"dlg2");
+  catWorldFill(x,st);
+  finOpened(catAsItem(x));
+  if(document.querySelector("#dlg2 #castBox"))castOpened(catAsItem(x));
 }
 
 /* ============ смена постера через TMDB ============ */
@@ -1686,10 +1729,22 @@ async function crewFill(it,box){
 }
 
 /* --- статья об актёре: биография + вся фильмография --- */
+/* «прославила ли роль актёра»: известность проекта × вес роли.
+   Сериал — по числу серий (роль в 1–2 сериях почти ничего не весит), фильм — по месту в титрах,
+   камео и роли без указания в титрах режутся ещё сильнее. Сортировка «Известные» идёт по этому числу. */
+function roleFame(o,x){
+  const base=(o.vc||0)+20*(x.popularity||0);
+  let w;
+  if(o.crew)w=.7;
+  else if(o.t==="tv"){const e=x.episode_count||0;w=e>=40?1:e>=20?.9:e>=10?.7:e>=5?.45:e>=3?.25:e>=1?.08:.5}
+  else{const r=x.order;w=r==null?.6:r<=2?1:r<=4?.8:r<=7?.55:r<=11?.35:r<=19?.2:.1}
+  if(/uncredited|cameo|камео|без указания/i.test(x.character||""))w*=.25;
+  return Math.round(base*w);
+}
 function personGet(id){
   id=+id;
   return once("person:"+id,async()=>{
-    const c=await cacheGet("person:"+id,PERS_TTL);if(c&&c.v===3)return c;
+    const c=await cacheGet("person:"+id,PERS_TTL);if(c&&c.v===4)return c;
     const d=await tmdbGet(`/person/${id}`,{language:"ru-RU",append_to_response:"combined_credits,external_ids"});
     let bio=d.biography||"",bioLang="ru";
     if(!bio){try{const e=await tmdbGet(`/person/${id}`,{language:"en-US"});bio=e.biography||"";bioLang="en"}catch(_){}}
@@ -1702,6 +1757,7 @@ function personGet(id){
       const o=catNorm(x,x.media_type);
       if(seen.has(o.k)||!o.title||o.title==="?")continue;seen.add(o.k);
       o.ov=String(o.ov||"").slice(0,220);o.ch=String(x.character||"").split(" / ")[0].slice(0,60);o.ep=x.episode_count||0;o.pop=x.popularity||0;
+      o.fame=roleFame(o,x);
       cr.push(o);
     }
     /* работы за камерой: режиссёр, сценарист, создатель — в той же фильмографии, роль подписана */
@@ -1713,11 +1769,11 @@ function personGet(id){
       if(!o.title||o.title==="?")continue;
       const ex=cr.find(c=>c.k===o.k);
       if(ex){if(!ex.ch)ex.ch=role;else if(!ex.ch.includes(role))ex.ch+=" · "+role;continue}
-      o.ov=String(o.ov||"").slice(0,220);o.ch=role;o.ep=x.episode_count||0;o.pop=x.popularity||0;o.crew=1;
+      o.ov=String(o.ov||"").slice(0,220);o.ch=role;o.ep=x.episode_count||0;o.pop=x.popularity||0;o.crew=1;o.fame=roleFame(o,x);
       cr.push(o);
     }
-    cr.sort((a,b)=>b.pop-a.pop);
-    const o={v:3,wd:(d.external_ids&&d.external_ids.wikidata_id)||"",g:d.gender||0,dep:d.known_for_department||"",id,n:d.name||"",p:d.profile_path||"",bd:d.birthday||"",dd:d.deathday||"",pob:d.place_of_birth||"",bio,bioLang,imdb:d.imdb_id||"",cr:cr.slice(0,150)};
+    cr.sort((a,b)=>(b.fame-a.fame)||(b.pop-a.pop));
+    const o={v:4,wd:(d.external_ids&&d.external_ids.wikidata_id)||"",g:d.gender||0,dep:d.known_for_department||"",id,n:d.name||"",p:d.profile_path||"",bd:d.birthday||"",dd:d.deathday||"",pob:d.place_of_birth||"",bio,bioLang,imdb:d.imdb_id||"",cr:cr.slice(0,150)};
     cachePut("person:"+id,o);return o;
   });
 }
@@ -1845,7 +1901,7 @@ async function catActorMore(){
     if(!Ps.length)throw R[0]&&R[0].reason||new Error("нет данных");
     const map=new Map();
     for(const P of Ps)for(const x of P.cr){let e=map.get(x.k);if(!e){e=Object.assign({},x,{who:[]});map.set(x.k,e)}if(!e.who.includes(P.n))e.who.push(P.n)}
-    const list=[...map.values()].sort((a,b)=>b.who.length-a.who.length||(b.pop||0)-(a.pop||0));
+    const c=catCur(),list=[...map.values()].filter(x=>catPass(x,c)).sort((a,b)=>b.who.length-a.who.length||(b.fame||b.pop||0)-(a.fame||a.pop||0));
     for(const x of list)XREG.set(x.k,x);
     CAT.items=list;CAT.seen=new Set(list.map(x=>x.k));CAT.page=1;CAT.total=1;CAT.totalRes=list.length;
   }catch(e){if(CAT.tok===tok)CAT.err=e.message==="Failed to fetch"?"нет связи с TMDB":(e.message||"ошибка")}
