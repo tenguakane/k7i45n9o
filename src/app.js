@@ -5308,6 +5308,7 @@ function applyTheme(){
     $("#themeColor")?.setAttribute("content",THEME_META[id]||"#131416");
   }
   const tb=$("#themeBtn"),ti=tb&&tb.querySelector(".ico-theme");if(ti)ti.style.color=themeDot(g?id:(THEMES.includes(id)?id:"dark"));
+  if(window.foxTint)foxTint();
   if(UI.gridSize)root.style.setProperty("--gridMin",UI.gridSize+"px");
   renderThemePicker();
 }
@@ -5578,10 +5579,23 @@ function foxRated(it,res,finish){
     clearTimeout(idle);idle=setTimeout(()=>{if(foxOn()&&fxOn())foxMood("sleep")},240000);
     if(!raf)raf=requestAnimationFrame(()=>{raf=0;if(!foxOn()||!l.offsetWidth)return;
       const r=l.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=px-cx,dy=py-cy,d=Math.hypot(dx,dy)||1,k=Math.min(1,d/260);
-      sv.style.setProperty("--ex",(dx/d*1.7*k).toFixed(2)+"px");sv.style.setProperty("--ey",(dy/d*1.3*k).toFixed(2)+"px")})};
+      sv.style.setProperty("--ex",(dx/d*.55*k).toFixed(2)+"px");sv.style.setProperty("--ey",(dy/d*.3*k).toFixed(2)+"px")})};
   window.addEventListener("pointermove",move,{passive:true});
   (function blink(){setTimeout(()=>{if(foxOn()&&l.dataset.mood!=="sleep"){sv.style.setProperty("--bl",".08");setTimeout(()=>sv.style.setProperty("--bl","1"),120)}blink()},3500+Math.random()*4500)})();
   l.addEventListener("click",()=>foxSay("poke"));
+  /* картинка лисы оранжевая: в других темах подкрашиваем её под --fox1 */
+  const tint=()=>{try{
+    const c=getComputedStyle(document.documentElement).getPropertyValue("--fox1").trim(),m=/^#?([0-9a-f]{6})$/i.exec(c);
+    const H=document.documentElement.style;if(!m){H.removeProperty("--foxHue");return}
+    const n=parseInt(m[1],16),r=(n>>16)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,L=(mx+mn)/2;
+    let h=0;if(d){h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360}
+    const S=d?d/(1-Math.abs(2*L-1)):0,dh=((h-18+540)%360)-180;
+    const own=Math.abs(dh)<25;   /* оранжевые темы — родной цвет картинки */
+    H.setProperty("--foxHue",own?"0deg":dh.toFixed(0)+"deg");
+    H.setProperty("--foxSat",own?"1":Math.min(1.1,Math.max(.3,S/.9)).toFixed(2));
+    H.setProperty("--foxLum",own?"1":Math.min(1.3,Math.max(.85,L/.55)).toFixed(2));
+  }catch(e){logErr("Цвет лисы",e,1)}};
+  window.foxTint=tint;tint();new MutationObserver(tint).observe(document.documentElement,{attributes:true,attributeFilter:["class","data-theme","data-skin"]});
   idle=setTimeout(()=>{if(foxOn()&&fxOn())foxMood("sleep")},240000);
 })();
 /* реакции на чужие функции — оборачиваем после определения */

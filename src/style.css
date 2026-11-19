@@ -1050,7 +1050,7 @@ dialog{transition:box-shadow .5s}
 /* лис */
 .sb-logo{position:relative;cursor:pointer}
 .sb-logo svg{--ex:0px;--ey:0px;--bl:1;transition:transform .3s}
-.sb-logo svg circle.fox-eye{transform-box:fill-box;transform-origin:center;transform:translate(var(--ex),var(--ey)) scaleY(var(--bl));transition:transform .09s}
+.sb-logo svg circle.fox-eye{transform:translate(var(--ex),var(--ey));transition:transform .09s}.sb-logo svg .fe{transform-box:fill-box;transform-origin:center;transform:scaleY(var(--bl));transition:transform .09s}.fox-img{filter:hue-rotate(var(--foxHue,0deg)) saturate(var(--foxSat,1)) brightness(var(--foxLum,1))}
 .sb-logo:hover svg{transform:rotate(-4deg) scale(1.06)}
 @keyframes foxHappy{0%{transform:none}18%{transform:translateY(-7px) rotate(-9deg)}38%{transform:translateY(0) rotate(7deg)}58%{transform:translateY(-5px) rotate(-6deg)}78%{transform:rotate(3deg)}100%{transform:none}}
 @keyframes foxSad{0%{transform:none}25%{transform:translateY(3px) rotate(-8deg) scale(.95)}75%{transform:translateY(3px) rotate(-8deg) scale(.95)}100%{transform:none}}
