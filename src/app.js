@@ -1662,10 +1662,10 @@ function vBoxAn(){
 const boxSwitch=()=>{const v=UI.boxView==="an"?"an":"top";return `<div class="plsw"><div class="seg lg" data-ui="boxView"><button data-v="top" class="${v==="top"?"on":""}">Рейтинг</button><button data-v="an" class="${v==="an"?"on":""}">📊 Аналитика</button></div></div>`};
 
 /* ============ Вкладка «Люди»: актёры, режиссёры и сценаристы — популярные, ваши, любимые, поиск ============ */
-const PPL={pop:[],page:0,pages:1,run:false,err:"",found:null,q:"",crew:new Map(),crewRun:false,crewDone:0,crewTotal:0,crewTried:false};
+const PPL={top:{page:0,pages:1,run:false,done:0,total:0,by:new Map(),err:""},pop:[],page:0,pages:1,run:false,err:"",found:null,q:"",crew:new Map(),crewRun:false,crewDone:0,crewTotal:0,crewTried:false};
 const PPL_ROLES=[["act","Актёры","Acting","a"],["dir","Режиссёры","Directing","d"],["wri","Сценаристы","Writing","w"]];
 const pplRole=()=>PPL_ROLES.find(r=>r[0]===UI.pplRole)||PPL_ROLES[0];
-const pplMode=()=>{const r=pplRole()[0];let m=UI.pplMode;if(m==="ours"&&r==="act")m="pop";if(m!=="pop"&&m!=="fav"&&m!=="ours")m=r==="act"?"pop":"ours";return m};
+const pplMode=()=>{const r=pplRole()[0];let m=UI.pplMode;if(r==="act"&&(m==="ours"||m==="top"))m="pop";if(r!=="act"&&m==="pop")m="top";if(m!=="pop"&&m!=="fav"&&m!=="ours"&&m!=="top")m=r==="act"?"pop":"top";return m};
 const pplNorm=x=>({i:x.id,n:x.name||"?",p:x.profile_path||"",c:(x.known_for||[]).map(k=>k.title||k.name).filter(Boolean).slice(0,2).join(", "),g:x.gender||0,d:x.known_for_department||"",e:0});
 async function pplPopular(more){
   if(PPL.run||!apiKey("tmdb"))return;
@@ -1703,6 +1703,36 @@ async function pplCrewLoad(){
   await Promise.all([work(),work(),work(),work()]);
   PPL.crewRun=false;pplPaint();
 }
+/* известные режиссёры и сценаристы: берём самые оценённые зрителями фильмы TMDB и смотрим, кто их снял и написал */
+async function pplTopLoad(more){
+  const T=PPL.top;if(T.run||!apiKey("tmdb"))return;
+  if(T.page>0&&!more){pplPaint();return}
+  if(T.page>=T.pages)return;
+  const pages=T.page===0?2:1;T.run=true;T.err="";pplPaint();
+  try{
+    for(let k=0;k<pages&&T.page<T.pages;k++){
+      const page=T.page+1,ck="ppl:top:"+page;let r=await cacheGet(ck,24*3600e3);
+      if(!r){const d=await tmdbGet("/discover/movie",{language:"ru-RU",include_adult:"false",sort_by:"vote_count.desc",page});r={res:(d.results||[]).map(x=>({id:x.id,v:x.vote_average||0})),pages:Math.min(d.total_pages||1,25)};cachePut(ck,r)}
+      T.pages=r.pages;T.total+=r.res.length;paintSoon();
+      let i=0;
+      const work=async()=>{while(i<r.res.length){const m=r.res[i++];try{const c=await crewGet({tmdb:{type:"movie",id:m.id}});T.by.set(m.id,{v:m.v,list:c||[]})}catch(_){T.by.set(m.id,{v:m.v,list:[]})}T.done++;if(T.done%6===0)paintSoon()}};
+      await Promise.all([work(),work(),work(),work()]);
+      T.page=page;
+    }
+  }catch(e){T.err=e.message==="Failed to fetch"?"нет связи с TMDB":e.message}
+  finally{T.run=false}
+  pplPaint();
+}
+let pplT=0;const paintSoon=()=>{clearTimeout(pplT);pplT=setTimeout(pplPaint,200)};
+function pplTop(role){
+  const names=role==="dir"?["Режиссёр"]:["Сценарист","Создатель"],M=new Map();
+  for(const {v,list} of PPL.top.by.values())for(const x of list){
+    if(!x.r.some(r=>names.includes(r)))continue;
+    let o=M.get(x.i);if(!o){o={i:x.i,n:x.n,p:x.p,g:0,d:"",e:0,k:0,sv:0};M.set(x.i,o)}
+    o.k++;o.sv+=v;
+  }
+  return[...M.values()].sort((a,b)=>b.k-a.k||b.sv-a.sv||cmpRu(a.n,b.n)).map(o=>Object.assign(o,{c:`${o.k} ${plural(o.k,"фильм","фильма","фильмов")} из самых оценённых`}));
+}
 function pplOurs(role){
   const names=role==="dir"?["Режиссёр"]:["Сценарист","Создатель"],M=new Map();
   for(const it of acItems()){
@@ -1727,35 +1757,38 @@ function pplPaint(){
     empty="По этому запросу никого не нашлось.";
   }else if(mode==="fav"){
     L=favShown().filter(f=>favDep(f)===dk).map(f=>({i:f.id,n:f.n||"Человек",p:f.p||"",c:DB.raters.length>1?favInit(f):"",g:0,e:0}));
-    empty=`Любимых ${rk==="act"?"актёров":rk==="dir"?"режиссёров":"сценаристов"} пока нет. Отметьте ☆ в составе проекта, в статье или в списке «Популярные» / «У вас».`;
+    empty=`Любимых ${rk==="act"?"актёров":rk==="dir"?"режиссёров":"сценаристов"} пока нет. Отметьте ☆ в составе проекта, в статье или в списках «Известные» и «У вас».`;
   }else if(mode==="ours"){
     L=pplOurs(rk);empty=PPL.crewRun?"":"Среди оценённых проектов с данными TMDB таких людей пока не нашлось.";
     note=PPL.crewRun?`<p class="dim" style="font-size:12.5px;margin:0 0 10px">⏳ Загружаю съёмочные группы: ${PPL.crewDone} из ${PPL.crewTotal}…</p>`:"";
+  }else if(mode==="top"){
+    const T=PPL.top;L=pplTop(rk);empty=T.run?"":"Пока никого.";
+    note=T.run?`<p class="dim" style="font-size:12.5px;margin:0 0 10px">⏳ Разбираю самые оценённые фильмы: ${T.done} из ${T.total}…</p>`:L.length?`<p class="dim" style="font-size:12.5px;margin:0 0 10px">Рейтинг по числу фильмов среди самых оценённых зрителями фильмов TMDB (проанализировано ${T.by.size}). «Показать ещё» добавляет следующие 20 фильмов и новых людей.</p>`:"";
   }else{
     L=PPL.pop.filter(a=>(a.d||"Acting")===dept&&gf(a));empty=PPL.run?"":"Пока никого.";
-    if(rk!=="act"&&L.length)note=`<p class="dim" style="font-size:12.5px;margin:0 0 10px">Среди самых популярных людей TMDB режиссёров и сценаристов немного. Больше — в «У вас» и через поиск по имени.</p>`;
   }
   for(const a of L)FAVD.set(a.i,dk);
-  const err=PPL.err?`<p class="rnote">⚠ ${esc(PPL.err)}</p>`:"";
-  const more=!PPL.found&&mode==="pop"&&PPL.page>0&&PPL.page<PPL.pages?`<p style="margin:12px 0 0"><button class="btn" id="pplMore" ${PPL.run?"disabled":""}>${PPL.run?"⏳ Загружаю…":"Показать ещё"}</button></p>`:"";
-  box.innerHTML=err+note+(PPL.run&&!L.length?`<p class="dim">⏳ Загружаю…</p>`:L.length?`<div class="actgrid">${L.map(a=>actCard(a,null)).join("")}</div>${more}`:`<div class="empty">${esc(empty)}</div>${more}`);
+  const err=(PPL.err||(mode==="top"&&PPL.top.err)?`<p class="rnote">⚠ ${esc(PPL.err||PPL.top.err)}</p>`:"");
+  const busy=mode==="top"?PPL.top.run:PPL.run;
+  const more=!PPL.found&&((mode==="pop"&&PPL.page>0&&PPL.page<PPL.pages)||(mode==="top"&&PPL.top.page>0&&PPL.top.page<PPL.top.pages))?`<p style="margin:12px 0 0"><button class="btn" id="pplMore" ${busy?"disabled":""}>${busy?"⏳ Загружаю…":"Показать ещё"}</button></p>`:"";
+  box.innerHTML=err+note+(busy&&!L.length?`<p class="dim">⏳ Загружаю…</p>`:L.length?`<div class="actgrid">${L.map(a=>actCard(a,null)).join("")}</div>${more}`:`<div class="empty">${esc(empty)}</div>${more}`);
 }
 function vPeople(){
   const mode=pplMode(),[rk]=pplRole();
-  setTimeout(()=>{if(mode==="pop"&&!PPL.found)pplPopular(false);else if(mode==="ours"&&!PPL.found)pplCrewLoad();pplPaint()},0);
+  setTimeout(()=>{if(mode==="pop"&&!PPL.found)pplPopular(false);else if(mode==="top"&&!PPL.found)pplTopLoad(false);else if(mode==="ours"&&!PPL.found)pplCrewLoad();pplPaint()},0);
   const G=UI.pplG==="f"||UI.pplG==="m"?UI.pplG:"all",nf=d=>favList().filter(f=>favDep(f)===d).length;
   return `<div class="ptitle"><div><h1>Люди</h1><p>Актёры, режиссёры и сценаристы: популярные, из ваших проектов, любимые и поиск по имени</p></div></div>
   <form class="toolbar" id="pplForm"><input class="inp" id="pplQ" value="${esc(PPL.q)}" placeholder="Найти человека по имени" style="flex:1;min-width:200px" autocomplete="off"><button class="btn" type="submit">Найти</button>${PPL.found?`<button class="btn ghost" type="button" id="pplClr">Сбросить поиск</button>`:""}</form>
   <div class="toolbar"><div class="seg" data-ui="pplRole">${PPL_ROLES.map(r=>`<button data-v="${r[0]}" class="${rk===r[0]?"on":""}">${r[1]}${mode==="fav"?` <small>${nf(r[3])}</small>`:""}</button>`).join("")}</div>
-    <div class="seg" data-ui="pplMode"><button data-v="pop" class="${mode==="pop"?"on":""}">Популярные</button>${rk!=="act"?`<button data-v="ours" class="${mode==="ours"?"on":""}" title="Те, кто снимал или писал ваши проекты">У вас</button>`:""}<button data-v="fav" class="${mode==="fav"?"on":""}">Любимые <small>${favList().length}</small></button></div>
-    ${mode!=="ours"?`<div class="chips" data-ui="pplG"><button class="chip ${G==="all"?"on":""}" data-v="all">Все</button><button class="chip ${G==="f"?"on":""}" data-v="f">Женщины</button><button class="chip ${G==="m"?"on":""}" data-v="m">Мужчины</button></div>`:""}
+    <div class="seg" data-ui="pplMode">${rk==="act"?`<button data-v="pop" class="${mode==="pop"?"on":""}">Популярные</button>`:`<button data-v="top" class="${mode==="top"?"on":""}" title="Те, кто снял или написал самые оценённые зрителями фильмы">Известные</button>`}${rk!=="act"?`<button data-v="ours" class="${mode==="ours"?"on":""}" title="Те, кто снимал или писал ваши проекты">У вас</button>`:""}<button data-v="fav" class="${mode==="fav"?"on":""}">Любимые <small>${favList().length}</small></button></div>
+    ${mode==="pop"||mode==="fav"||PPL.found?`<div class="chips" data-ui="pplG"><button class="chip ${G==="all"?"on":""}" data-v="all">Все</button><button class="chip ${G==="f"?"on":""}" data-v="f">Женщины</button><button class="chip ${G==="m"?"on":""}" data-v="m">Мужчины</button></div>`:""}
     ${mode==="fav"&&DB.raters.length>1&&!PPL.found?`<div class="seg" data-ui="favWho"><button data-v="all" class="${favWhoCur()==="all"?"on":""}">Все</button><button data-v="&" class="${favWhoCur()==="&"?"on":""}">Оба</button>${DB.raters.map(r=>`<button data-v="${esc(r)}" class="${favWhoCur()===r?"on":""}">${esc(r)}</button>`).join("")}</div>`:""}</div>
   <div id="pplBody"></div>`;
 }
 /* смена роли: у режиссёров и сценаристов сразу открывается «У вас», у актёров — «Популярные» (раздел «Любимые» остаётся) */
 document.addEventListener("click",e=>{
   const b=e.target.closest&&e.target.closest('[data-ui="pplRole"] [data-v]');if(!b)return;
-  if(UI.pplMode!=="fav")UI.pplMode=b.dataset.v==="act"?"pop":"ours";
+  if(UI.pplMode!=="fav")UI.pplMode=b.dataset.v==="act"?"pop":"top";
 },true);
 document.addEventListener("submit",e=>{
   if(!e.target||e.target.id!=="pplForm")return;e.preventDefault();pplSearch(document.getElementById("pplQ").value);
@@ -1764,7 +1797,7 @@ document.addEventListener("click",e=>{
   const r=e.target.closest&&e.target.closest("#pplMore,#pplClr");if(!r)return;
   e.stopPropagation();e.preventDefault();
   if(r.id==="pplClr"){PPL.found=null;PPL.q="";render();return}
-  pplPopular(true);
+  if(pplMode()==="top")pplTopLoad(true);else pplPopular(true);
 },true);
 function planSwitch(){
   const pl=DB.items.filter(i=>i.status==="planned"),nS=pl.filter(isUpcoming).length,nP=pl.length-nS,nQ=DB.items.filter(isProp).length,cur=UI.planList==="prop"?"prop":UI.planList==="eps"?"eps":UI.planList==="hist"?"hist":"plan",on=cur==="prop";
