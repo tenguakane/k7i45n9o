@@ -1569,16 +1569,23 @@ function bxaChart(S){
   if(hi<=lo)hi=lo+1;
   const nice=x=>{const p=Math.pow(10,Math.floor(Math.log10(x))),m=x/p;return(m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p};
   const step=nice((hi-lo)/4);lo=Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;
-  const bw=(document.getElementById("bxaBody")||{}).clientWidth||760,W=Math.max(300,Math.round(bw-14)),H=window.innerWidth<=820?240:300,L=bw<520?62:74,Rr=14,T=12,B=30,pw=W-L-Rr,ph=H-T-B;BXA.cw=bw;
+  const bw=(document.getElementById("bxaBody")||{}).clientWidth||760,W=Math.max(300,Math.round(bw-14)),H=window.innerWidth<=820?240:300,L=bw<520?62:74,Rr=68,T=12,B=30,pw=W-L-Rr,ph=H-T-B;BXA.cw=bw;
   const x=i=>L+(N<=1?pw/2:i/(N-1)*pw),y=v=>T+ph-(Math.max(lo,Math.min(hi,v))-lo)/(hi-lo)*ph;
   const fy=v=>metric==="wk"?bxaPct(v).replace("+0%","0%"):v===0?"0":fmtMoney(v);
   let g="";for(let v=lo;v<=hi+step/2;v+=step){const yy=y(v).toFixed(1);g+=`<line x1="${L}" x2="${W-Rr}" y1="${yy}" y2="${yy}" class="bxa-gl${Math.abs(v)<1e-9?" z":""}"/><text x="${L-8}" y="${yy}" class="bxa-yt">${esc(fy(v))}</text>`}
   const xs=[];const xstep=N<=12?1:N<=35?7:N<=75?14:30;for(let i=0;i<N;i+=xstep)xs.push(i);
   g+=xs.map(i=>`<text x="${x(i).toFixed(1)}" y="${H-8}" class="bxa-xt">${i+1}</text>`).join("");
   const lines=ser.map(s=>{let p="",on=false;s.v.forEach((v,i)=>{if(v==null){on=false;return}p+=(on?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1);on=true});return `<path d="${p}" class="bxa-ln" style="stroke:var(--bx${s.c})"/>`}).join("");
+  const segs=s=>{const out=[];let cur=[];s.v.forEach((v,i)=>{if(v==null){if(cur.length)out.push(cur);cur=[];return}cur.push([x(i),y(v)])});if(cur.length)out.push(cur);return out};
+  const base=y(Math.max(lo,Math.min(hi,0)));
+  const defs=metric==="wk"?"":`<defs>${ser.map(s=>`<linearGradient id="bxg${s.c}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--bx${s.c})" stop-opacity=".16"/><stop offset="1" stop-color="var(--bx${s.c})" stop-opacity="0"/></linearGradient>`).join("")}</defs>`;
+  const areas=metric==="wk"?"":ser.map(s=>segs(s).filter(q=>q.length>1).map(q=>`<path d="M${q[0][0].toFixed(1)} ${base.toFixed(1)}${q.map(p=>`L${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join("")}L${q[q.length-1][0].toFixed(1)} ${base.toFixed(1)}Z" fill="url(#bxg${s.c})"/>`).join("")).join("");
+  const ends=ser.map(s=>{let i=-1;for(let k=s.v.length-1;k>=0;k--)if(s.v[k]!=null){i=k;break}return i<0?null:{c:s.c,x:x(i),y:y(s.v[i]),t:metric==="wk"?bxaPct(s.v[i]):fmtMoney(s.v[i])}}).filter(Boolean);
+  const lab=ends.map(e=>({...e,ly:e.y})).sort((a,b)=>a.ly-b.ly);for(let k=1;k<lab.length;k++)if(lab[k].ly-lab[k-1].ly<13)lab[k].ly=lab[k-1].ly+13;
+  const endsSvg=ends.map(e=>`<circle cx="${e.x.toFixed(1)}" cy="${e.y.toFixed(1)}" r="3.6" class="bxa-ed" style="fill:var(--bx${e.c})"/>`).join("")+lab.map(e=>`<text x="${(e.x+8).toFixed(1)}" y="${e.ly.toFixed(1)}" class="bxa-el">${esc(e.t)}</text>`).join("");
   BXA.chart={ser,N,metric};
-  return `<div class="bxa-ch" id="bxaCh"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="График сборов по дням проката">${g}${lines}<line id="bxaCx" class="bxa-cx" x1="0" x2="0" y1="${T}" y2="${T+ph}" visibility="hidden"/><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="bxaHit" data-l="${L}" data-pw="${pw}" data-w="${W}"/></svg><div class="bxa-tip" id="bxaTip" hidden></div></div>
-  <p class="dim" style="font-size:12px;margin:4px 0 0;text-align:center">День проката (1 — день премьеры в США)</p>`;
+  return `<div class="bxa-ch" id="bxaCh"><svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="График сборов по дням проката">${defs}${g}${areas}${lines}${endsSvg}<line id="bxaCx" class="bxa-cx" x1="0" x2="0" y1="${T}" y2="${T+ph}" visibility="hidden"/><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="bxaHit" data-l="${L}" data-pw="${pw}" data-w="${W}"/></svg><div class="bxa-tip" id="bxaTip" hidden></div></div>
+  <p class="bxa-cap">День проката · 1 — день премьеры в США</p>`;
 }
 document.addEventListener("pointermove",e=>{
   const h=e.target&&e.target.id==="bxaHit"?e.target:null,tip=document.getElementById("bxaTip"),cx=document.getElementById("bxaCx");
@@ -1609,35 +1616,36 @@ function bxaPaint(){
   run.forEach(bxaRuGet);
   const chips=S.map(rl=>`<span class="bxa-sel"><i style="background:var(--bx${UI.bxaCol[rl]})"></i>${BXA.ru.get(rl)?`<a href="#" data-bxa-open="${rl}">${esc(bxaName(rl))}</a>`:esc(bxaName(rl))} <small>${bxaYear(rl)}</small><button type="button" data-bxa-rm="${rl}" aria-label="Убрать">✕</button></span>`).join("");
   const stats=S.map(rl=>({rl,s:bxaStat(rl)}));
-  const tbl=S.length?`<div class="tblw"><table class="bxa-tb"><thead><tr><th>Фильм</th><th title="Сборы первого уикенда (пт–вс)">Старт</th><th>Лучший день</th><th title="Изменение сборов второго уикенда к первому">2-й уикенд</th><th title="За сколько дней фильм собрал $100 млн в США">До $100 млн</th><th title="Итог, делённый на первый уикенд: чем больше, тем дольше фильм держался">Запас хода</th><th>Итог в США</th></tr></thead><tbody>${stats.map(({rl,s})=>`<tr><td><i class="bxa-dot" style="background:var(--bx${UI.bxaCol[rl]})"></i>${esc(bxaName(rl))}</td><td>${bxaM(s.w1)}</td><td>${bxaM(s.best)}<small class="dim"> · ${s.bestI+1}-й</small></td><td class="${s.drop2!=null&&s.drop2<-.6?"bxa-bad":""}">${bxaPct(s.drop2)}</td><td>${bxaDays(s.m100)}</td><td>${bxaX(s.legs)}</td><td>${bxaM(s.tot)}</td></tr>`).join("")}</tbody></table></div>`:"";
+  const cards=stats.length?`<div class="bxa-cards">${stats.map(({rl,s})=>`<article class="bxa-card" style="--c:var(--bx${UI.bxaCol[rl]})"><div class="bxa-cn">${esc(bxaName(rl))} <small>${bxaYear(rl)}</small></div><div class="bxa-big">${bxaM(s.tot)}<small>итог в США</small></div><dl><div title="Сборы первого уикенда (пт–вс)"><dt>Старт</dt><dd>${bxaM(s.w1)}</dd></div><div><dt>Лучший день</dt><dd>${bxaM(s.best)}<small> · ${s.bestI+1}-й</small></dd></div><div title="Изменение сборов второго уикенда к первому"><dt>2-й уикенд</dt><dd class="${s.drop2!=null&&s.drop2<-.6?"bxa-bad":""}">${bxaPct(s.drop2)}</dd></div><div title="За сколько дней фильм собрал $100 млн в США"><dt>До $100 млн</dt><dd>${bxaDays(s.m100)}</dd></div><div title="Итог, делённый на первый уикенд: чем больше, тем дольше фильм держался"><dt>Запас хода</dt><dd>${bxaX(s.legs)}</dd></div></dl></article>`).join("")}</div>`:"";
   const hl=[];
   if(stats.length>1){
     const by=(f,dir=1)=>stats.filter(x=>f(x.s)!=null).sort((a,b)=>dir*(f(b.s)-f(a.s)))[0];
-    const a=by(s=>s.m100?-s.m100:null);if(a)hl.push(`Быстрее всех до $100 млн — <b>${esc(bxaName(a.rl))}</b>: ${bxaDays(a.s.m100)}.`);
-    const b=by(s=>s.drop2!=null?-s.drop2:null);if(b&&b.s.drop2<0)hl.push(`Сильнее всех просел на втором уикенде — <b>${esc(bxaName(b.rl))}</b>: ${bxaPct(b.s.drop2)}.`);
-    const c=by(s=>s.legs);if(c)hl.push(`Дольше всех держался — <b>${esc(bxaName(c.rl))}</b>: итог в ${bxaX(c.s.legs).slice(1)} раза больше первого уикенда.`);
-    const d=by(s=>s.w1);if(d)hl.push(`Лучший старт — <b>${esc(bxaName(d.rl))}</b>: ${bxaM(d.s.w1)} за первый уикенд.`);
+    const a=by(s=>s.m100?-s.m100:null);if(a)hl.push(["Быстрее всех до $100 млн",a.rl,bxaDays(a.s.m100)]);
+    const b=by(s=>s.drop2!=null?-s.drop2:null);if(b&&b.s.drop2<0)hl.push(["Сильнее всех просел на втором уикенде",b.rl,bxaPct(b.s.drop2)]);
+    const c=by(s=>s.legs);if(c)hl.push(["Дольше всех держался",c.rl,"итог в "+bxaX(c.s.legs).slice(1)+" раза больше первого уикенда"]);
+    const d=by(s=>s.w1);if(d)hl.push(["Лучший старт",d.rl,bxaM(d.s.w1)+" за первый уикенд"]);
   }
   const rk=BXA_REC.find(r=>r[0]===UI.bxaRec)||BXA_REC[0];
   const yrs=UI.bxaRy||"all",ys=[...new Set(Object.values(BXA.db.films).map(f=>f.o.slice(0,4)))].sort().reverse();
   const rec=Object.keys(BXA.db.films).filter(rl=>yrs==="all"||bxaYear(rl)===yrs).map(rl=>({rl,s:bxaStat(rl)})).map(x=>({...x,k:rk[2](x.s)})).filter(x=>x.k!=null).sort((a,b)=>b.k-a.k).slice(0,10);
   rec.forEach(x=>bxaRuGet(x.rl));
-  const res=BXA.res;
-  box.innerHTML=`<p class="dim" style="margin:0 0 12px;font-size:12.5px">Прокат в США по данным Box Office Mojo · ${nF} ${plural(nF,"фильм","фильма","фильмов")}${up?` · обновлено ${up}`:""}. Мировых сборов по дням в открытом доступе нет.</p>
-  <div class="panel bxa-pick">
-    <div class="row" style="gap:8px"><input class="inp" id="bxaQ" value="${esc(BXA.q)}" placeholder="Найти фильм для сравнения" autocomplete="off" style="flex:1;min-width:180px"></div>
-    ${res?`<div class="bxa-res">${res.length?res.map(rl=>bxaFilmBtn(rl)).join(""):BXA.qRun?"":`<span class="dim">В файле сборов такого фильма нет — его можно добавить в <code>tools/box-extra.txt</code> (IMDb-номер).</span>`}${BXA.qRun?`<span class="dim">⏳ ищу…</span>`:""}</div>`:""}
-    <div class="bxa-sels">${chips||`<span class="dim">Выберите до ${BXA_MAX} фильмов.</span>`}</div>
-    ${run.length?`<div class="bxa-q"><span class="dim">Сейчас в прокате:</span>${run.map(rl=>bxaFilmBtn(rl)).join("")}</div>`:""}
-    ${mine.length?`<div class="bxa-q"><span class="dim">Из вашей базы:</span>${mine.map(x=>bxaFilmBtn(x.rl)).join("")}</div>`:""}
-  </div>
-  ${S.length?`<div class="toolbar" style="margin-top:14px">${seg("bxaMet",met,[["cum","Накопленные"],["day","По дням"],["wk","Неделя к неделе"]])}${seg("bxaR",R,[["10","10 дней"],["30","30"],["60","60"],["all","Весь прокат"]])}</div>
-  ${bxaChart(S)}${met==="wk"?`<p class="dim" style="font-size:12.5px;margin:6px 0 0">Сколько фильм собрал в этот день по сравнению с тем же днём неделей раньше: −50% — сборы упали вдвое.</p>`:""}
-  ${hl.length?`<ul class="bxa-hl">${hl.map(h=>`<li>${h}</li>`).join("")}</ul>`:""}${tbl}`:""}
+  const kmax=rec.length?rec[0].k:1,kmin=rec.length?rec[rec.length-1].k:0,rel=k=>kmax===kmin?1:.14+.86*(k-kmin)/(kmax-kmin);
+  const res=BXA.res,open=UI.bxaPick==="1"||!S.length||!!BXA.q;
+  box.innerHTML=`<p class="bxa-note">Прокат в США по данным Box Office Mojo · ${nF} ${plural(nF,"фильм","фильма","фильмов")}${up?` · обновлено ${up}`:""}. Мировых сборов по дням в открытом доступе нет.</p>
+  <section class="bxa-hero">
+    <div class="bxa-top"><div class="bxa-sels">${chips||`<span class="dim">Выберите до ${BXA_MAX} фильмов для сравнения</span>`}</div><button type="button" class="chip sm bxa-addb${open?" on":""}" data-bxu="bxaPick:${open&&S.length&&!BXA.q?0:1}">＋ Фильм</button></div>
+    ${open?`<div class="bxa-pick"><input class="inp" id="bxaQ" value="${esc(BXA.q)}" placeholder="Найти фильм по названию" autocomplete="off">
+      ${res?`<div class="bxa-res">${res.length?res.map(rl=>bxaFilmBtn(rl)).join(""):BXA.qRun?"":`<span class="dim">В файле сборов такого фильма нет. Его можно добавить в <code>tools/box-extra.txt</code> (IMDb-номер).</span>`}${BXA.qRun?`<span class="dim">⏳ ищу…</span>`:""}</div>`:""}
+      ${run.length?`<div class="bxa-q"><span class="dim">Сейчас в прокате</span><div class="bxa-row">${run.map(rl=>bxaFilmBtn(rl)).join("")}</div></div>`:""}
+      ${mine.length?`<div class="bxa-q"><span class="dim">Из вашей базы</span><div class="bxa-row">${mine.map(x=>bxaFilmBtn(x.rl)).join("")}</div></div>`:""}</div>`:""}
+  </section>
+  ${S.length?`<div class="bxa-ctl">${seg("bxaMet",met,[["cum","Накопленные"],["day","По дням"],["wk","Неделя к неделе"]])}${seg("bxaR",R,[["10","10 дней"],["30","30"],["60","60"],["all","Весь прокат"]])}</div>
+  ${bxaChart(S)}${met==="wk"?`<p class="bxa-cap" style="margin-top:2px">Сколько фильм собрал в этот день по сравнению с тем же днём неделей раньше: −50% значит, что сборы упали вдвое.</p>`:""}
+  ${hl.length?`<div class="bxa-ins">${hl.map(([t,rl,v])=>`<div style="--c:var(--bx${UI.bxaCol[rl]})"><span>${t}</span><b>${esc(bxaName(rl))}</b><em>${v}</em></div>`).join("")}</div>`:""}${cards}`:""}
   <section class="bxa-recs"><h3>Рекорды</h3>
-    <div class="toolbar">${seg("bxaRec",rk[0],BXA_REC.map(r=>[r[0],r[1]]))}<select class="inp" id="bxaRy" style="width:auto"><option value="all">Все годы</option>${ys.map(y=>`<option ${y===yrs?"selected":""}>${y}</option>`).join("")}</select></div>
-    <ol class="bxa-rl">${rec.map(x=>`<li><span class="bxa-rn">${esc(bxaName(x.rl))} <small class="dim">${bxaYear(x.rl)}</small></span><b>${rk[3](x.s)}</b>${bxaSel().includes(x.rl)?`<button type="button" class="chip sm on bxa-ab" data-bxa-rm="${x.rl}" title="Убрать из сравнения">✓</button>`:`<button type="button" class="chip sm bxa-ab" data-bxa-add="${x.rl}" title="Добавить в сравнение">＋</button>`}</li>`).join("")}</ol>
-    ${rk[0]==="legs"?`<p class="dim" style="font-size:12px">Только фильмы со стартом от $10 млн.</p>`:rk[0]==="drop"?`<p class="dim" style="font-size:12px">Только фильмы со стартом от $20 млн.</p>`:""}
+    <div class="bxa-ctl">${seg("bxaRec",rk[0],BXA_REC.map(r=>[r[0],r[1]]))}<select class="inp" id="bxaRy"><option value="all">Все годы</option>${ys.map(y=>`<option ${y===yrs?"selected":""}>${y}</option>`).join("")}</select></div>
+    <ol class="bxa-rl">${rec.map((x,n)=>`<li style="--p:${(rel(x.k)*100).toFixed(1)}%"><i class="bxa-rk">${n+1}</i><span class="bxa-rn">${esc(bxaName(x.rl))} <small>${bxaYear(x.rl)}</small></span><b>${rk[3](x.s)}</b>${bxaSel().includes(x.rl)?`<button type="button" class="chip sm on bxa-ab" data-bxa-rm="${x.rl}" title="Убрать из сравнения">✓</button>`:`<button type="button" class="chip sm bxa-ab" data-bxa-add="${x.rl}" title="Добавить в сравнение">＋</button>`}</li>`).join("")}</ol>
+    ${rk[0]==="legs"?`<p class="bxa-cap" style="text-align:left">Только фильмы со стартом от $10 млн.</p>`:rk[0]==="drop"?`<p class="bxa-cap" style="text-align:left">Только фильмы со стартом от $20 млн.</p>`:""}
   </section>`;
   const q=document.getElementById("bxaQ");
   if(q){if(BXA.focus){q.focus();q.setSelectionRange(q.value.length,q.value.length);BXA.focus=false}
