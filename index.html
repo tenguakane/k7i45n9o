@@ -4350,6 +4350,8 @@ function vPlan(){
   const all=DB.items.filter(i=>i.status==="planned");
   const tp={};all.forEach(i=>tp[i.type]=(tp[i.type]||0)+1);
   const nSeen=all.filter(i=>seenList(i).length).length;
+  const gCnt={};all.forEach(i=>(i.genres||[]).forEach(g=>gCnt[g]=(gCnt[g]||0)+1));
+  if(UI.planGenre&&!gCnt[UI.planGenre])UI.planGenre="";
   let list=all.slice();
   if(UI.planType!=="all")list=list.filter(i=>i.type===UI.planType);
   if(UI.planAw){finKick("awards");list=list.filter(i=>awFilterOk(i,UI.planAw))}
@@ -4358,8 +4360,14 @@ function vPlan(){
   const uniNames=[...U.groups].filter(([n,a])=>a.some(i=>i.status==="planned")).map(([n])=>n).sort(cmpRu);
   if(UI.planUni&&!uniNames.includes(UI.planUni))UI.planUni="";
   const uni=UI.planView==="uni";
-  const nAct=(UI.planSeen!=="all"?1:0)+(UI.planUni?1:0)+(uni?1:0)+((UI.planSort||"added")!=="added"?1:0)+(UI.planAw?1:0);
+  const nAct=(UI.planSeen!=="all"?1:0)+(UI.planUni?1:0)+(uni?1:0)+((UI.planSort||"added")!=="added"?1:0)+(UI.planAw?1:0)+(UI.planGenre?1:0)+(UI.planDur&&UI.planDur!=="all"?1:0);
   if(UI.planUni&&!uni)list=list.filter(i=>U.of.get(i.id)===UI.planUni);
+  if(UI.planGenre)list=list.filter(i=>(i.genres||[]).includes(UI.planGenre));
+  const DURB=[["a","до 90 мин",m=>m<=90],["b","90–120",m=>m>90&&m<=120],["c","120–150",m=>m>120&&m<=150],["d","от 150 мин",m=>m>150]];
+  const durOf=i=>{const m=totalMinutes(i);return isNum(m)&&m>0?m:null};
+  const dCnt={};DURB.forEach(([k,,f])=>dCnt[k]=list.filter(i=>{const m=durOf(i);return m!=null&&f(m)}).length);
+  const noDur=list.filter(i=>durOf(i)==null).length,pd=DURB.find(b=>b[0]===UI.planDur);
+  if(pd)list=list.filter(i=>{const m=durOf(i);return m!=null&&pd[2](m)});
   const S={added:(a,b)=>(a.addedAt||0)-(b.addedAt||0)||(a.id>b.id?1:-1),title:(a,b)=>cmpRu(a.title,b.title),dur:(a,b)=>(totalMinutes(a)||0)-(totalMinutes(b)||0),year:(a,b)=>(a.year||0)-(b.year||0),budget:(a,b)=>(finV(b,"b")??-1)-(finV(a,"b")??-1)||cmpRu(a.title,b.title),revenue:(a,b)=>(finV(b,"r")??-1)-(finV(a,"r")??-1)||cmpRu(a.title,b.title),awards:(a,b)=>(awScore(b)??-1)-(awScore(a)??-1)||cmpRu(a.title,b.title)};
   finKick(UI.planSort);
   list.sort(S[UI.planSort]||S.added);
@@ -4381,6 +4389,9 @@ function vPlan(){
   ${UI.planFiltOpen?`<div class="toolbar pfpanel">
     <div class="seg" data-ui="planView"><button data-v="list" class="${uni?"":"on"}">Список</button><button data-v="uni" class="${uni?"on":""}">🌐 Вселенные</button></div>
     <div class="chips" data-ui="planSeen"><button class="chip ${UI.planSeen==="all"?"on":""}" data-v="all">Любые</button><button class="chip ${UI.planSeen==="new"?"on":""}" data-v="new">Новое для обоих <small>${all.length-nSeen}</small></button><button class="chip ${UI.planSeen==="seen"?"on":""}" data-v="seen">👁 Пересмотр <small>${nSeen}</small></button></div>
+    ${Object.keys(gCnt).length?selectHTML("planGenre",[["","Жанр: любой"],...Object.keys(gCnt).sort(cmpRu).map(g=>[g,`${esc(g)} (${gCnt[g]})`])],UI.planGenre||""):""}
+    <div class="chips" data-ui="planDur" title="Для сериалов учитывается общая длительность всех серий"><button class="chip ${pd?"":"on"}" data-v="all">Любая длительность</button>${DURB.map(([k,n])=>`<button class="chip ${UI.planDur===k?"on":""}" data-v="${k}">${n} <small>${dCnt[k]}</small></button>`).join("")}</div>
+    ${pd&&noDur?`<span class="dim" style="font-size:12px">без длительности скрыто: ${noDur}</span>`:""}
     <div class="sp"></div>
     ${uniNames.length?`<select class="inp" data-uis="planUni" title="Фильтр по вселенной или серии"><option value="">Все вселенные и серии</option>${uniNames.map(n=>`<option value="${esc(n)}" ${UI.planUni===n?"selected":""}>${esc(n)}</option>`).join("")}</select>`:""}
     ${selectHTML("planAw",[["","Оскар: любые"],["win","Лауреаты Оскара"],["nom","Номинанты Оскара"],["none","Без Оскара"]],UI.planAw||"")}${UI.planAw?finBannerHTML("awards"):""}
